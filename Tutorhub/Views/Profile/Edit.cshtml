@@ -1,0 +1,307 @@
+﻿@model Tutorbub.Models.UserProfileViewModel
+
+@{
+    ViewData["Title"] = "Edit Profile";
+    Layout = "_Layout";
+}
+
+<style>
+    .profile-form-container {
+        max-width: 800px;
+        margin: 0 auto;
+        background: white;
+        border-radius: 16px;
+        padding: 30px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+    }
+
+    .form-section {
+        margin-bottom: 30px;
+        padding-bottom: 25px;
+        border-bottom: 2px solid #F3F1E7;
+    }
+
+    .form-section:last-child {
+        border-bottom: none;
+        margin-bottom: 0;
+        padding-bottom: 0;
+    }
+
+    .form-section-title {
+        font-size: 18px;
+        font-weight: 600;
+        color: #1F3B2C;
+        margin-bottom: 20px;
+    }
+
+    .form-section-title i {
+        margin-right: 10px;
+        color: #1F3B2C;
+    }
+
+    .form-control:focus {
+        border-color: #1F3B2C;
+        box-shadow: 0 0 0 0.2rem rgba(31, 59, 44, 0.25);
+    }
+
+    .btn-save {
+        background-color: #1F3B2C;
+        color: white;
+        padding: 12px 40px;
+        border-radius: 8px;
+        border: none;
+        font-weight: 600;
+        transition: opacity 0.3s;
+        width: 100%;
+    }
+
+    .btn-save:hover {
+        opacity: 0.8;
+        color: white;
+    }
+
+    .btn-cancel {
+        background-color: #6c757d;
+        color: white;
+        padding: 12px 40px;
+        border-radius: 8px;
+        border: none;
+        font-weight: 600;
+        transition: opacity 0.3s;
+        text-decoration: none;
+        display: inline-block;
+        text-align: center;
+    }
+
+    .btn-cancel:hover {
+        opacity: 0.8;
+        color: white;
+    }
+
+    .required-star {
+        color: #dc3545;
+        margin-left: 3px;
+    }
+
+    .field-validation-error {
+        color: #dc3545;
+        font-size: 12px;
+    }
+</style>
+
+<div class="container py-5">
+    <div class="profile-form-container">
+        <h2 class="text-center mb-4" style="color:#1F3B2C;">
+            <i class="fas fa-user-edit me-2"></i>Complete Your Profile
+        </h2>
+        <p class="text-center text-muted mb-4">
+            Fill in all the details to complete your profile
+        </p>
+
+        @if (ViewBag.Error != null)
+        {
+            <div class="alert alert-danger">@ViewBag.Error</div>
+        }
+
+        @if (TempData["Success"] != null)
+        {
+            <div class="alert alert-success">@TempData["Success"]</div>
+        }
+
+        <form method="post" asp-controller="Profile" asp-action="Edit">
+            @Html.AntiForgeryToken()
+            <input type="hidden" asp-for="Id" />
+            <input type="hidden" asp-for="UserName" />
+            <input type="hidden" asp-for="Role" />
+
+            <!-- ===== বেসিক ইনফো ===== -->
+            <div class="form-section">
+                <div class="form-section-title"><i class="fas fa-id-card"></i> Basic Information</div>
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="FullName" class="form-label fw-bold">Full Name <span class="required-star">*</span></label>
+                        <input asp-for="FullName" class="form-control" placeholder="Enter your full name" />
+                        <span asp-validation-for="FullName" class="text-danger"></span>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="Email" class="form-label fw-bold">Email <span class="required-star">*</span></label>
+                        <input asp-for="Email" class="form-control" placeholder="Enter your email" />
+                        <span asp-validation-for="Email" class="text-danger"></span>
+                    </div>
+                    <div class="col-md-12 mb-3">
+                        <label asp-for="MobileNumber" class="form-label fw-bold">Mobile Number <span class="required-star">*</span></label>
+                        <input asp-for="MobileNumber" class="form-control" placeholder="Enter your mobile number" />
+                        <span asp-validation-for="MobileNumber" class="text-danger"></span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ===== অ্যাডিশনাল ইনফো ===== -->
+            <div class="form-section">
+                <div class="form-section-title"><i class="fas fa-info-circle"></i> Additional Information</div>
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="Gender" class="form-label fw-bold">Gender <span class="required-star">*</span></label>
+                        <select asp-for="Gender" class="form-control">
+                            <option value="">Select Gender</option>
+                            <option value="Male">Male</option>
+                            <option value="Female">Female</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="AgeRange" class="form-label fw-bold">Age Range <span class="required-star">*</span></label>
+                        <select asp-for="AgeRange" class="form-control">
+                            <option value="">Select Age Range</option>
+                            <option value="Under 18">Under 18</option>
+                            <option value="18-24">18-24</option>
+                            <option value="25-34">25-34</option>
+                            <option value="35-44">35-44</option>
+                            <option value="45-54">45-54</option>
+                            <option value="55+">55+</option>
+                        </select>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="PrimaryDeviceType" class="form-label fw-bold">Primary Device <span class="required-star">*</span></label>
+                        <select asp-for="PrimaryDeviceType" class="form-control">
+                            <option value="">Select Primary Device</option>
+                            <option value="Mobile">Mobile</option>
+                            <option value="Tablet">Tablet</option>
+                            <option value="Laptop">Laptop</option>
+                            <option value="Computer">Computer</option>
+                        </select>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="YearsOfExperience" class="form-label fw-bold">Years of Experience</label>
+                        <select asp-for="YearsOfExperience" class="form-control">
+                            <option value="">Select Experience</option>
+                            <option value="0-1 year">0-1 year</option>
+                            <option value="1-2 years">1-2 years</option>
+                            <option value="3-5 years">3-5 years</option>
+                            <option value="5-10 years">5-10 years</option>
+                            <option value="10+ years">10+ years</option>
+                        </select>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="AreaType" class="form-label fw-bold">Area Type</label>
+                        <select asp-for="AreaType" class="form-control">
+                            <option value="">Select Area Type</option>
+                            <option value="Village">Village</option>
+                            <option value="Town">Town</option>
+                            <option value="City">City</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ===== অ্যাড্রেস ===== -->
+            <div class="form-section">
+                <div class="form-section-title"><i class="fas fa-map-marker-alt"></i> Address</div>
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="Country" class="form-label fw-bold">Country <span class="required-star">*</span></label>
+                        <input asp-for="Country" class="form-control" placeholder="Enter your country" />
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="StreetAddress" class="form-label fw-bold">Street Address</label>
+                        <input asp-for="StreetAddress" class="form-control" placeholder="Enter your street address" />
+                    </div>
+                    <div class="col-md-12 mb-3">
+                        <label asp-for="PermanentAddress" class="form-label fw-bold">Permanent Address</label>
+                        <input asp-for="PermanentAddress" class="form-control" placeholder="Enter your permanent address" />
+                    </div>
+                </div>
+            </div>
+
+            <!-- ===== এডুকেশন ===== -->
+            <div class="form-section">
+                <div class="form-section-title"><i class="fas fa-graduation-cap"></i> Education</div>
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="EducationLevel" class="form-label fw-bold">Education Level <span class="required-star">*</span></label>
+                        <select asp-for="EducationLevel" class="form-control">
+                            <option value="">Select Education Level</option>
+                            <option value="JSC/JDC/8 pass">JSC/JDC/8 pass</option>
+                            <option value="Secondary">Secondary</option>
+                            <option value="Higher Secondary">Higher Secondary</option>
+                            <option value="Diploma">Diploma</option>
+                            <option value="Bachelor/Honors">Bachelor/Honors</option>
+                            <option value="Masters">Masters</option>
+                            <option value="PhD">PhD (Doctor of Philosophy)</option>
+                        </select>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="CurrentStudyStatus" class="form-label fw-bold">Currently Studying</label>
+                        <select asp-for="CurrentStudyStatus" class="form-control">
+                            <option value="No">No</option>
+                            <option value="Yes">Yes</option>
+                        </select>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="ExamDegreeTitle" class="form-label fw-bold">Exam/Degree Title</label>
+                        <input asp-for="ExamDegreeTitle" class="form-control" placeholder="e.g. BSc in Computer Science" />
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="InstitutionName" class="form-label fw-bold">Institution Name</label>
+                        <input asp-for="InstitutionName" class="form-control" placeholder="Enter institution name" />
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="PassingYear" class="form-label fw-bold">Passing Year</label>
+                        <input asp-for="PassingYear" class="form-control" placeholder="e.g. 2020" />
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="IsCSEStudent" class="form-label fw-bold">CSE/CS Student</label>
+                        <select asp-for="IsCSEStudent" class="form-control">
+                            <option value="false">No</option>
+                            <option value="true">Yes</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ===== ইম্পোর্ট্যান্ট লিংক ===== -->
+            <div class="form-section">
+                <div class="form-section-title"><i class="fas fa-link"></i> Important Links</div>
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="CvLink" class="form-label fw-bold">CV Link</label>
+                        <input asp-for="CvLink" class="form-control" placeholder="https://drive.google.com/your-cv" />
+                        <span asp-validation-for="CvLink" class="text-danger"></span>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="GithubProfile" class="form-label fw-bold">Github Profile</label>
+                        <input asp-for="GithubProfile" class="form-control" placeholder="https://github.com/username" />
+                        <span asp-validation-for="GithubProfile" class="text-danger"></span>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="PortfolioLink" class="form-label fw-bold">Portfolio Link</label>
+                        <input asp-for="PortfolioLink" class="form-control" placeholder="https://yourportfolio.com" />
+                        <span asp-validation-for="PortfolioLink" class="text-danger"></span>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="LinkedInProfile" class="form-label fw-bold">LinkedIn Profile</label>
+                        <input asp-for="LinkedInProfile" class="form-control" placeholder="https://linkedin.com/in/username" />
+                        <span asp-validation-for="LinkedInProfile" class="text-danger"></span>
+                    </div>
+                    <div class="col-md-12 mb-3">
+                        <label asp-for="ProfileImageLink" class="form-label fw-bold">Profile Image Link</label>
+                        <input asp-for="ProfileImageLink" class="form-control" placeholder="https://i.ibb.co/your-image.jpg" />
+                        <span asp-validation-for="ProfileImageLink" class="text-danger"></span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ===== বাটন ===== -->
+            <div class="d-flex gap-3 mt-4">
+                <a asp-controller="Profile" asp-action="Index" class="btn-cancel flex-grow-1">Cancel</a>
+                <button type="submit" class="btn-save flex-grow-1">
+                    <i class="fas fa-save me-2"></i>Save Profile
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

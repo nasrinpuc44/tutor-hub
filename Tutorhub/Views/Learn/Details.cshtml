@@ -1,0 +1,444 @@
+﻿@model Tutorbub.Models.CourseDetailViewModel
+
+@{
+    ViewData["Title"] = Model.Title + " - Smart Tutor Hub";
+    Layout = "_Layout";
+}
+
+<style>
+    /* ===== ডিটেলস পেইজ স্টাইল ===== */
+    .detail-wrapper {
+        display: flex;
+        gap: 40px;
+        max-width: 1280px;
+        margin: 0 auto;
+        padding: 30px 20px;
+    }
+
+    .detail-main {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .detail-sidebar {
+        width: 340px;
+        flex-shrink: 0;
+    }
+
+    .detail-image {
+        width: 100%;
+        border-radius: 16px;
+        overflow: hidden;
+        max-height: 420px;
+        object-fit: cover;
+        background: #E7E4D9;
+    }
+
+    .detail-title {
+        font-family: 'Georgia', serif;
+        font-size: 32px;
+        color: #1F3B2C;
+        margin: 18px 0 10px;
+        line-height: 1.2;
+    }
+
+    .detail-meta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 16px 28px;
+        color: #6B7568;
+        font-size: 14px;
+        padding: 12px 0;
+        border-top: 1px solid #eee;
+        border-bottom: 1px solid #eee;
+        margin-bottom: 20px;
+    }
+
+    .detail-meta span i {
+        width: 18px;
+        color: #1F3B2C;
+    }
+
+    .detail-section-title {
+        font-size: 18px;
+        font-weight: 700;
+        color: #1F3B2C;
+        margin: 24px 0 12px;
+    }
+
+    .detail-section-title i {
+        margin-right: 8px;
+        color: #1F3B2C;
+    }
+
+    .detail-desc {
+        color: #4B5648;
+        line-height: 1.7;
+        font-size: 15px;
+    }
+
+    .feature-list {
+        list-style: none;
+        padding: 0;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 8px 16px;
+    }
+
+    .feature-list li {
+        padding: 6px 0;
+        color: #4B5648;
+        font-size: 14px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .feature-list li i {
+        color: #1F3B2C;
+        font-size: 14px;
+    }
+
+    /* ===== সাইডবার ===== */
+    .sidebar-card {
+        background: #fff;
+        border-radius: 16px;
+        padding: 28px 24px;
+        box-shadow: 0 4px 24px rgba(0,0,0,0.06);
+        border: 1px solid rgba(0,0,0,0.04);
+        position: sticky;
+        top: 100px;
+    }
+
+    .sidebar-price {
+        font-size: 36px;
+        font-weight: 800;
+        color: #1F3B2C;
+    }
+
+    .sidebar-price span {
+        font-size: 18px;
+        font-weight: 400;
+        color: #8A9188;
+    }
+
+    .btn-buy {
+        width: 100%;
+        padding: 14px;
+        background: #1F3B2C;
+        color: #fff;
+        border: none;
+        border-radius: 10px;
+        font-size: 18px;
+        font-weight: 700;
+        transition: opacity 0.3s;
+        margin-top: 12px;
+    }
+
+    .btn-buy:hover {
+        opacity: 0.8;
+        color: #fff;
+    }
+
+    .btn-buy i {
+        margin-right: 8px;
+    }
+
+    .sidebar-info {
+        margin-top: 20px;
+        border-top: 1px solid #f0f0f0;
+        padding-top: 18px;
+    }
+
+    .sidebar-info-item {
+        display: flex;
+        justify-content: space-between;
+        padding: 6px 0;
+        font-size: 14px;
+        color: #4B5648;
+    }
+
+    .sidebar-info-item .label {
+        color: #8A9188;
+    }
+
+    .sidebar-info-item .value {
+        font-weight: 600;
+        color: #1F3B2C;
+    }
+
+    /* ===== সুপারিশকৃত কোর্স ===== */
+    .recommended-section {
+        max-width: 1280px;
+        margin: 0 auto;
+        padding: 20px 20px 40px;
+    }
+
+    .recommended-section h3 {
+        font-family: 'Georgia', serif;
+        font-size: 26px;
+        color: #1F3B2C;
+        margin-bottom: 20px;
+    }
+
+    .recommended-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 18px;
+    }
+
+    .recommended-card {
+        background: #fff;
+        border-radius: 12px;
+        overflow: hidden;
+        border: 1px solid rgba(0,0,0,0.04);
+        transition: transform 0.3s, box-shadow 0.3s;
+        cursor: pointer;
+        text-decoration: none;
+        color: inherit;
+        display: block;
+    }
+
+    .recommended-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+    }
+
+    .recommended-card img {
+        width: 100%;
+        height: 120px;
+        object-fit: cover;
+        background: #E7E4D9;
+    }
+
+    .recommended-card .body {
+        padding: 12px 14px 14px;
+    }
+
+    .recommended-card .body h6 {
+        font-size: 14px;
+        font-weight: 700;
+        color: #1F3B2C;
+        margin-bottom: 4px;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+    .recommended-card .body .price {
+        font-weight: 700;
+        color: #1F3B2C;
+        font-size: 15px;
+    }
+
+    .recommended-card .body .rating {
+        font-size: 12px;
+        color: #D98E1F;
+    }
+
+    @@media (max-width: 992px) {
+        .detail-wrapper {
+            flex-direction: column;
+        }
+
+        .detail-sidebar {
+            width: 100%;
+        }
+
+        .sidebar-card {
+            position: static;
+        }
+
+        .feature-list {
+            grid-template-columns: 1fr;
+        }
+
+        .detail-title {
+            font-size: 26px;
+        }
+
+        .recommended-grid {
+            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+        }
+    }
+
+    @@media (max-width: 576px) {
+        .detail-wrapper {
+            padding: 15px 12px;
+        }
+
+        .detail-title {
+            font-size: 22px;
+        }
+
+        .detail-meta {
+            gap: 10px 16px;
+            font-size: 13px;
+        }
+
+        .sidebar-price {
+            font-size: 28px;
+        }
+
+        .recommended-grid {
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+        }
+    }
+</style>
+
+<!-- ===== মেইন কন্টেন্ট ===== -->
+<div class="detail-wrapper">
+    <!-- বাম পাশ: কোর্স ডিটেলস -->
+    <div class="detail-main">
+        <img src="@Model.Image" alt="@Model.Title" class="detail-image" />
+
+        <h1 class="detail-title">@Model.Title</h1>
+
+        <div class="detail-meta">
+            <span><i class="fas fa-user-graduate"></i> @Model.Instructor</span>
+            <span><i class="fas fa-clock"></i> @Model.Duration</span>
+            <span><i class="fas fa-book-open"></i> @Model.Lessons Lessons</span>
+            <span><i class="fas fa-signal"></i> @Model.Level</span>
+            <span><i class="fas fa-star" style="color:#D98E1F;"></i> @Model.Rating ★</span>
+            <span><i class="fas fa-users"></i> @(Model.Students / 1000).ToString("0.0")k Students</span>
+        </div>
+
+        <div class="detail-desc">
+            <p>@Model.Description</p>
+        </div>
+
+        <!-- ফিচারসমূহ -->
+        @if (Model.Features != null && Model.Features.Any())
+        {
+            <div class="detail-section-title"><i class="fas fa-check-circle"></i> What You'll Learn</div>
+            <ul class="feature-list">
+                @foreach (var feature in Model.Features)
+                {
+                    <li><i class="fas fa-check-circle" style="color:#1F3B2C;"></i> @feature</li>
+                }
+            </ul>
+        }
+
+        <!-- আরও ইনফো -->
+        <div style="margin-top: 24px; padding-top: 20px; border-top: 1px solid #eee;">
+            <p style="color:#6B7568; font-size:14px;">
+                <i class="fas fa-certificate me-1" style="color:#1F3B2C;"></i>
+                Certificate of Completion included
+            </p>
+            <p style="color:#6B7568; font-size:14px;">
+                <i class="fas fa-clock me-1" style="color:#1F3B2C;"></i>
+                Lifetime access to course materials
+            </p>
+        </div>
+    </div>
+
+    <!-- ডান পাশ: সাইডবার -->
+    <div class="detail-sidebar">
+        <div class="sidebar-card">
+            <div class="sidebar-price">৳@Model.Price.ToString("N0") <span>BDT</span></div>
+
+            <button class="btn-buy" onclick="buyCourse(@Model.Id)">
+                <i class="fas fa-shopping-cart"></i> Enroll Now
+            </button>
+
+            <div class="sidebar-info">
+                <div class="sidebar-info-item">
+                    <span class="label"><i class="fas fa-clock"></i> Duration</span>
+                    <span class="value">@Model.Duration</span>
+                </div>
+                <div class="sidebar-info-item">
+                    <span class="label"><i class="fas fa-video"></i> Lessons</span>
+                    <span class="value">@Model.Lessons</span>
+                </div>
+                <div class="sidebar-info-item">
+                    <span class="label"><i class="fas fa-signal"></i> Level</span>
+                    <span class="value">@Model.Level</span>
+                </div>
+                <div class="sidebar-info-item">
+                    <span class="label"><i class="fas fa-language"></i> Language</span>
+                    <span class="value">Bangla / English</span>
+                </div>
+                <div class="sidebar-info-item">
+                    <span class="label"><i class="fas fa-users"></i> Students</span>
+                    <span class="value">@Model.Students</span>
+                </div>
+            </div>
+
+            <hr style="margin:14px 0;" />
+
+            <div style="text-align:center; font-size:13px; color:#8A9188;">
+                <i class="fas fa-lock me-1"></i> Secure payment
+                <span style="margin:0 6px;">•</span>
+                <i class="fas fa-undo me-1"></i> 7-day money-back guarantee
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ===== সুপারিশকৃত কোর্স ===== -->
+<section class="recommended-section">
+    <h3><i class="fas fa-thumbs-up me-2" style="color:#1F3B2C;"></i>You Might Also Like</h3>
+    <div class="recommended-grid" id="recommendedGrid">
+        <!-- JS দিয়ে রেন্ডার হবে -->
+    </div>
+</section>
+
+@section Scripts {
+    <script>
+        // ===== ডামি কোর্স ডেটা (ডিটেলসের জন্য) =====
+        const courseData = [
+            { id: 1, title: "English Grammar Course", image: "https://i.ibb.co.com/KjyJyXy8/English-grammar-courses-online-with-real-certificates.jpg", price: 1499, rating: 4.9 },
+            { id: 2, title: "Basic WordPress Theme Development", image: "https://i.ibb.co.com/ZpRSvpsk/Basic-Word-Press-theme-development-full-course.jpg", price: 1999, rating: 4.8 },
+            { id: 3, title: "Complete React Front-end Developer", image: "https://i.ibb.co.com/rf3RgYqG/Complete-React-Front-end-developer-course.jpg", price: 2499, rating: 4.9 },
+            { id: 4, title: "Complete Web Design", image: "https://i.ibb.co.com/XZSqdW0B/Complete-Web-Design-from-Figma-to-Webflow.jpg", price: 1799, rating: 4.7 },
+            { id: 5, title: "Flutter Development Bootcamp", image: "https://i.ibb.co.com/qZ60Vqg/Flutter-Development-Bootcamp-with-Dart.jpg", price: 2299, rating: 4.8 },
+            { id: 6, title: "The Ultimate Figma Course", image: "https://i.ibb.co.com/rGttSLJy/The-Ultimate-Figma-Course-From-Zero-to-Expert.jpg", price: 1599, rating: 4.9 },
+            { id: 7, title: "Node.js & Express Backend", image: "https://i.ibb.co.com/7vZ6R3k/Node-js-Express-Backend.jpg", price: 2699, rating: 4.7 },
+            { id: 8, title: "Python Data Science & ML", image: "https://i.ibb.co.com/0j8wQ9K/Python-Data-Science.jpg", price: 2999, rating: 4.9 }
+        ];
+
+        // ===== বর্তমান কোর্সের আইডি (URL থেকে) =====
+        const currentId = parseInt(window.location.pathname.split('/').pop());
+
+        // ===== সুপারিশকৃত কোর্স রেন্ডার =====
+        function renderRecommended() {
+            const grid = document.getElementById('recommendedGrid');
+            const recommended = courseData.filter(c => c.id !== currentId).slice(0, 4);
+
+            let html = '';
+            recommended.forEach(course => {
+                html += `
+                    <a href="/Learn/Details/${course.id}" class="recommended-card">
+                        <img src="${course.image}" alt="${course.title}" />
+                        <div class="body">
+                            <h6>${course.title}</h6>
+                            <div style="display:flex; justify-content:space-between; align-items:center; margin-top:4px;">
+                                <span class="price">৳${course.price.toLocaleString()}</span>
+                                <span class="rating">★ ${course.rating}</span>
+                            </div>
+                        </div>
+                    </a>
+                `;
+            });
+
+            grid.innerHTML = html;
+        }
+
+        // ===== কিনার ফাংশন =====
+        function buyCourse(id) {
+            const isLoggedIn = '@Context.Session.GetString("UserName")' !== '';
+            if (!isLoggedIn) {
+                alert('Please login to enroll in this course.');
+                window.location.href = '/Account/Login';
+                return;
+            }
+            alert('Course enrolled successfully! (Demo)');
+            // এখানে পেমেন্ট পেজ বা অর্ডার লজিক যোগ করতে পারেন
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            renderRecommended();
+        });
+    </script>
+}

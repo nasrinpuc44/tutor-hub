@@ -1,0 +1,71 @@
+﻿@model Tutorbub.Models.TeacherDashboardViewModel
+
+@{
+    ViewData["Title"] = "Teacher Dashboard";
+    Layout = "_Layout";
+}
+
+<style>
+    .dashboard-card {
+        background: white;
+        border-radius: 16px;
+        padding: 25px 20px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+        border: 1px solid rgba(0,0,0,0.04);
+        transition: transform 0.3s, box-shadow 0.3s;
+        height: 100%;
+    }
+    .dashboard-card:hover { transform: translateY(-4px); box-shadow: 0 8px 30px rgba(0,0,0,0.1); }
+    .stat-number { font-size: 32px; font-weight: 800; color: #1F3B2C; }
+    .stat-label { color: #6B7568; font-size: 14px; }
+    .profile-avatar-lg { width: 120px; height: 120px; border-radius: 50%; object-fit: cover; border: 4px solid #1F3B2C; }
+    .greeting-text { font-family: 'Georgia', serif; color: #1F3B2C; }
+</style>
+
+<div class="container py-4">
+    @if (TempData["Error"] != null) { <div class="alert alert-danger">@TempData["Error"]</div> }
+
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="dashboard-card text-center">
+                <img src="@(string.IsNullOrEmpty(Model.ProfileImageLink) ? "https://i.ibb.co/fd9sY88Y/IMG-6916-1.png" : Model.ProfileImageLink)" alt="Profile" class="profile-avatar-lg" />
+                <h3 class="greeting-text mt-3">Welcome, @Model.FullName!</h3>
+                <p class="text-muted">
+                    <i class="fas fa-envelope me-1"></i>@Model.Email
+                    <span class="mx-2">|</span>
+                    <i class="fas fa-phone me-1"></i>@Model.MobileNumber
+                </p>
+                <div class="d-flex justify-content-center gap-3 flex-wrap">
+                    <span class="badge bg-success"><i class="fas fa-check me-1"></i>Active Teacher</span>
+                    <span class="badge bg-primary"><i class="fas fa-star me-1"></i>@Model.Rating ★</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4 mb-4">
+        <div class="col-md-3 col-6"><div class="dashboard-card text-center"><div class="stat-number">@Model.TotalStudents</div><div class="stat-label"><i class="fas fa-users me-1"></i>Total Students</div></div></div>
+        <div class="col-md-3 col-6"><div class="dashboard-card text-center"><div class="stat-number">@Model.TotalCourses</div><div class="stat-label"><i class="fas fa-book me-1"></i>Total Courses</div></div></div>
+        <div class="col-md-3 col-6"><div class="dashboard-card text-center"><div class="stat-number">@Model.CompletedSessions</div><div class="stat-label"><i class="fas fa-check-circle me-1"></i>Completed Sessions</div></div></div>
+        <div class="col-md-3 col-6"><div class="dashboard-card text-center"><div class="stat-number">@Model.Rating.ToString("0.0")</div><div class="stat-label"><i class="fas fa-star me-1" style="color:#D98E1F;"></i>Average Rating</div></div></div>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-md-6">
+            <div class="dashboard-card"><h5 style="color:#1F3B2C;"><i class="fas fa-book-open me-2"></i>My Courses</h5><p class="text-muted">Manage your courses and track student progress.</p><div class="d-flex justify-content-center"><span class="text-muted small">Coming Soon...</span></div></div>
+        </div>
+        <div class="col-md-6">
+            <div class="dashboard-card"><h5 style="color:#1F3B2C;"><i class="fas fa-calendar-check me-2"></i>Schedule</h5><p class="text-muted">View and manage your teaching schedule.</p><div class="d-flex justify-content-center"><span class="text-muted small">Coming Soon...</span></div></div>
+        </div>
+        <div class="col-md-6">
+            <div class="dashboard-card"><h5 style="color:#1F3B2C;"><i class="fas fa-users me-2"></i>My Students</h5><p class="text-muted">View your students and their progress.</p><div class="d-flex justify-content-center"><span class="text-muted small">Coming Soon...</span></div></div>
+        </div>
+        <div class="col-md-6">
+            <div class="dashboard-card"><h5 style="color:#1F3B2C;"><i class="fas fa-chart-line me-2"></i>Earnings</h5><p class="text-muted">Track your earnings and payments.</p><div class="d-flex justify-content-center"><span class="text-muted small">Coming Soon...</span></div></div>
+        </div>
+    </div>
+
+    <div class="mt-4 text-center text-muted small">
+        <i class="fas fa-info-circle me-1"></i>More features will be available soon. Stay tuned!
+    </div>
+</div>
