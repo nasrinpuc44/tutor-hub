@@ -1,4 +1,5 @@
-﻿﻿<!DOCTYPE html>
+﻿﻿
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
@@ -243,7 +244,141 @@
                 }
             }
 
-            /* প্রোফাইল লিংক স্টাইল */
+            /* ===== ড্রপডাউন মেনু স্টাইল ===== */
+            .profile-dropdown .dropdown-toggle {
+                color: #1F3B2C !important;
+                text-decoration: none !important;
+                font-weight: 500;
+                transition: opacity 0.3s;
+                background: none;
+                border: none;
+                display: flex;
+                align-items: center;
+                gap: 6px;
+                padding: 0;
+                cursor: pointer;
+            }
+
+            .profile-dropdown .dropdown-toggle:hover {
+                opacity: 0.7;
+            }
+
+            .profile-dropdown .dropdown-toggle i {
+                font-size: 18px;
+            }
+
+            .profile-dropdown .dropdown-toggle .caret {
+                font-size: 12px;
+                margin-left: 4px;
+            }
+
+            .profile-dropdown .dropdown-menu {
+                border: none;
+                border-radius: 12px;
+                box-shadow: 0 8px 30px rgba(0,0,0,0.12);
+                padding: 8px 0;
+                min-width: 220px;
+                background: white;
+                margin-top: 8px;
+            }
+
+            .profile-dropdown .dropdown-menu .dropdown-header {
+                padding: 10px 20px 6px;
+                font-weight: 600;
+                color: #1F3B2C;
+                border-bottom: 1px solid #f0f0f0;
+                margin-bottom: 4px;
+            }
+
+            .profile-dropdown .dropdown-menu .dropdown-header small {
+                display: block;
+                font-weight: 400;
+                color: #6B7568;
+                font-size: 12px;
+            }
+
+            .profile-dropdown .dropdown-menu .dropdown-item {
+                padding: 10px 20px;
+                color: #4B5648;
+                font-size: 14px;
+                font-weight: 500;
+                transition: all 0.2s;
+                display: flex;
+                align-items: center;
+                gap: 10px;
+            }
+
+            .profile-dropdown .dropdown-menu .dropdown-item:hover {
+                background-color: #F3F1E7;
+                color: #1F3B2C;
+            }
+
+            .profile-dropdown .dropdown-menu .dropdown-item i {
+                width: 20px;
+                text-align: center;
+                color: #6B7568;
+                font-size: 14px;
+            }
+
+            .profile-dropdown .dropdown-menu .dropdown-item:hover i {
+                color: #1F3B2C;
+            }
+
+            .profile-dropdown .dropdown-menu .dropdown-divider {
+                margin: 4px 0;
+                border-color: #f0f0f0;
+            }
+
+            .profile-dropdown .dropdown-menu .dropdown-item.text-danger {
+                color: #e74c3c;
+            }
+
+            .profile-dropdown .dropdown-menu .dropdown-item.text-danger i {
+                color: #e74c3c;
+            }
+
+            .profile-dropdown .dropdown-menu .dropdown-item.text-danger:hover {
+                background-color: #fde8e8;
+            }
+
+            .profile-dropdown .dropdown-menu .dropdown-item .badge-role {
+                font-size: 10px;
+                padding: 2px 10px;
+                border-radius: 20px;
+                font-weight: 600;
+                background: #eef2f6;
+                color: #6B7568;
+                margin-left: auto;
+            }
+
+            .profile-dropdown .dropdown-menu .dropdown-item .badge-role.teacher {
+                background: #d1ecf1;
+                color: #0c6b7c;
+            }
+
+            .profile-dropdown .dropdown-menu .dropdown-item .badge-role.admin {
+                background: #fff3cd;
+                color: #b8860b;
+            }
+
+            /* ড্রপডাউন অ্যানিমেশন */
+            .profile-dropdown .dropdown-menu {
+                display: block;
+                opacity: 0;
+                visibility: hidden;
+                transform: translateY(-8px);
+                transition: all 0.2s ease;
+                pointer-events: none;
+            }
+
+            .profile-dropdown.show .dropdown-menu {
+                opacity: 1;
+                visibility: visible;
+                transform: translateY(0);
+                pointer-events: auto;
+            }
+
+            /* প্রোফাইল লিংক স্টাইল (পুরনো) */
             .profile-link {
                 color: #1F3B2C !important;
                 text-decoration: none !important;
@@ -282,46 +417,91 @@
                 <!-- Desktop Menu -->
                 <div class="hidden lg:flex items-center gap-7 xl:gap-8">
                     <a asp-controller="Home" asp-action="Index" class="text-sm font-medium transition hover:opacity-70" style="color:#4B5648;">Home</a>
-                    <!-- Learn - এখন Learn Controller এ指向 -->
                     <a asp-controller="Learn" asp-action="Index" class="text-sm font-medium transition hover:opacity-70" style="color:#4B5648;">Learn</a>
-                    <a href="#key-features" class="text-sm font-medium transition hover:opacity-70" style="color:#4B5648;">Practice</a>
-                    <a href="#knowledge-mastery-graph" class="text-sm font-medium transition hover:opacity-70" style="color:#4B5648;">Progress</a>
-                    <a href="#need-a-tutor" class="text-sm font-medium transition hover:opacity-70" style="color:#4B5648;">Leaderboard</a>
+                    <a asp-controller="Practice" asp-action="Index" class="text-sm font-medium transition hover:opacity-70" style="color:#4B5648;">Practice</a>
+                    <a asp-controller="Progress" asp-action="Progress" class="text-sm font-medium transition hover:opacity-70" style="color:#4B5648;">Progress</a>
+                    <a asp-controller="Leaderboard" asp-action="Leaderboard" class="text-sm font-medium transition hover:opacity-70" style="color:#4B5648;">Leaderboard</a>
                 </div>
 
-                <!-- Desktop Right Side - Login/User (Register রিমুভ করা হয়েছে) -->
+                <!-- Desktop Right Side - User Dropdown -->
                 <div class="hidden lg:flex items-center">
                     @if (Context.Session.GetString("UserName") != null)
                     {
-                        <div class="flex items-center gap-3">
-                            @if (Context.Session.GetString("UserRole") == "Teacher")
+                        var userRole = Context.Session.GetString("UserRole");
+                        var isTeacher = userRole == "Teacher";
+                        var isAdmin = userRole == "Admin";
+                        var userFullName = Context.Session.GetString("UserFullName") ?? Context.Session.GetString("UserName");
+                        var userInitials = "";
+                        if (!string.IsNullOrEmpty(userFullName))
+                        {
+                            var names = userFullName.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+                            if (names.Length >= 2)
                             {
-                                <!-- ===== Teacher Dashboard লিংক যোগ করা হয়েছে ===== -->
-                                <a asp-controller="Teacher" asp-action="TeacherDashboard" class="profile-link text-sm font-medium">
-                                    <i class="fas fa-chart-pie me-1"></i> Teacher Dashboard
-                                </a>
+                                userInitials = names[0][0].ToString().ToUpper() + names[1][0].ToString().ToUpper();
                             }
-                            <a asp-controller="Profile" asp-action="Index" class="profile-link text-sm font-medium">
-                                <i class="fas fa-user-circle me-1"></i>
-                                @Context.Session.GetString("UserFullName")
-                            </a>
-                            @if (Context.Session.GetString("UserRole") == "Admin")
+                            else if (names.Length == 1 && names[0].Length > 0)
                             {
-                                <a asp-controller="Admin" asp-action="Dashboard" class="inline-flex items-center gap-1.5 px-4 py-2 rounded-full font-semibold text-white text-sm transition hover:opacity-90" style="background-color:#1F3B2C;">
-                                    <i class="fas fa-chart-pie me-1"></i> Dashboard
-                                </a>
+                                userInitials = names[0][0].ToString().ToUpper();
                             }
-                            <form method="post" asp-controller="Account" asp-action="Logout" class="inline">
-                                @Html.AntiForgeryToken()
-                                <button type="submit" class="text-sm font-medium transition hover:opacity-70" style="color:#6B7568; background:none; border:none; cursor:pointer;">
-                                    <i class="fas fa-sign-out-alt me-1"></i> Logout
-                                </button>
-                            </form>
+                            else
+                            {
+                                userInitials = "U";
+                            }
+                        }
+                        else
+                        {
+                            userInitials = "U";
+                        }
+
+                        <div class="profile-dropdown dropdown" id="profileDropdown">
+                            <button class="dropdown-toggle" type="button" id="userMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="fas fa-user-circle"></i>
+                                <span>@userFullName</span>
+                                <span class="caret"><i class="fas fa-chevron-down"></i></span>
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userMenuButton">
+                                <li class="dropdown-header">
+                                    @userFullName
+                                    <small>@Context.Session.GetString("UserName")</small>
+                                </li>
+                                <li><hr class="dropdown-divider" /></li>
+                                <li>
+                                    <a class="dropdown-item" asp-controller="Profile" asp-action="Index">
+                                        <i class="fas fa-id-card"></i> My Profile
+                                    </a>
+                                </li>
+                                @if (isTeacher)
+                                {
+                                    <li>
+                                        <a class="dropdown-item" asp-controller="Teacher" asp-action="TeacherDashboard">
+                                            <i class="fas fa-chalkboard-teacher"></i> Teacher Dashboard
+                                            <span class="badge-role teacher">Teacher</span>
+                                        </a>
+                                    </li>
+                                }
+                                @if (isAdmin)
+                                {
+                                    <li>
+                                        <a class="dropdown-item" asp-controller="Admin" asp-action="Dashboard">
+                                            <i class="fas fa-shield-alt"></i> Admin Panel
+                                            <span class="badge-role admin">Admin</span>
+                                        </a>
+                                    </li>
+                                }
+                                <li><hr class="dropdown-divider" /></li>
+                                <li>
+                                    <form method="post" asp-controller="Account" asp-action="Logout" id="logoutFormDesktop">
+                                        @Html.AntiForgeryToken()
+                                        <a class="dropdown-item text-danger" href="#" onclick="document.getElementById('logoutFormDesktop').submit(); return false;">
+                                            <i class="fas fa-sign-out-alt"></i> Logout
+                                        </a>
+                                    </form>
+                                </li>
+                            </ul>
                         </div>
                     }
                     else
                     {
-                        <!-- শুধু Login বাটন (Register রিমুভ করা হয়েছে) -->
                         <div class="flex items-center gap-2">
                             <a asp-controller="Account" asp-action="Login" class="inline-flex items-center gap-1.5 px-5 py-2.5 rounded-full font-semibold text-white text-sm transition hover:opacity-90" style="background-color:#1F3B2C;">
                                 <i class="fas fa-sign-in-alt"></i> Login
@@ -341,49 +521,63 @@
                 </button>
             </div>
 
-            <!-- Mobile Menu (Register রিমুভ করা হয়েছে) -->
+            <!-- Mobile Menu -->
             <div id="mobileMenu" class="hidden lg:hidden pb-5">
                 <div class="flex flex-col gap-4">
                     <a asp-controller="Home" asp-action="Index" class="text-sm" style="color:#4B5648;">Home</a>
-                    <!-- Learn - মোবাইল মেনুতে আপডেট -->
                     <a asp-controller="Learn" asp-action="Index" class="text-sm" style="color:#4B5648;">Learn</a>
-                    <a href="#key-features" class="text-sm" style="color:#4B5648;">Practice</a>
-                    <a href="#knowledge-mastery-graph" class="text-sm" style="color:#4B5648;">Progress</a>
-                    <a href="#need-a-tutor" class="text-sm" style="color:#4B5648;">Leaderboard</a>
+                    <a asp-controller="Practice" asp-action="Index" class="text-sm" style="color:#4B5648;">Practice</a>
+                    <a asp-controller="Progress" asp-action="Progress" class="text-sm" style="color:#4B5648;">Progress</a>
+                    <a asp-controller="Leaderboard" asp-action="Leaderboard" class="text-sm" style="color:#4B5648;">Leaderboard</a>
 
                     <hr class="border-black/5" />
 
                     @if (Context.Session.GetString("UserName") != null)
                     {
+                        var userRoleMobile = Context.Session.GetString("UserRole");
+                        var isTeacherMobile = userRoleMobile == "Teacher";
+                        var isAdminMobile = userRoleMobile == "Admin";
+                        var userFullNameMobile = Context.Session.GetString("UserFullName") ?? Context.Session.GetString("UserName");
+
                         <div class="flex flex-col gap-2">
-                            @if (Context.Session.GetString("UserRole") == "Teacher")
-                            {
-                                <!-- ===== Mobile Menu তে Teacher Dashboard লিংক যোগ করা হয়েছে ===== -->
-                                <a asp-controller="Teacher" asp-action="TeacherDashboard" class="text-sm font-medium" style="color:#1F3B2C;">
-                                    <i class="fas fa-chart-pie me-1"></i> Teacher Dashboard
-                                </a>
-                            }
+                            <!-- মোবাইলে ইউজারের নাম দেখানো -->
+                            <div class="text-sm font-semibold" style="color:#1F3B2C; padding: 4px 0;">
+                                <i class="fas fa-user-circle me-2"></i> @userFullNameMobile
+                                <span class="text-xs font-normal text-muted" style="color:#6B7568;">(@Context.Session.GetString("UserName"))</span>
+                            </div>
+
                             <a asp-controller="Profile" asp-action="Index" class="text-sm font-medium" style="color:#1F3B2C;">
-                                <i class="fas fa-user-circle me-1"></i>
-                                @Context.Session.GetString("UserFullName")
+                                <i class="fas fa-id-card me-2"></i> My Profile
                             </a>
-                            @if (Context.Session.GetString("UserRole") == "Admin")
+
+                            @if (isTeacherMobile)
                             {
-                                <a asp-controller="Admin" asp-action="Dashboard" class="inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-full font-semibold text-white text-sm" style="background-color:#1F3B2C;">
-                                    <i class="fas fa-chart-pie me-1"></i> Dashboard
+                                <a asp-controller="Teacher" asp-action="TeacherDashboard" class="text-sm font-medium" style="color:#1F3B2C;">
+                                    <i class="fas fa-chalkboard-teacher me-2"></i> Teacher Dashboard
+                                    <span class="text-xs text-muted" style="color:#0c6b7c;">Teacher</span>
                                 </a>
                             }
-                            <form method="post" asp-controller="Account" asp-action="Logout" class="inline">
+
+                            @if (isAdminMobile)
+                            {
+                                <a asp-controller="Admin" asp-action="Dashboard" class="text-sm font-medium" style="color:#1F3B2C;">
+                                    <i class="fas fa-shield-alt me-2"></i> Admin Panel
+                                    <span class="text-xs text-muted" style="color:#b8860b;">Admin</span>
+                                </a>
+                            }
+
+                            <hr class="border-black/5" />
+
+                            <form method="post" asp-controller="Account" asp-action="Logout" id="logoutFormMobile">
                                 @Html.AntiForgeryToken()
-                                <button type="submit" class="text-sm font-medium text-left" style="color:#6B7568; background:none; border:none; cursor:pointer;">
-                                    <i class="fas fa-sign-out-alt me-1"></i> Logout
+                                <button type="submit" class="text-sm font-medium text-left" style="color:#e74c3c; background:none; border:none; cursor:pointer; width:100%; padding: 4px 0;">
+                                    <i class="fas fa-sign-out-alt me-2"></i> Logout
                                 </button>
                             </form>
                         </div>
                     }
                     else
                     {
-                        <!-- শুধু Login বাটন (Register রিমুভ করা হয়েছে) -->
                         <div class="flex flex-col gap-2">
                             <a asp-controller="Account" asp-action="Login" class="inline-flex items-center justify-center gap-1.5 px-5 py-2.5 rounded-full font-semibold text-white text-sm" style="background-color:#1F3B2C;">
                                 <i class="fas fa-sign-in-alt"></i> Login
@@ -468,6 +662,28 @@
 
             mobileMenuButton.addEventListener("click", function() {
                 mobileMenu.classList.toggle("hidden");
+            });
+
+            // ড্রপডাউন ম্যানুয়ালি টগল করার জন্য (Bootstrap 5 এর সাথে)
+            document.addEventListener('DOMContentLoaded', function() {
+                const dropdownToggle = document.querySelector('.profile-dropdown .dropdown-toggle');
+                if (dropdownToggle) {
+                    dropdownToggle.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        const parent = this.closest('.profile-dropdown');
+                        if (parent) {
+                            parent.classList.toggle('show');
+                        }
+                    });
+                }
+
+                // ড্রপডাউনের বাইরে ক্লিক করলে বন্ধ
+                document.addEventListener('click', function(e) {
+                    const dropdown = document.querySelector('.profile-dropdown');
+                    if (dropdown && !dropdown.contains(e.target)) {
+                        dropdown.classList.remove('show');
+                    }
+                });
             });
     </script>
 

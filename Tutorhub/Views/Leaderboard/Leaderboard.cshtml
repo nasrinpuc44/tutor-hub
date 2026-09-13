@@ -1,0 +1,478 @@
+﻿﻿@{
+    ViewData["Title"] = "Leaderboard - SMART TUTOR HUB";
+    Layout = "_Layout";
+}
+
+<style>
+    .leaderboard-wrapper {
+        max-width: 1000px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+
+    /* ===== হেডার ===== */
+    .lb-header {
+        text-align: center;
+        margin-bottom: 30px;
+    }
+
+    .lb-header h2 {
+        font-size: 32px;
+        font-weight: 700;
+        color: #1e2b37;
+    }
+
+    .lb-header h2 i {
+        color: #D98E1F;
+        margin-right: 12px;
+    }
+
+    .lb-header p {
+        color: #6B7568;
+        font-size: 16px;
+        margin-top: 4px;
+    }
+
+    /* ===== ট্যাব ===== */
+    .lb-tabs {
+        display: flex;
+        gap: 4px;
+        background: #f0f4f9;
+        border-radius: 12px;
+        padding: 4px;
+        margin-bottom: 24px;
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+
+    .lb-tabs button {
+        padding: 10px 28px;
+        border: none;
+        border-radius: 10px;
+        font-weight: 600;
+        font-size: 14px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        background: transparent;
+        color: #6B7568;
+    }
+
+    .lb-tabs button:hover {
+        color: #1e2b37;
+    }
+
+    .lb-tabs button.active {
+        background: white;
+        color: #1e2b37;
+        box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+    }
+
+    /* ===== টেবিল ===== */
+    .lb-table-wrap {
+        background: white;
+        border-radius: 16px;
+        box-shadow: 0 4px 24px rgba(0,0,0,0.06);
+        overflow: hidden;
+        border: 1px solid rgba(0,0,0,0.04);
+    }
+
+    .lb-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .lb-table thead {
+        background: #f8fafc;
+        border-bottom: 1px solid #eef2f6;
+    }
+
+    .lb-table thead th {
+        padding: 14px 20px;
+        text-align: left;
+        font-size: 13px;
+        font-weight: 600;
+        color: #6B7568;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .lb-table tbody tr {
+        border-bottom: 1px solid #f0f4f9;
+        transition: background 0.2s;
+    }
+
+    .lb-table tbody tr:hover {
+        background: #fafbfc;
+    }
+
+    .lb-table tbody tr:last-child {
+        border-bottom: none;
+    }
+
+    .lb-table tbody td {
+        padding: 14px 20px;
+        font-size: 14px;
+        color: #1e2b37;
+        vertical-align: middle;
+    }
+
+    /* ===== র‍্যাঙ্ক ব্যাজ ===== */
+    .rank-badge {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        font-weight: 700;
+        font-size: 14px;
+        background: #eef2f6;
+        color: #6B7568;
+    }
+
+    .rank-badge.gold {
+        background: #fff3cd;
+        color: #b8860b;
+    }
+
+    .rank-badge.silver {
+        background: #e8edf5;
+        color: #5a6a7a;
+    }
+
+    .rank-badge.bronze {
+        background: #fde8d4;
+        color: #b86b2a;
+    }
+
+    /* ===== ইউজার অ্যাভাটার ===== */
+    .lb-user {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .lb-user .avatar {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        object-fit: cover;
+        background: #eef2f6;
+    }
+
+    .lb-user .name {
+        font-weight: 600;
+        color: #1e2b37;
+    }
+
+    .lb-user .badge-role {
+        font-size: 10px;
+        padding: 2px 10px;
+        border-radius: 20px;
+        font-weight: 600;
+        background: #eef2f6;
+        color: #6B7568;
+    }
+
+    .lb-user .badge-role.teacher {
+        background: #d1ecf1;
+        color: #0c6b7c;
+    }
+
+    .lb-user .badge-role.admin {
+        background: #fff3cd;
+        color: #b8860b;
+    }
+
+    /* ===== স্কোর ===== */
+    .lb-score {
+        font-weight: 700;
+        font-size: 16px;
+        color: #1e2b37;
+    }
+
+    .lb-score small {
+        font-weight: 400;
+        font-size: 12px;
+        color: #6B7568;
+    }
+
+    /* ===== স্ট্রিক ===== */
+    .lb-streak {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        color: #D98E1F;
+        font-weight: 600;
+    }
+
+    .lb-streak i {
+        font-size: 14px;
+    }
+
+    /* ===== নিজের অবস্থান হাইলাইট ===== */
+    .lb-table tbody tr.current-user {
+        background: #eaf5ef;
+        border-left: 4px solid #1f7b4d;
+    }
+
+    .lb-table tbody tr.current-user td:first-child {
+        padding-left: 16px;
+    }
+
+    /* ===== খালি স্টেট ===== */
+    .lb-empty {
+        text-align: center;
+        padding: 40px 20px;
+        color: #6B7568;
+    }
+
+    .lb-empty i {
+        font-size: 48px;
+        opacity: 0.3;
+        margin-bottom: 16px;
+        display: block;
+    }
+
+    .lb-empty h5 {
+        color: #1e2b37;
+        margin-bottom: 4px;
+    }
+
+    /* ===== রেস্পন্সিভ ===== */
+    @@media (max-width: 768px) {
+        .lb-table thead th,
+        .lb-table tbody td {
+            padding: 10px 12px;
+            font-size: 13px;
+        }
+
+        .lb-user .name {
+            font-size: 13px;
+        }
+
+        .lb-user .avatar {
+            width: 28px;
+            height: 28px;
+        }
+
+        .lb-tabs button {
+            padding: 8px 16px;
+            font-size: 12px;
+        }
+
+        .lb-header h2 {
+            font-size: 24px;
+        }
+
+        .lb-score {
+            font-size: 14px;
+        }
+    }
+
+    @@media (max-width: 576px) {
+        .lb-table thead th:nth-child(3),
+        .lb-table tbody td:nth-child(3) {
+            display: none;
+        }
+
+        .lb-table thead th:nth-child(4),
+        .lb-table tbody td:nth-child(4) {
+            display: none;
+        }
+    }
+</style>
+
+<div class="leaderboard-wrapper">
+
+    <!-- ===== হেডার ===== -->
+    <div class="lb-header">
+        <h2><i class="fas fa-trophy"></i>Leaderboard</h2>
+        <p>See where you rank among your peers! Compete and climb to the top.</p>
+    </div>
+
+    <!-- ===== ট্যাব ===== -->
+    <div class="lb-tabs" id="tabContainer">
+        <button class="active" data-tab="points"><i class="fas fa-star me-1"></i> Points</button>
+        <button data-tab="streak"><i class="fas fa-fire me-1"></i> Streak</button>
+        <button data-tab="accuracy"><i class="fas fa-bullseye me-1"></i> Accuracy</button>
+        <button data-tab="quizzes"><i class="fas fa-brain me-1"></i> Quizzes</button>
+    </div>
+
+    <!-- ===== টেবিল ===== -->
+    <div class="lb-table-wrap">
+        <table class="lb-table">
+            <thead>
+                <tr>
+                    <th style="width:60px;">Rank</th>
+                    <th>User</th>
+                    <th style="width:100px;">Score</th>
+                    <th style="width:100px;">Streak</th>
+                    <th style="width:120px;">Accuracy</th>
+                </tr>
+            </thead>
+            <tbody id="leaderboardBody">
+                <!-- JS দিয়ে রেন্ডার হবে -->
+            </tbody>
+        </table>
+    </div>
+
+</div>
+
+@section Scripts {
+    <script>
+        console.log('🏆 Leaderboard page loaded');
+
+        // ===== ডামি ইউজার ডেটা (পরে API থেকে আসবে) =====
+        const users = [
+            { id: 1, name: "Dr. Sarah Ahmed", avatar: "", role: "Teacher", points: 2850, streak: 45, accuracy: 92, quizzes: 38, isCurrentUser: false },
+            { id: 2, name: "Mr. Rajib Hasan", avatar: "", role: "Teacher", points: 2720, streak: 38, accuracy: 88, quizzes: 34, isCurrentUser: false },
+            { id: 3, name: "Ms. Farhana Akter", avatar: "", role: "Teacher", points: 2680, streak: 42, accuracy: 90, quizzes: 36, isCurrentUser: false },
+            { id: 4, name: "Mr. Kamal Hossain", avatar: "", role: "Teacher", points: 2510, streak: 30, accuracy: 85, quizzes: 30, isCurrentUser: false },
+            { id: 5, name: "Ms. Nusrat Jahan", avatar: "", role: "Teacher", points: 2430, streak: 35, accuracy: 87, quizzes: 32, isCurrentUser: false },
+            { id: 6, name: "Rahim Ahmed", avatar: "", role: "Student", points: 1850, streak: 20, accuracy: 78, quizzes: 25, isCurrentUser: false },
+            { id: 7, name: "Karim Mia", avatar: "", role: "Student", points: 1620, streak: 15, accuracy: 72, quizzes: 20, isCurrentUser: false },
+            { id: 8, name: "Sadia Khan", avatar: "", role: "Student", points: 1480, streak: 12, accuracy: 68, quizzes: 18, isCurrentUser: false },
+            { id: 9, name: "Rafi Ahmed", avatar: "", role: "Student", points: 1320, streak: 8, accuracy: 65, quizzes: 15, isCurrentUser: false },
+            { id: 10, name: "Taslima Begum", avatar: "", role: "Student", points: 1100, streak: 5, accuracy: 60, quizzes: 12, isCurrentUser: false },
+            { id: 11, name: "You", avatar: "", role: "Student", points: 950, streak: 6, accuracy: 75, quizzes: 10, isCurrentUser: true }
+        ];
+
+        // ===== DOM রেফারেন্স =====
+        const tbody = document.getElementById('leaderboardBody');
+        const tabs = document.querySelectorAll('.lb-tabs button');
+
+        // ===== র‍্যাঙ্ক ব্যাজ ক্লাস =====
+        function getRankClass(index) {
+            if (index === 0) return 'gold';
+            if (index === 1) return 'silver';
+            if (index === 2) return 'bronze';
+            return '';
+        }
+
+        // ===== অ্যাভাটার ইমেজ =====
+        function getAvatar(name) {
+            const initials = name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2);
+            return `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=1f7b4d&color=fff&size=36&bold=true`;
+        }
+
+        // ===== টেবিল রেন্ডার =====
+        function renderLeaderboard(sortedUsers, sortType) {
+            if (!sortedUsers || sortedUsers.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="5">
+                            <div class="lb-empty">
+                                <i class="fas fa-users"></i>
+                                <h5>No users found</h5>
+                                <p>Start learning and compete with others!</p>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            let html = '';
+            sortedUsers.forEach((user, index) => {
+                const rank = index + 1;
+                const rankClass = getRankClass(index);
+                const isCurrent = user.isCurrentUser;
+                const roleClass = user.role === 'Teacher' ? 'teacher' : (user.role === 'Admin' ? 'admin' : '');
+                const avatarUrl = user.avatar || getAvatar(user.name);
+
+                let scoreValue = user.points;
+                let scoreLabel = 'pts';
+                if (sortType === 'streak') {
+                    scoreValue = user.streak;
+                    scoreLabel = 'days';
+                } else if (sortType === 'accuracy') {
+                    scoreValue = user.accuracy;
+                    scoreLabel = '%';
+                } else if (sortType === 'quizzes') {
+                    scoreValue = user.quizzes;
+                    scoreLabel = 'quizzes';
+                }
+
+                html += `
+                    <tr class="${isCurrent ? 'current-user' : ''}">
+                        <td>
+                            <span class="rank-badge ${rankClass}">${rank}</span>
+                        </td>
+                        <td>
+                            <div class="lb-user">
+                                <img src="${avatarUrl}" alt="${user.name}" class="avatar" />
+                                <div>
+                                    <div class="name">${user.name}</div>
+                                    <span class="badge-role ${roleClass}">${user.role}</span>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="lb-score">${scoreValue} <small>${scoreLabel}</small></div>
+                        </td>
+                        <td>
+                            <span class="lb-streak"><i class="fas fa-fire"></i> ${user.streak}d</span>
+                        </td>
+                        <td>
+                            <span style="font-weight:600; color:${user.accuracy >= 80 ? '#1f7b4d' : (user.accuracy >= 60 ? '#b8860b' : '#c94a4a')};">${user.accuracy}%</span>
+                        </td>
+                    </tr>
+                `;
+            });
+
+            tbody.innerHTML = html;
+        }
+
+        // ===== ডেটা সাজানো =====
+        function sortUsers(type) {
+            const sorted = [...users];
+            switch (type) {
+                case 'points':
+                    sorted.sort((a, b) => b.points - a.points);
+                    break;
+                case 'streak':
+                    sorted.sort((a, b) => b.streak - a.streak);
+                    break;
+                case 'accuracy':
+                    sorted.sort((a, b) => b.accuracy - a.accuracy);
+                    break;
+                case 'quizzes':
+                    sorted.sort((a, b) => b.quizzes - a.quizzes);
+                    break;
+                default:
+                    sorted.sort((a, b) => b.points - a.points);
+            }
+            return sorted;
+        }
+
+        // ===== ট্যাব পরিবর্তন =====
+        function switchTab(type) {
+            // ট্যাব অ্যাক্টিভ পরিবর্তন
+            tabs.forEach(tab => {
+                tab.classList.remove('active');
+                if (tab.dataset.tab === type) {
+                    tab.classList.add('active');
+                }
+            });
+
+            const sorted = sortUsers(type);
+            renderLeaderboard(sorted, type);
+        }
+
+        // ===== ইভেন্ট লিসেনার =====
+        tabs.forEach(tab => {
+            tab.addEventListener('click', function() {
+                const type = this.dataset.tab;
+                switchTab(type);
+            });
+        });
+
+        // ===== শুরু =====
+        document.addEventListener('DOMContentLoaded', function() {
+            // ডিফল্ট: পয়েন্ট অনুযায়ী সাজানো
+            const sorted = sortUsers('points');
+            renderLeaderboard(sorted, 'points');
+        });
+    </script>
+}

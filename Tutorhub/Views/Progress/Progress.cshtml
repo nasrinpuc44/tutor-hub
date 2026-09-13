@@ -1,0 +1,703 @@
+﻿﻿@{
+    ViewData["Title"] = "My Progress - SMART TUTOR HUB";
+    Layout = "_Layout";
+}
+
+<style>
+    .progress-wrapper {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+
+    /* ===== স্ট্যাটস কার্ড ===== */
+    .stat-card {
+        background: white;
+        border-radius: 16px;
+        padding: 24px 20px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+        border: 1px solid rgba(0,0,0,0.04);
+        transition: transform 0.3s, box-shadow 0.3s;
+        height: 100%;
+    }
+
+    .stat-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 8px 30px rgba(0,0,0,0.1);
+    }
+
+    .stat-icon {
+        width: 48px;
+        height: 48px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 22px;
+        margin-bottom: 12px;
+    }
+
+    .stat-icon.green { background: #d4edda; color: #1f7b4d; }
+    .stat-icon.blue { background: #d1ecf1; color: #0c6b7c; }
+    .stat-icon.gold { background: #fff3cd; color: #b8860b; }
+    .stat-icon.purple { background: #e7dcf5; color: #6f42c1; }
+
+    .stat-number {
+        font-size: 28px;
+        font-weight: 800;
+        color: #1e2b37;
+        line-height: 1.2;
+    }
+
+    .stat-label {
+        font-size: 14px;
+        color: #6B7568;
+        margin-top: 2px;
+    }
+
+    /* ===== সেকশন হেডার ===== */
+    .section-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+        flex-wrap: wrap;
+        gap: 12px;
+    }
+
+    .section-header h3 {
+        font-size: 22px;
+        font-weight: 700;
+        color: #1e2b37;
+        margin: 0;
+    }
+
+    .section-header h3 i {
+        margin-right: 10px;
+        color: #1f7b4d;
+    }
+
+    /* ===== প্রগ্রেস বার (সার্কুলার) ===== */
+    .circular-progress {
+        position: relative;
+        width: 120px;
+        height: 120px;
+        flex-shrink: 0;
+    }
+
+    .circular-progress svg {
+        transform: rotate(-90deg);
+    }
+
+    .circular-progress .bg-circle {
+        fill: none;
+        stroke: #eef2f6;
+        stroke-width: 6;
+    }
+
+    .circular-progress .progress-circle {
+        fill: none;
+        stroke: #1f7b4d;
+        stroke-width: 6;
+        stroke-linecap: round;
+        transition: stroke-dasharray 0.8s ease;
+    }
+
+    .circular-progress .center-text {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        font-weight: 700;
+        font-size: 22px;
+        color: #1e2b37;
+        text-align: center;
+    }
+
+    .circular-progress .center-text small {
+        font-size: 11px;
+        font-weight: 400;
+        color: #6B7568;
+        display: block;
+    }
+
+    /* ===== কোর্স প্রগ্রেস কার্ড ===== */
+    .course-progress-card {
+        background: white;
+        border-radius: 16px;
+        padding: 20px;
+        border: 1px solid rgba(0,0,0,0.04);
+        box-shadow: 0 2px 12px rgba(0,0,0,0.04);
+        transition: box-shadow 0.3s;
+        display: flex;
+        align-items: center;
+        gap: 16px;
+    }
+
+    .course-progress-card:hover {
+        box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+    }
+
+    .course-progress-card .course-img {
+        width: 80px;
+        height: 80px;
+        border-radius: 12px;
+        object-fit: cover;
+        flex-shrink: 0;
+        background: #eef2f6;
+    }
+
+    .course-progress-card .course-info {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .course-progress-card .course-info h5 {
+        font-size: 16px;
+        font-weight: 700;
+        color: #1e2b37;
+        margin: 0 0 4px 0;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .course-progress-card .course-info .meta {
+        font-size: 13px;
+        color: #6B7568;
+        display: flex;
+        gap: 16px;
+        flex-wrap: wrap;
+    }
+
+    .course-progress-card .course-info .meta i {
+        margin-right: 4px;
+        color: #1f7b4d;
+    }
+
+    .course-progress-card .progress-track-mini {
+        width: 140px;
+        flex-shrink: 0;
+    }
+
+    .course-progress-card .progress-track-mini .bar-bg {
+        height: 6px;
+        background: #eef2f6;
+        border-radius: 10px;
+        overflow: hidden;
+    }
+
+    .course-progress-card .progress-track-mini .bar-fill {
+        height: 100%;
+        background: #1f7b4d;
+        border-radius: 10px;
+        transition: width 0.6s ease;
+    }
+
+    .course-progress-card .progress-track-mini .label {
+        display: flex;
+        justify-content: space-between;
+        font-size: 12px;
+        color: #6B7568;
+        margin-top: 4px;
+    }
+
+    /* ===== কুইজ হিস্ট্রি ===== */
+    .quiz-history-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 14px 18px;
+        background: #f9fbfd;
+        border-radius: 12px;
+        border-left: 4px solid #1f7b4d;
+        margin-bottom: 10px;
+        transition: background 0.2s;
+    }
+
+    .quiz-history-item:hover {
+        background: #f0f4f9;
+    }
+
+    .quiz-history-item .left {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+    }
+
+    .quiz-history-item .left .title {
+        font-weight: 600;
+        color: #1e2b37;
+        font-size: 15px;
+    }
+
+    .quiz-history-item .left .sub {
+        font-size: 13px;
+        color: #6B7568;
+    }
+
+    .quiz-history-item .right {
+        text-align: right;
+    }
+
+    .quiz-history-item .right .score {
+        font-weight: 700;
+        font-size: 18px;
+        color: #1e2b37;
+    }
+
+    .quiz-history-item .right .date {
+        font-size: 12px;
+        color: #8A9188;
+    }
+
+    .quiz-history-item .badge-result {
+        padding: 4px 14px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 600;
+    }
+
+    .badge-result.pass { background: #d4edda; color: #1f7b4d; }
+    .badge-result.fail { background: #f8d7da; color: #c94a4a; }
+
+    /* ===== খালি স্টেট ===== */
+    .empty-state {
+        text-align: center;
+        padding: 40px 20px;
+        color: #6B7568;
+    }
+
+    .empty-state i {
+        font-size: 48px;
+        opacity: 0.3;
+        margin-bottom: 16px;
+        display: block;
+    }
+
+    .empty-state h5 {
+        color: #1e2b37;
+        margin-bottom: 4px;
+    }
+
+    /* ===== রেস্পন্সিভ ===== */
+    @@media (max-width: 768px) {
+        .course-progress-card {
+            flex-direction: column;
+            align-items: stretch;
+            text-align: center;
+        }
+
+        .course-progress-card .course-img {
+            width: 100%;
+            height: 140px;
+            margin: 0 auto;
+        }
+
+        .course-progress-card .progress-track-mini {
+            width: 100%;
+        }
+
+        .course-progress-card .course-info h5 {
+            white-space: normal;
+        }
+
+        .quiz-history-item {
+            flex-direction: column;
+            text-align: center;
+            gap: 8px;
+        }
+
+        .quiz-history-item .right {
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 22px;
+        }
+
+        .section-header h3 {
+            font-size: 18px;
+        }
+
+        .circular-progress {
+            width: 100px;
+            height: 100px;
+        }
+
+        .circular-progress .center-text {
+            font-size: 18px;
+        }
+    }
+</style>
+
+<div class="progress-wrapper">
+
+    <!-- ===== পেজ টাইটেল ===== -->
+    <div class="mb-4">
+        <h2 style="color:#1e2b37; font-weight:700; font-size:28px;">
+            <i class="fas fa-chart-line me-2" style="color:#1f7b4d;"></i>My Progress
+        </h2>
+        <p style="color:#6B7568; margin-top:4px;">Track your learning journey across courses and quizzes</p>
+    </div>
+
+    <!-- ===== স্ট্যাটস ===== -->
+    <div class="row g-4 mb-4">
+        <div class="col-md-3 col-6">
+            <div class="stat-card">
+                <div class="stat-icon green"><i class="fas fa-star"></i></div>
+                <div class="stat-number" id="totalPoints">0</div>
+                <div class="stat-label">Total Points</div>
+            </div>
+        </div>
+        <div class="col-md-3 col-6">
+            <div class="stat-card">
+                <div class="stat-icon blue"><i class="fas fa-check-circle"></i></div>
+                <div class="stat-number" id="correctAnswers">0</div>
+                <div class="stat-label">Correct Answers</div>
+            </div>
+        </div>
+        <div class="col-md-3 col-6">
+            <div class="stat-card">
+                <div class="stat-icon gold"><i class="fas fa-fire"></i></div>
+                <div class="stat-number" id="streakDays">0</div>
+                <div class="stat-label">Day Streak</div>
+            </div>
+        </div>
+        <div class="col-md-3 col-6">
+            <div class="stat-card">
+                <div class="stat-icon purple"><i class="fas fa-trophy"></i></div>
+                <div class="stat-number" id="quizzesCompleted">0</div>
+                <div class="stat-label">Quizzes Completed</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== গ্রিড: বামে কোর্স প্রগ্রেস, ডানে কুইজ স্ট্যাটস ===== -->
+    <div class="row g-4">
+        <!-- বাম কলাম: কোর্স প্রগ্রেস -->
+        <div class="col-lg-7">
+            <div class="card border-0 shadow-sm rounded-4 p-4">
+                <div class="section-header">
+                    <h3><i class="fas fa-book-open"></i>Course Progress</h3>
+                    <span style="font-size:14px; color:#6B7568;" id="courseCount">0 courses</span>
+                </div>
+                <div id="courseProgressList">
+                    <!-- JS দিয়ে রেন্ডার হবে -->
+                    <div class="empty-state">
+                        <i class="fas fa-book"></i>
+                        <h5>No courses enrolled</h5>
+                        <p>Start learning by enrolling in a course!</p>
+                        <a href="/Learn/Index" class="btn btn-sm" style="background:#1f7b4d; color:white; border-radius:30px; padding:8px 28px;">
+                            Browse Courses <i class="fas fa-arrow-right ms-1"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ডান কলাম: কুইজ স্ট্যাটস -->
+        <div class="col-lg-5">
+            <div class="card border-0 shadow-sm rounded-4 p-4">
+                <div class="section-header">
+                    <h3><i class="fas fa-brain"></i>Quiz Performance</h3>
+                    <span style="font-size:14px; color:#6B7568;" id="quizCount">0 quizzes</span>
+                </div>
+
+                <!-- সার্কুলার প্রগ্রেস -->
+                <div class="text-center mb-4">
+                    <div class="circular-progress mx-auto" id="circularProgress">
+                        <svg width="120" height="120" viewBox="0 0 120 120">
+                            <circle class="bg-circle" cx="60" cy="60" r="50" />
+                            <circle class="progress-circle" cx="60" cy="60" r="50"
+                                    stroke-dasharray="314.16"
+                                    stroke-dashoffset="314.16"
+                                    id="progressCircle" />
+                        </svg>
+                        <div class="center-text">
+                            <span id="accuracyPercent">0%</span>
+                            <small>Accuracy</small>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- কুইজ হিস্ট্রি -->
+                <div id="quizHistoryList">
+                    <!-- JS দিয়ে রেন্ডার হবে -->
+                    <div class="empty-state">
+                        <i class="fas fa-question-circle"></i>
+                        <h5>No quizzes attempted</h5>
+                        <p>Take your first practice quiz to start tracking!</p>
+                        <a href="/Practice/Index" class="btn btn-sm" style="background:#1f7b4d; color:white; border-radius:30px; padding:8px 28px;">
+                            Start Practice <i class="fas fa-arrow-right ms-1"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== ডিটেইল্ড কুইজ হিস্ট্রি (নিচে) ===== -->
+    <div class="card border-0 shadow-sm rounded-4 p-4 mt-4">
+        <div class="section-header">
+            <h3><i class="fas fa-list-ul"></i>Recent Activity</h3>
+            <span style="font-size:14px; color:#6B7568;">Last 10 activities</span>
+        </div>
+        <div id="recentActivityList">
+            <!-- JS দিয়ে রেন্ডার হবে -->
+            <div class="empty-state">
+                <i class="fas fa-clock"></i>
+                <h5>No recent activity</h5>
+                <p>Your learning activities will appear here</p>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+@section Scripts {
+    <script>
+        console.log('📊 Progress page loaded');
+
+        // ===== ডামি ডেটা (পরে API থেকে আসবে) =====
+        const progressData = {
+            totalPoints: 240,
+            correctAnswers: 48,
+            streakDays: 6,
+            quizzesCompleted: 8,
+
+            // কোর্স প্রগ্রেস
+            courses: [
+                { id: 1, title: "English Grammar Course", image: "https://i.ibb.co.com/KjyJyXy8/English-grammar-courses-online-with-real-certificates.jpg", progress: 75, totalLessons: 48, completedLessons: 36 },
+                { id: 2, title: "Complete React Front-end Developer", image: "https://i.ibb.co.com/rf3RgYqG/Complete-React-Front-end-developer-course.jpg", progress: 40, totalLessons: 62, completedLessons: 25 },
+                { id: 3, title: "The Ultimate Figma Course", image: "https://i.ibb.co.com/rGttSLJy/The-Ultimate-Figma-Course-From-Zero-to-Expert.jpg", progress: 90, totalLessons: 28, completedLessons: 25 }
+            ],
+
+            // কুইজ হিস্ট্রি
+            quizzes: [
+                { id: 1, title: "General Knowledge Quiz", subject: "Mixed", score: 8, total: 10, date: "2026-09-07", passed: true },
+                { id: 2, title: "Physics Fundamentals", subject: "Physics", score: 6, total: 10, date: "2026-09-06", passed: true },
+                { id: 3, title: "Programming Basics", subject: "CS", score: 4, total: 10, date: "2026-09-05", passed: false },
+                { id: 4, title: "English Grammar", subject: "Language", score: 9, total: 10, date: "2026-09-04", passed: true },
+                { id: 5, title: "Chemistry Quiz", subject: "Science", score: 7, total: 10, date: "2026-09-03", passed: true }
+            ]
+        };
+
+        // ===== DOM রেফারেন্স =====
+        const totalPoints = document.getElementById('totalPoints');
+        const correctAnswers = document.getElementById('correctAnswers');
+        const streakDays = document.getElementById('streakDays');
+        const quizzesCompleted = document.getElementById('quizzesCompleted');
+        const courseList = document.getElementById('courseProgressList');
+        const quizHistoryList = document.getElementById('quizHistoryList');
+        const recentActivityList = document.getElementById('recentActivityList');
+        const progressCircle = document.getElementById('progressCircle');
+        const accuracyPercent = document.getElementById('accuracyPercent');
+        const courseCount = document.getElementById('courseCount');
+        const quizCount = document.getElementById('quizCount');
+
+        // ===== অ্যাকুরেসি ক্যালকুলেট =====
+        function calculateAccuracy(quizzes) {
+            if (!quizzes || quizzes.length === 0) return 0;
+            let totalCorrect = 0;
+            let totalQuestions = 0;
+            quizzes.forEach(q => {
+                totalCorrect += q.score;
+                totalQuestions += q.total;
+            });
+            return Math.round((totalCorrect / totalQuestions) * 100);
+        }
+
+        // ===== স্ট্যাটস আপডেট =====
+        function updateStats(data) {
+            totalPoints.textContent = data.totalPoints || 0;
+            correctAnswers.textContent = data.correctAnswers || 0;
+            streakDays.textContent = data.streakDays || 0;
+            quizzesCompleted.textContent = data.quizzesCompleted || 0;
+        }
+
+        // ===== সার্কুলার প্রগ্রেস আপডেট =====
+        function updateCircularProgress(percentage) {
+            const circumference = 314.16; // 2 * PI * 50
+            const offset = circumference - (percentage / 100) * circumference;
+            progressCircle.style.strokeDashoffset = offset;
+            accuracyPercent.textContent = percentage + '%';
+        }
+
+        // ===== কোর্স প্রগ্রেস রেন্ডার =====
+        function renderCourses(courses) {
+            if (!courses || courses.length === 0) {
+                courseList.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-book"></i>
+                        <h5>No courses enrolled</h5>
+                        <p>Start learning by enrolling in a course!</p>
+                        <a href="/Learn/Index" class="btn btn-sm" style="background:#1f7b4d; color:white; border-radius:30px; padding:8px 28px;">
+                            Browse Courses <i class="fas fa-arrow-right ms-1"></i>
+                        </a>
+                    </div>
+                `;
+                courseCount.textContent = '0 courses';
+                return;
+            }
+
+            let html = '';
+            courses.forEach(course => {
+                const pct = course.progress || 0;
+                html += `
+                    <div class="course-progress-card mb-3">
+                        <img src="${course.image}" alt="${course.title}" class="course-img" />
+                        <div class="course-info">
+                            <h5>${course.title}</h5>
+                            <div class="meta">
+                                <span><i class="fas fa-check-circle"></i> ${course.completedLessons || 0}/${course.totalLessons || 0} lessons</span>
+                                <span><i class="fas fa-percent"></i> ${pct}% complete</span>
+                            </div>
+                        </div>
+                        <div class="progress-track-mini">
+                            <div class="bar-bg">
+                                <div class="bar-fill" style="width:${pct}%;"></div>
+                            </div>
+                            <div class="label">
+                                <span>${pct}%</span>
+                                <span><a href="/Learn/Details/${course.id}" style="color:#1f7b4d; text-decoration:none; font-weight:600;">Continue</a></span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+
+            courseList.innerHTML = html;
+            courseCount.textContent = `${courses.length} courses`;
+        }
+
+        // ===== কুইজ হিস্ট্রি রেন্ডার =====
+        function renderQuizHistory(quizzes) {
+            if (!quizzes || quizzes.length === 0) {
+                quizHistoryList.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-question-circle"></i>
+                        <h5>No quizzes attempted</h5>
+                        <p>Take your first practice quiz to start tracking!</p>
+                        <a href="/Practice/Index" class="btn btn-sm" style="background:#1f7b4d; color:white; border-radius:30px; padding:8px 28px;">
+                            Start Practice <i class="fas fa-arrow-right ms-1"></i>
+                        </a>
+                    </div>
+                `;
+                quizCount.textContent = '0 quizzes';
+                return;
+            }
+
+            let html = '';
+            quizzes.forEach(q => {
+                const pct = Math.round((q.score / q.total) * 100);
+                const badgeClass = q.passed ? 'pass' : 'fail';
+                const badgeText = q.passed ? 'Passed' : 'Failed';
+                const date = new Date(q.date);
+                const formattedDate = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+
+                html += `
+                    <div class="quiz-history-item">
+                        <div class="left">
+                            <div class="title">${q.title}</div>
+                            <div class="sub"><i class="fas fa-tag me-1"></i>${q.subject}</div>
+                        </div>
+                        <div class="right">
+                            <div class="score">${q.score}/${q.total}</div>
+                            <div class="date">${formattedDate}</div>
+                            <span class="badge-result ${badgeClass}">${badgeText}</span>
+                        </div>
+                    </div>
+                `;
+            });
+
+            quizHistoryList.innerHTML = html;
+            quizCount.textContent = `${quizzes.length} quizzes`;
+        }
+
+        // ===== রিসেন্ট অ্যাক্টিভিটি রেন্ডার =====
+        function renderRecentActivity(courses, quizzes) {
+            const activities = [];
+
+            // কোর্স থেকে অ্যাক্টিভিটি
+            courses.forEach(c => {
+                activities.push({
+                    type: 'course',
+                    title: c.title,
+                    detail: `${c.completedLessons || 0}/${c.totalLessons || 0} lessons completed (${c.progress || 0}%)`,
+                    icon: 'fa-book-open',
+                    color: '#1f7b4d',
+                    date: new Date(Date.now() - Math.random() * 7 * 24 * 60 * 60 * 1000)
+                });
+            });
+
+            // কুইজ থেকে অ্যাক্টিভিটি
+            quizzes.forEach(q => {
+                activities.push({
+                    type: 'quiz',
+                    title: q.title,
+                    detail: `Score: ${q.score}/${q.total} (${Math.round((q.score/q.total)*100)}%)`,
+                    icon: 'fa-brain',
+                    color: q.passed ? '#1f7b4d' : '#c94a4a',
+                    date: new Date(q.date)
+                });
+            });
+
+            // সাজানো (নতুন থেকে পুরাতন)
+            activities.sort((a, b) => b.date - a.date);
+            const recent = activities.slice(0, 10);
+
+            if (recent.length === 0) {
+                recentActivityList.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-clock"></i>
+                        <h5>No recent activity</h5>
+                        <p>Your learning activities will appear here</p>
+                    </div>
+                `;
+                return;
+            }
+
+            let html = '';
+            recent.forEach(act => {
+                const dateStr = act.date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+                const timeStr = act.date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+                html += `
+                    <div class="quiz-history-item" style="border-left-color: ${act.color};">
+                        <div class="left">
+                            <div class="title"><i class="fas ${act.icon}" style="color:${act.color}; width:20px;"></i> ${act.title}</div>
+                            <div class="sub">${act.detail}</div>
+                        </div>
+                        <div class="right">
+                            <div style="font-size:13px; color:#6B7568;">${dateStr}</div>
+                            <div style="font-size:12px; color:#8A9188;">${timeStr}</div>
+                        </div>
+                    </div>
+                `;
+            });
+
+            recentActivityList.innerHTML = html;
+        }
+
+        // ===== ডেটা লোড =====
+        function loadProgressData() {
+            // TODO: এখানে API কল করে আসল ডেটা আনতে হবে
+            // fetch('/Progress/GetProgressData').then(...)
+
+            const data = progressData;
+            updateStats(data);
+            renderCourses(data.courses);
+            renderQuizHistory(data.quizzes);
+
+            const accuracy = calculateAccuracy(data.quizzes);
+            updateCircularProgress(accuracy);
+
+            renderRecentActivity(data.courses, data.quizzes);
+        }
+
+        // ===== শুরু =====
+        document.addEventListener('DOMContentLoaded', function() {
+            loadProgressData();
+        });
+    </script>
+}

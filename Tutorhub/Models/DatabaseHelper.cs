@@ -313,20 +313,36 @@ namespace Tutorbub.Models
             }
         }
 
-        // ===== ইউজার ডিলিট =====
+        // ===== ইউজার ডিলিট (সম্পর্কিত Teacher Request সহ) =====
+        // ইউজার ডিলিট করার আগে তার সব TeacherRequests রো ডিলিট করা হয়, যাতে
+        // ফরেন কী কনস্ট্রেইন্টের কারণে ডিলিট ব্যর্থ না হয় (টিচার ডিলিট করলে
+        // তার রিকোয়েস্ট হিস্ট্রিও ডাটাবেজ থেকে মুছে যায়)।
         public bool DeleteUser(int userId)
         {
-            string query = "DELETE FROM \"Users\" WHERE \"Id\" = @id";
+            using var connection = new NpgsqlConnection(_connectionString);
+            connection.Open();
+            using var transaction = connection.BeginTransaction();
+
             try
             {
-                using var connection = new NpgsqlConnection(_connectionString);
-                using var command = new NpgsqlCommand(query, connection);
-                command.Parameters.AddWithValue("@id", userId);
-                connection.Open();
-                return command.ExecuteNonQuery() > 0;
+                using (var deleteRequestsCommand = new NpgsqlCommand(
+                    "DELETE FROM \"TeacherRequests\" WHERE \"UserId\" = @id", connection, transaction))
+                {
+                    deleteRequestsCommand.Parameters.AddWithValue("@id", userId);
+                    deleteRequestsCommand.ExecuteNonQuery();
+                }
+
+                using var deleteUserCommand = new NpgsqlCommand(
+                    "DELETE FROM \"Users\" WHERE \"Id\" = @id", connection, transaction);
+                deleteUserCommand.Parameters.AddWithValue("@id", userId);
+                int rowsAffected = deleteUserCommand.ExecuteNonQuery();
+
+                transaction.Commit();
+                return rowsAffected > 0;
             }
             catch (Exception ex)
             {
+                transaction.Rollback();
                 throw new Exception("Error deleting user: " + ex.Message);
             }
         }
@@ -637,6 +653,27 @@ namespace Tutorbub.Models
             catch (Exception ex)
             {
                 throw new Exception("Error making user teacher: " + ex.Message);
+            }
+        }
+
+        // ===== Teacher Request নিজের Id দিয়ে সরাসরি ডিলিট =====
+        // যদি এই request-এর সাথে জড়িত UserId এর কোনো ইউজার Users টেবিলে
+        // না থাকে (যেমন পুরনো/টেস্ট ডেটা), তাহলেও এই মেথড দিয়ে শুধু এই
+        // নির্দিষ্ট request রো-টা মুছে ফেলা যাবে।
+        public bool DeleteTeacherRequestById(int requestId)
+        {
+            string query = "DELETE FROM \"TeacherRequests\" WHERE \"Id\" = @id";
+            try
+            {
+                using var connection = new NpgsqlConnection(_connectionString);
+                using var command = new NpgsqlCommand(query, connection);
+                command.Parameters.AddWithValue("@id", requestId);
+                connection.Open();
+                return command.ExecuteNonQuery() > 0;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Error deleting teacher request: " + ex.Message);
             }
         }
     }

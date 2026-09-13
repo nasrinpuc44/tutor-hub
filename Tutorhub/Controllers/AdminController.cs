@@ -213,6 +213,59 @@ namespace Tutorbub.Controllers
             return Json(new { success = false, message = "Failed to process request" });
         }
 
+        // ===== Teacher ডিলিট (ইউজার অ্যাকাউন্ট + Request দুটোই) =====
+        // এখানে ইউজার আইডি (id) এবং request আইডি (requestId) দুটোই পাঠানো হয়।
+        // ইউজার অ্যাকাউন্ট ডিলিটের চেষ্টা করা হয় (থাকলে তার সব request-ও
+        // ক্যাসকেড হয়ে যায়), এবং আলাদাভাবে এই নির্দিষ্ট request রো-টাও সরাসরি
+        // ডিলিট করার চেষ্টা করা হয় — যাতে ইউজার না থাকলেও (যেমন পুরনো/টেস্ট
+        // ডেটা) কার্ডটা ঠিকই লিস্ট থেকে মুছে যায়।
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult DeleteTeacherAccount(int id, int requestId)
+        {
+            var role = HttpContext.Session.GetString("UserRole");
+            if (role != "Admin")
+            {
+                return Json(new { success = false, message = "Unauthorized" });
+            }
+
+            var currentUserId = HttpContext.Session.GetString("UserId");
+            if (id > 0 && currentUserId == id.ToString())
+            {
+                return Json(new { success = false, message = "Cannot delete your own account" });
+            }
+
+            bool userDeleted = false;
+            bool requestDeleted = false;
+
+            try
+            {
+                if (id > 0)
+                {
+                    userDeleted = _dbHelper.DeleteUser(id);
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("DeleteTeacherAccount - error deleting user: " + ex.Message);
+            }
+
+            try
+            {
+                requestDeleted = _dbHelper.DeleteTeacherRequestById(requestId);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("DeleteTeacherAccount - error deleting request: " + ex.Message);
+            }
+
+            if (userDeleted || requestDeleted)
+            {
+                return Json(new { success = true, message = "Teacher deleted successfully" });
+            }
+            return Json(new { success = false, message = "Failed to delete: no matching user or request was found" });
+        }
+
         // ===== Teacher Request ডিটেইলস =====
         [HttpGet]
         public IActionResult GetTeacherRequestDetails(int id)

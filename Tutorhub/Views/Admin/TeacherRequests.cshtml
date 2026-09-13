@@ -1,6 +1,5 @@
 ﻿<!-- 📁 Views/Admin/TeacherRequests.cshtml -->
 <!-- লোকেশন: Tutorbub/Views/Admin/TeacherRequests.cshtml -->
-
 @model List<Tutorbub.Models.TeacherRequest>
 
 @{
@@ -22,44 +21,178 @@
         z-index: 100;
         transition: transform 0.3s ease;
     }
-    .admin-sidebar-brand { padding: 0 20px 20px 20px; border-bottom: 1px solid rgba(255,255,255,0.1); margin-bottom: 15px; }
-    .admin-sidebar-brand h4 { color: #F3F1E7; font-weight: 600; margin: 0; }
-    .admin-sidebar-brand small { color: #8A9188; font-size: 12px; }
-    .admin-sidebar-menu { list-style: none; padding: 0; margin: 0; }
-    .admin-sidebar-menu li a {
-        display: flex; align-items: center; padding: 12px 20px;
-        color: #C7D0C9; text-decoration: none; transition: all 0.3s ease;
-        border-left: 3px solid transparent; font-size: 14px; cursor: pointer;
+
+    .admin-sidebar-brand {
+        padding: 0 20px 20px 20px;
+        border-bottom: 1px solid rgba(255,255,255,0.1);
+        margin-bottom: 15px;
     }
-    .admin-sidebar-menu li a:hover { background-color: rgba(255,255,255,0.05); color: #ffffff; border-left-color: #F4C744; }
-    .admin-sidebar-menu li a.active { background-color: rgba(255,255,255,0.08); color: #ffffff; border-left-color: #F4C744; }
-    .admin-sidebar-menu li a i { width: 24px; margin-right: 10px; font-size: 16px; text-align: center; }
-    .admin-sidebar-menu li a .badge-sidebar { margin-left: auto; background-color: rgba(255,255,255,0.15); padding: 2px 10px; border-radius: 12px; font-size: 11px; color: #F3F1E7; }
 
-    .admin-main-content { margin-left: 250px; padding: 20px; min-height: calc(100vh - 80px); }
-    .sidebar-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(0,0,0,0.5); z-index: 99; }
-    .sidebar-overlay.active { display: block; }
-    .sidebar-toggle { display: none; position: fixed; top: 90px; left: 15px; z-index: 101; background-color: #1F3B2C; color: white; border: none; border-radius: 8px; padding: 10px 12px; font-size: 18px; cursor: pointer; }
-    .sidebar-toggle:hover { background-color: #2d5a42; }
+        .admin-sidebar-brand h4 {
+            color: #F3F1E7;
+            font-weight: 600;
+            margin: 0;
+        }
 
-    .status-pending { background-color: #fff3cd; color: #856404; }
-    .status-approved { background-color: #d4edda; color: #155724; }
-    .status-rejected { background-color: #f8d7da; color: #721c24; }
+        .admin-sidebar-brand small {
+            color: #8A9188;
+            font-size: 12px;
+        }
 
-    .request-card { border-radius: 12px; border: 1px solid #eee; padding: 20px; margin-bottom: 15px; background: white; transition: box-shadow 0.3s; }
-    .request-card:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
+    .admin-sidebar-menu {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
 
-    .modal-content { background-color: #ffffff !important; border-radius: 16px !important; }
-    .modal-header { background-color: #1F3B2C !important; color: white !important; border-radius: 16px 16px 0 0 !important; }
-    .modal-header .btn-close { filter: brightness(0) invert(1) !important; }
-    .modal-body { background-color: #ffffff !important; }
+        .admin-sidebar-menu li a {
+            display: flex;
+            align-items: center;
+            padding: 12px 20px;
+            color: #C7D0C9;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            border-left: 3px solid transparent;
+            font-size: 14px;
+            cursor: pointer;
+        }
+
+            .admin-sidebar-menu li a:hover {
+                background-color: rgba(255,255,255,0.05);
+                color: #ffffff;
+                border-left-color: #F4C744;
+            }
+
+            .admin-sidebar-menu li a.active {
+                background-color: rgba(255,255,255,0.08);
+                color: #ffffff;
+                border-left-color: #F4C744;
+            }
+
+            .admin-sidebar-menu li a i {
+                width: 24px;
+                margin-right: 10px;
+                font-size: 16px;
+                text-align: center;
+            }
+
+            .admin-sidebar-menu li a .badge-sidebar {
+                margin-left: auto;
+                background-color: rgba(255,255,255,0.15);
+                padding: 2px 10px;
+                border-radius: 12px;
+                font-size: 11px;
+                color: #F3F1E7;
+            }
+
+    .admin-main-content {
+        margin-left: 250px;
+        padding: 20px;
+        min-height: calc(100vh - 80px);
+    }
+
+    .sidebar-overlay {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: rgba(0,0,0,0.5);
+        z-index: 99;
+    }
+
+        .sidebar-overlay.active {
+            display: block;
+        }
+
+    .sidebar-toggle {
+        display: none;
+        position: fixed;
+        top: 90px;
+        left: 15px;
+        z-index: 101;
+        background-color: #1F3B2C;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        padding: 10px 12px;
+        font-size: 18px;
+        cursor: pointer;
+    }
+
+        .sidebar-toggle:hover {
+            background-color: #2d5a42;
+        }
+
+    .status-pending {
+        background-color: #fff3cd;
+        color: #856404;
+    }
+
+    .status-approved {
+        background-color: #d4edda;
+        color: #155724;
+    }
+
+    .status-rejected {
+        background-color: #f8d7da;
+        color: #721c24;
+    }
+
+    .request-card {
+        border-radius: 12px;
+        border: 1px solid #eee;
+        padding: 20px;
+        margin-bottom: 15px;
+        background: white;
+        transition: box-shadow 0.3s;
+    }
+
+        .request-card:hover {
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        }
+
+    .modal-content {
+        background-color: #ffffff !important;
+        border-radius: 16px !important;
+    }
+
+    .modal-header {
+        background-color: #1F3B2C !important;
+        color: white !important;
+        border-radius: 16px 16px 0 0 !important;
+    }
+
+        .modal-header .btn-close {
+            filter: brightness(0) invert(1) !important;
+        }
+
+    .modal-body {
+        background-color: #ffffff !important;
+    }
 
     @@media (max-width: 992px) {
-        .admin-sidebar { transform: translateX(-100%); }
-        .admin-sidebar.open { transform: translateX(0); }
-        .sidebar-toggle { display: block; }
-        .sidebar-overlay.active { display: block; }
-        .admin-main-content { margin-left: 0; padding: 20px 15px; }
+        .admin-sidebar {
+            transform: translateX(-100%);
+        }
+
+            .admin-sidebar.open {
+                transform: translateX(0);
+            }
+
+        .sidebar-toggle {
+            display: block;
+        }
+
+        .sidebar-overlay.active {
+            display: block;
+        }
+
+        .admin-main-content {
+            margin-left: 0;
+            padding: 20px 15px;
+        }
     }
 </style>
 
@@ -91,7 +224,10 @@
         <span class="badge bg-warning text-dark">@ViewBag.PendingCount Pending</span>
     </div>
 
-    @if (TempData["Success"] != null) { <div class="alert alert-success">@TempData["Success"]</div> }
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success">@TempData["Success"]</div>
+    }
 
     @if (Model.Count == 0)
     {
@@ -106,7 +242,7 @@
         foreach (var request in Model)
         {
             var statusClass = request.Status == "Pending" ? "status-pending" : (request.Status == "Approved" ? "status-approved" : "status-rejected");
-            
+
             <div class="request-card" id="request-@request.Id">
                 <div class="d-flex flex-wrap justify-content-between align-items-start">
                     <div>
@@ -139,6 +275,9 @@
                         }
                         <button class="btn btn-sm btn-info text-white" onclick="viewRequestDetails(@request.Id)">
                             <i class="fas fa-eye"></i>
+                        </button>
+                        <button class="btn btn-sm btn-outline-danger btn-delete-teacher" data-userid="@request.UserId" data-requestid="@request.Id" data-name="@request.FullName" title="Delete this teacher's account permanently">
+                            <i class="fas fa-trash"></i>
                         </button>
                     </div>
                 </div>
@@ -241,14 +380,53 @@
                 body: formData,
                 headers: headers
             })
-            .then(function(response) { return response.json(); })
-            .then(function(data) {
-                alert(data.message);
-                if (data.success) { location.reload(); }
-            })
-            .catch(function(error) {
-                alert('Error processing request');
+                .then(function(response) { return response.json(); })
+                .then(function(data) {
+                    alert(data.message);
+                    if (data.success) { location.reload(); }
+                })
+                .catch(function(error) {
+                    alert('Error processing request');
+                });
+        }
+
+        document.querySelectorAll('.btn-delete-teacher').forEach(function(btn) {
+            btn.addEventListener('click', function() {
+                var userId = this.dataset.userid;
+                var requestId = this.dataset.requestid;
+                var name = this.dataset.name;
+                deleteTeacher(userId, requestId, name);
             });
+        });
+
+        function deleteTeacher(userId, requestId, name) {
+            if (!confirm('আপনি কি নিশ্চিত যে "' + name + '"-কে স্থায়ীভাবে ডিলিট করতে চান?\n\nএটি ইউজার অ্যাকাউন্টসহ তার সব Teacher Request ডাটাবেস থেকে সম্পূর্ণ মুছে ফেলবে। এই কাজটি আর ফিরিয়ে আনা যাবে না।')) {
+                return;
+            }
+
+            var formData = new FormData();
+            formData.append('id', userId);
+            formData.append('requestId', requestId);
+
+            var token = document.querySelector('input[name="__RequestVerificationToken"]');
+            var headers = {};
+            if (token) { headers['RequestVerificationToken'] = token.value; }
+
+            fetch('/Admin/DeleteTeacherAccount', {
+                method: 'POST',
+                body: formData,
+                headers: headers
+            })
+                .then(function(response) { return response.json(); })
+                .then(function(data) {
+                    alert(data.message);
+                    if (data.success) {
+                        location.reload();
+                    }
+                })
+                .catch(function(error) {
+                    alert('Error deleting teacher account');
+                });
         }
 
         function viewRequestDetails(id) {
@@ -256,45 +434,45 @@
             detailsDiv.innerHTML = '<div class="text-center py-5"><div class="spinner-border text-success" role="status"><span class="visually-hidden">Loading...</span></div><p class="mt-2 text-muted">Loading request details...</p></div>';
 
             fetch('/Admin/GetTeacherRequestDetails?id=' + id)
-            .then(function(response) { return response.json(); })
-            .then(function(data) {
-                if (data.success) {
-                    var r = data.request;
-                    var statusClass = r.status == 'Pending' ? 'status-pending' : (r.status == 'Approved' ? 'status-approved' : 'status-rejected');
+                .then(function(response) { return response.json(); })
+                .then(function(data) {
+                    if (data.success) {
+                        var r = data.request;
+                        var statusClass = r.status == 'Pending' ? 'status-pending' : (r.status == 'Approved' ? 'status-approved' : 'status-rejected');
 
-                    var html = '';
-                    html += '<div class="row">';
-                    html += '<div class="col-md-6"><strong>Full Name:</strong> ' + r.fullName + '</div>';
-                    html += '<div class="col-md-6"><strong>Status:</strong> <span class="badge ' + statusClass + '">' + r.status + '</span></div>';
-                    html += '<div class="col-md-6"><strong>Email:</strong> ' + r.email + '</div>';
-                    html += '<div class="col-md-6"><strong>Mobile:</strong> ' + r.mobileNumber + '</div>';
-                    html += '<div class="col-md-12"><hr /></div>';
-                    html += '<div class="col-md-6"><strong>Education:</strong> ' + r.education + '</div>';
-                    html += '<div class="col-md-6"><strong>Institution:</strong> ' + r.institution + '</div>';
-                    html += '<div class="col-md-6"><strong>Subject Expertise:</strong> ' + r.subjectExpertise + '</div>';
-                    html += '<div class="col-md-6"><strong>Experience:</strong> ' + r.experience + '</div>';
-                    html += '<div class="col-md-6"><strong>Teaching Style:</strong> ' + (r.teachingStyle || 'Not specified') + '</div>';
-                    html += '<div class="col-md-6"><strong>Hourly Rate:</strong> ৳' + r.hourlyRate + '</div>';
-                    html += '<div class="col-md-6"><strong>Available Days:</strong> ' + r.availableDays + '</div>';
-                    html += '<div class="col-md-6"><strong>Preferred Time:</strong> ' + (r.preferredTime || 'Not specified') + '</div>';
-                    html += '<div class="col-md-12"><hr /></div>';
-                    html += '<div class="col-md-12"><strong>CV Link:</strong> ' + (r.cvLink ? '<a href="' + r.cvLink + '" target="_blank">View CV</a>' : 'Not provided') + '</div>';
-                    html += '<div class="col-md-12"><strong>Why Teach:</strong> ' + r.whyTeach + '</div>';
-                    html += '<div class="col-md-12"><hr /></div>';
-                    html += '<div class="col-md-6"><strong>Request Date:</strong> ' + r.requestDate + '</div>';
-                    html += '<div class="col-md-6"><strong>Admin Note:</strong> ' + (r.adminNote || 'No note') + '</div>';
-                    html += '</div>';
+                        var html = '';
+                        html += '<div class="row">';
+                        html += '<div class="col-md-6"><strong>Full Name:</strong> ' + r.fullName + '</div>';
+                        html += '<div class="col-md-6"><strong>Status:</strong> <span class="badge ' + statusClass + '">' + r.status + '</span></div>';
+                        html += '<div class="col-md-6"><strong>Email:</strong> ' + r.email + '</div>';
+                        html += '<div class="col-md-6"><strong>Mobile:</strong> ' + r.mobileNumber + '</div>';
+                        html += '<div class="col-md-12"><hr /></div>';
+                        html += '<div class="col-md-6"><strong>Education:</strong> ' + r.education + '</div>';
+                        html += '<div class="col-md-6"><strong>Institution:</strong> ' + r.institution + '</div>';
+                        html += '<div class="col-md-6"><strong>Subject Expertise:</strong> ' + r.subjectExpertise + '</div>';
+                        html += '<div class="col-md-6"><strong>Experience:</strong> ' + r.experience + '</div>';
+                        html += '<div class="col-md-6"><strong>Teaching Style:</strong> ' + (r.teachingStyle || 'Not specified') + '</div>';
+                        html += '<div class="col-md-6"><strong>Hourly Rate:</strong> ৳' + r.hourlyRate + '</div>';
+                        html += '<div class="col-md-6"><strong>Available Days:</strong> ' + r.availableDays + '</div>';
+                        html += '<div class="col-md-6"><strong>Preferred Time:</strong> ' + (r.preferredTime || 'Not specified') + '</div>';
+                        html += '<div class="col-md-12"><hr /></div>';
+                        html += '<div class="col-md-12"><strong>CV Link:</strong> ' + (r.cvLink ? '<a href="' + r.cvLink + '" target="_blank">View CV</a>' : 'Not provided') + '</div>';
+                        html += '<div class="col-md-12"><strong>Why Teach:</strong> ' + r.whyTeach + '</div>';
+                        html += '<div class="col-md-12"><hr /></div>';
+                        html += '<div class="col-md-6"><strong>Request Date:</strong> ' + r.requestDate + '</div>';
+                        html += '<div class="col-md-6"><strong>Admin Note:</strong> ' + (r.adminNote || 'No note') + '</div>';
+                        html += '</div>';
 
-                    detailsDiv.innerHTML = html;
-                    var modal = new bootstrap.Modal(document.getElementById('requestModal'));
-                    modal.show();
-                } else {
-                    detailsDiv.innerHTML = '<div class="alert alert-danger text-center">' + data.message + '</div>';
-                }
-            })
-            .catch(function(error) {
-                detailsDiv.innerHTML = '<div class="alert alert-danger text-center">Error loading details</div>';
-            });
+                        detailsDiv.innerHTML = html;
+                        var modal = new bootstrap.Modal(document.getElementById('requestModal'));
+                        modal.show();
+                    } else {
+                        detailsDiv.innerHTML = '<div class="alert alert-danger text-center">' + data.message + '</div>';
+                    }
+                })
+                .catch(function(error) {
+                    detailsDiv.innerHTML = '<div class="alert alert-danger text-center">Error loading details</div>';
+                });
         }
     </script>
 }
