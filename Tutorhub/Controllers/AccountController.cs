@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Tutorbub.Models;
+using System.Text.RegularExpressions;
 
 namespace Tutorbub.Controllers
 {
@@ -85,6 +86,32 @@ namespace Tutorbub.Controllers
                 return View();
             }
 
+            // ===== ইমেইল খালি কিনা চেক =====
+            if (string.IsNullOrWhiteSpace(email))
+            {
+                ViewBag.Error = "Email is required.";
+                return View();
+            }
+
+            // ===== শুধু trim (lowercase করব না) =====
+            email = email.Trim();
+
+            // ===== @gmail.com হুবহু lowercase-এ শেষ হয়েছে কিনা চেক (case-sensitive) =====
+            if (!email.EndsWith("@gmail.com"))
+            {
+                ViewBag.Error = "Email must end with @gmail.com (all lowercase).";
+                return View();
+            }
+
+            // ===== Gmail ফরম্যাট ভ্যালিডেশন =====
+            // local part (gmail-এর আগের অংশ) uppercase/lowercase দুটোই চলবে
+            var gmailRegex = new Regex(@"^[A-Za-z0-9._%+-]+@gmail\.com$");
+            if (!gmailRegex.IsMatch(email))
+            {
+                ViewBag.Error = "Please enter a valid Gmail address (e.g. yourname@gmail.com).";
+                return View();
+            }
+
             // ইউজারনেম আছে কিনা চেক
             if (_dbHelper.UsernameExists(username))
             {
@@ -92,7 +119,7 @@ namespace Tutorbub.Controllers
                 return View();
             }
 
-            // ইমেইল আছে কিনা চেক
+            // ইমেইল আছে কিনা চেক (duplicate ধরতে case-insensitive ভাবে)
             if (_dbHelper.EmailExists(email))
             {
                 ViewBag.Error = "Email already registered";

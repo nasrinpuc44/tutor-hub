@@ -1,0 +1,1885 @@
+﻿@model List<Tutorbub.Models.TutorProfile>
+
+@{
+    ViewData["Title"] = "Find Tutor - Smart Tutor Hub";
+    Layout = "_Layout";
+}
+
+<style>
+    /* ======================
+           PAGE WRAPPER
+           ====================== */
+    .ft-page {
+        background: #F3F1E7;
+        padding: 40px 20px 70px;
+        min-height: 80vh;
+    }
+
+    .ft-layout {
+        max-width: 1280px;
+        margin: 0 auto;
+        display: grid;
+        grid-template-columns: 1fr 340px;
+        gap: 30px;
+        align-items: start;
+    }
+
+    .ft-header {
+        text-align: center;
+        margin-bottom: 30px;
+        grid-column: 1 / -1;
+    }
+
+        .ft-header h1 {
+            font-family: 'Georgia', serif;
+            font-size: 36px;
+            font-weight: 700;
+            color: #1F3B2C;
+            margin: 0 0 10px;
+        }
+
+        .ft-header p {
+            color: #5B6B5E;
+            font-size: 15.5px;
+            margin: 0 auto;
+            max-width: 640px;
+            line-height: 1.6;
+        }
+
+    .ft-search {
+        max-width: 620px;
+        margin: 24px auto 0;
+        display: flex;
+        background: white;
+        border-radius: 50px;
+        padding: 6px 6px 6px 22px;
+        box-shadow: 0 8px 30px rgba(31,59,44,0.08);
+        align-items: center;
+        gap: 10px;
+        border: 2px solid transparent;
+        transition: border-color 0.3s;
+    }
+
+        .ft-search:focus-within {
+            border-color: #1F3B2C;
+        }
+
+        .ft-search i {
+            color: #8A9188;
+            font-size: 16px;
+            flex-shrink: 0;
+        }
+
+        .ft-search input {
+            flex: 1;
+            border: none;
+            outline: none;
+            font-size: 14.5px;
+            padding: 11px 0;
+            background: transparent;
+            color: #1F3B2C;
+            min-width: 0;
+        }
+
+        .ft-search button {
+            background: #1F3B2C;
+            color: white;
+            border: none;
+            padding: 11px 24px;
+            border-radius: 50px;
+            font-weight: 600;
+            font-size: 13.5px;
+            cursor: pointer;
+            transition: opacity 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+        }
+
+            .ft-search button:hover {
+                opacity: 0.88;
+            }
+
+    .quick-chips {
+        display: flex;
+        gap: 8px;
+        justify-content: center;
+        flex-wrap: wrap;
+        margin-top: 18px;
+    }
+
+    .quick-chip {
+        background: white;
+        color: #1F3B2C;
+        border: 1.5px solid #E5E1D3;
+        padding: 7px 16px;
+        border-radius: 30px;
+        font-size: 13px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.25s;
+        user-select: none;
+    }
+
+        .quick-chip:hover {
+            border-color: #1F3B2C;
+            transform: translateY(-1px);
+        }
+
+        .quick-chip.active {
+            background: #1F3B2C;
+            color: white;
+            border-color: #1F3B2C;
+        }
+
+    .list-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 18px;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+
+        .list-header h3 {
+            font-size: 18px;
+            font-weight: 700;
+            color: #1F3B2C;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 9px;
+        }
+
+        .list-header .count-badge {
+            background: #1F3B2C;
+            color: white;
+            font-size: 12px;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-weight: 600;
+        }
+
+        .list-header .sort-wrap {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 13px;
+            color: #6B7568;
+        }
+
+            .list-header .sort-wrap select {
+                border: 1.5px solid #E5E1D3;
+                background: white;
+                padding: 7px 12px;
+                border-radius: 8px;
+                font-size: 13px;
+                color: #1F3B2C;
+                outline: none;
+                font-weight: 500;
+                cursor: pointer;
+            }
+
+    .tutor-row {
+        background: white;
+        border-radius: 16px;
+        padding: 22px;
+        margin-bottom: 16px;
+        border: 1px solid rgba(0,0,0,0.05);
+        box-shadow: 0 2px 12px rgba(0,0,0,0.04);
+        transition: all 0.3s;
+        display: grid;
+        grid-template-columns: 90px 1fr auto;
+        gap: 20px;
+        align-items: center;
+    }
+
+        .tutor-row:hover {
+            transform: translateX(3px);
+            box-shadow: 0 8px 28px rgba(31,59,44,0.1);
+            border-color: rgba(31,59,44,0.15);
+        }
+
+    .tr-avatar {
+        position: relative;
+        width: 90px;
+        height: 90px;
+    }
+
+        .tr-avatar .avatar-circle {
+            width: 90px;
+            height: 90px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #1F3B2C, #2d5a42);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 30px;
+            font-weight: 700;
+            border: 3px solid #F3F1E7;
+            box-shadow: 0 4px 14px rgba(31,59,44,0.2);
+            overflow: hidden;
+        }
+
+            .tr-avatar .avatar-circle img {
+                width: 100%;
+                height: 100%;
+                object-fit: cover;
+            }
+
+        .tr-avatar .v-tick {
+            position: absolute;
+            bottom: 3px;
+            right: 3px;
+            background: #2ecc71;
+            color: white;
+            width: 26px;
+            height: 26px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            border: 3px solid white;
+        }
+
+    .tr-info {
+        min-width: 0;
+    }
+
+    .tr-name-line {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        flex-wrap: wrap;
+        margin-bottom: 4px;
+    }
+
+    .tr-name {
+        font-size: 19px;
+        font-weight: 700;
+        color: #1F3B2C;
+        margin: 0;
+    }
+
+    .tr-id {
+        font-family: 'Courier New', monospace;
+        background: #F3F1E7;
+        color: #5B6B5E;
+        font-size: 11px;
+        font-weight: 700;
+        padding: 3px 10px;
+        border-radius: 20px;
+        letter-spacing: 0.4px;
+    }
+
+    .tr-top-badge {
+        background: linear-gradient(135deg, #D98E1F, #B8760F);
+        color: white;
+        font-size: 10px;
+        font-weight: 700;
+        padding: 3px 9px;
+        border-radius: 20px;
+        text-transform: uppercase;
+        letter-spacing: 0.4px;
+    }
+
+    .tr-rating-line {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 8px;
+        font-size: 13px;
+    }
+
+        .tr-rating-line .stars {
+            color: #D98E1F;
+            font-weight: 600;
+        }
+
+        .tr-rating-line .count {
+            color: #8A9188;
+            font-size: 12.5px;
+        }
+
+    .tr-meta {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 6px 18px;
+        font-size: 13px;
+        color: #5B6B5E;
+        margin-bottom: 10px;
+    }
+
+        .tr-meta .m-item {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            min-width: 0;
+        }
+
+            .tr-meta .m-item i {
+                color: #1F3B2C;
+                font-size: 12px;
+                width: 14px;
+                text-align: center;
+                flex-shrink: 0;
+            }
+
+            .tr-meta .m-item span {
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+            }
+
+    .tr-tags {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 5px;
+    }
+
+    .tr-tag {
+        font-size: 11px;
+        padding: 3px 10px;
+        border-radius: 20px;
+        background: #F3F1E7;
+        color: #1F3B2C;
+        font-weight: 500;
+    }
+
+        .tr-tag.mode {
+            background: #d1ecf1;
+            color: #0c6b7c;
+        }
+
+    .tr-actions {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        align-items: stretch;
+        min-width: 150px;
+    }
+
+    .tr-fee {
+        text-align: right;
+        margin-bottom: 4px;
+    }
+
+        .tr-fee .fee-val {
+            font-size: 19px;
+            font-weight: 800;
+            color: #1F3B2C;
+            line-height: 1;
+        }
+
+        .tr-fee .fee-lbl {
+            font-size: 10.5px;
+            color: #8A9188;
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+            font-weight: 600;
+        }
+
+    .btn-view-tr {
+        background: white;
+        color: #1F3B2C;
+        border: 1.5px solid #1F3B2C;
+        padding: 9px 16px;
+        border-radius: 10px;
+        font-weight: 600;
+        font-size: 13px;
+        cursor: pointer;
+        transition: all 0.25s;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+    }
+
+        .btn-view-tr:hover {
+            background: #F3F1E7;
+        }
+
+    .btn-request-tr {
+        background: #1F3B2C;
+        color: white;
+        border: none;
+        padding: 10px 16px;
+        border-radius: 10px;
+        font-weight: 600;
+        font-size: 13px;
+        cursor: pointer;
+        transition: opacity 0.25s;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+    }
+
+        .btn-request-tr:hover {
+            opacity: 0.88;
+        }
+
+    .ft-sidebar {
+        position: sticky;
+        top: 100px;
+        display: flex;
+        flex-direction: column;
+        gap: 18px;
+    }
+
+    .sidebar-card {
+        background: white;
+        border-radius: 18px;
+        padding: 26px 24px;
+        border: 1px solid rgba(0,0,0,0.05);
+        box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+    }
+
+    .area-tuition-card {
+        background: linear-gradient(145deg, #1F3B2C 0%, #2d5a42 100%);
+        color: white;
+        border-radius: 18px;
+        padding: 28px 24px;
+        position: relative;
+        overflow: hidden;
+        box-shadow: 0 10px 34px rgba(31,59,44,0.25);
+    }
+
+        .area-tuition-card::before {
+            content: '';
+            position: absolute;
+            top: -60px;
+            right: -60px;
+            width: 200px;
+            height: 200px;
+            background: radial-gradient(circle, rgba(244,199,68,0.18) 0%, transparent 65%);
+            border-radius: 50%;
+        }
+
+        .area-tuition-card .atc-icon {
+            width: 54px;
+            height: 54px;
+            border-radius: 14px;
+            background: rgba(244,199,68,0.15);
+            color: #F4C744;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+            margin-bottom: 16px;
+            position: relative;
+        }
+
+        .area-tuition-card h3 {
+            font-family: 'Georgia', serif;
+            font-size: 22px;
+            font-weight: 700;
+            color: white;
+            margin: 0 0 10px;
+            line-height: 1.25;
+            position: relative;
+        }
+
+        .area-tuition-card p {
+            font-size: 13.5px;
+            line-height: 1.65;
+            margin: 0 0 18px;
+            color: #D6DED5;
+            position: relative;
+        }
+
+        .area-tuition-card .atc-features {
+            list-style: none;
+            padding: 0;
+            margin: 0 0 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            position: relative;
+        }
+
+            .area-tuition-card .atc-features li {
+                display: flex;
+                align-items: flex-start;
+                gap: 9px;
+                font-size: 13px;
+                color: #E8EDE7;
+                line-height: 1.5;
+            }
+
+                .area-tuition-card .atc-features li i {
+                    color: #F4C744;
+                    font-size: 13px;
+                    margin-top: 3px;
+                    flex-shrink: 0;
+                }
+
+    .btn-area-contact {
+        width: 100%;
+        background: #F4C744;
+        color: #1F3B2C;
+        border: none;
+        padding: 13px;
+        border-radius: 10px;
+        font-weight: 700;
+        font-size: 14px;
+        cursor: pointer;
+        transition: all 0.25s;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        position: relative;
+    }
+
+        .btn-area-contact:hover {
+            background: #E8B92E;
+            transform: translateY(-1px);
+        }
+
+    .helper-card h4 {
+        font-family: 'Georgia', serif;
+        font-size: 18px;
+        color: #1F3B2C;
+        margin: 0 0 8px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+        .helper-card h4 i {
+            color: #D98E1F;
+            font-size: 17px;
+        }
+
+    .helper-card p {
+        font-size: 13.5px;
+        color: #6B7568;
+        line-height: 1.6;
+        margin: 0 0 16px;
+    }
+
+    .btn-helper {
+        width: 100%;
+        background: white;
+        color: #1F3B2C;
+        border: 1.5px solid #1F3B2C;
+        padding: 11px;
+        border-radius: 10px;
+        font-weight: 600;
+        font-size: 13.5px;
+        cursor: pointer;
+        transition: all 0.25s;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 7px;
+    }
+
+        .btn-helper:hover {
+            background: #1F3B2C;
+            color: white;
+        }
+
+    .tid-card {
+        background: #FAF9F4;
+        border-radius: 16px;
+        padding: 20px 22px;
+        border: 1.5px dashed #D5CFB8;
+    }
+
+        .tid-card h5 {
+            font-size: 14.5px;
+            font-weight: 700;
+            color: #1F3B2C;
+            margin: 0 0 6px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+            .tid-card h5 i {
+                color: #1F3B2C;
+            }
+
+        .tid-card p {
+            font-size: 12.5px;
+            color: #6B7568;
+            margin: 0 0 12px;
+            line-height: 1.5;
+        }
+
+        .tid-card .tid-input {
+            display: flex;
+            gap: 6px;
+        }
+
+        .tid-card input {
+            flex: 1;
+            border: 1.5px solid #E5E1D3;
+            background: white;
+            padding: 9px 12px;
+            border-radius: 8px;
+            font-size: 13px;
+            outline: none;
+            font-family: 'Courier New', monospace;
+            letter-spacing: 0.3px;
+            min-width: 0;
+        }
+
+            .tid-card input:focus {
+                border-color: #1F3B2C;
+            }
+
+        .tid-card button {
+            background: #1F3B2C;
+            color: white;
+            border: none;
+            padding: 9px 14px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 12.5px;
+            cursor: pointer;
+            transition: opacity 0.25s;
+            flex-shrink: 0;
+        }
+
+            .tid-card button:hover {
+                opacity: 0.88;
+            }
+
+    .empty-state {
+        background: white;
+        border-radius: 16px;
+        padding: 50px 26px;
+        text-align: center;
+        border: 1px solid rgba(0,0,0,0.05);
+    }
+
+        .empty-state .es-icon {
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            background: #F3F1E7;
+            color: #8A9188;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            margin-bottom: 14px;
+        }
+
+        .empty-state h4 {
+            font-size: 17px;
+            font-weight: 700;
+            color: #1F3B2C;
+            margin: 0 0 6px;
+        }
+
+        .empty-state p {
+            color: #6B7568;
+            font-size: 13.5px;
+            margin: 0 0 18px;
+        }
+
+    .ft-modal .modal-content {
+        border: none;
+        border-radius: 18px;
+        overflow: hidden;
+        box-shadow: 0 24px 80px rgba(0,0,0,0.2);
+    }
+
+    .ft-modal .modal-header {
+        background: #1F3B2C;
+        color: white;
+        border: none;
+        padding: 20px 26px;
+    }
+
+        .ft-modal .modal-header .modal-title {
+            font-size: 17px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .ft-modal .modal-header .btn-close {
+            filter: brightness(0) invert(1);
+            opacity: 0.9;
+        }
+
+    .ft-modal .modal-body {
+        padding: 26px;
+        max-height: 72vh;
+        overflow-y: auto;
+        background: #fff;
+    }
+
+    .tp-header {
+        display: flex;
+        gap: 20px;
+        align-items: center;
+        padding-bottom: 20px;
+        border-bottom: 1px solid #eee;
+        margin-bottom: 22px;
+    }
+
+    .tp-avatar {
+        width: 90px;
+        height: 90px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #1F3B2C, #2d5a42);
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        font-size: 30px;
+        flex-shrink: 0;
+        position: relative;
+        border: 3px solid white;
+        box-shadow: 0 6px 20px rgba(31,59,44,0.2);
+        overflow: hidden;
+    }
+
+        .tp-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .tp-avatar .v-tick {
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            background: #2ecc71;
+            color: white;
+            width: 26px;
+            height: 26px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            border: 3px solid white;
+        }
+
+    .tp-name {
+        font-size: 22px;
+        font-weight: 700;
+        color: #1F3B2C;
+        margin: 0 0 6px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+
+    .tp-id {
+        display: inline-block;
+        background: #F3F1E7;
+        color: #5B6B5E;
+        font-size: 11.5px;
+        font-weight: 700;
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-family: 'Courier New', monospace;
+        letter-spacing: 0.5px;
+        margin-bottom: 8px;
+    }
+
+    .tp-rating-line {
+        color: #D98E1F;
+        font-size: 14px;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+        .tp-rating-line .count {
+            color: #8A9188;
+            font-size: 12.5px;
+            font-weight: 400;
+        }
+
+    .tp-stat-row {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 12px;
+        margin-bottom: 22px;
+    }
+
+    .tp-stat {
+        background: #F3F1E7;
+        border-radius: 12px;
+        padding: 14px;
+        text-align: center;
+    }
+
+        .tp-stat .num {
+            font-size: 20px;
+            font-weight: 800;
+            color: #1F3B2C;
+            line-height: 1.2;
+        }
+
+        .tp-stat .lbl {
+            font-size: 11px;
+            color: #6B7568;
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+            font-weight: 600;
+            margin-top: 3px;
+        }
+
+    .tp-block {
+        margin-bottom: 22px;
+    }
+
+    .tp-block-title {
+        font-size: 13.5px;
+        font-weight: 700;
+        color: #1F3B2C;
+        margin-bottom: 10px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        text-transform: uppercase;
+        letter-spacing: 0.4px;
+    }
+
+        .tp-block-title i {
+            color: #1F3B2C;
+            font-size: 13px;
+        }
+
+    .tp-block p {
+        font-size: 14px;
+        color: #4B5648;
+        line-height: 1.7;
+        margin: 0;
+    }
+
+    .tp-info-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+    }
+
+    .tp-info-item {
+        background: #FAF9F4;
+        border-radius: 10px;
+        padding: 12px 14px;
+    }
+
+        .tp-info-item .label {
+            font-size: 10.5px;
+            text-transform: uppercase;
+            color: #8A9188;
+            letter-spacing: 0.4px;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .tp-info-item .value {
+            font-size: 13.5px;
+            font-weight: 600;
+            color: #1F3B2C;
+        }
+
+    .tp-chips {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+    }
+
+    .tp-chip {
+        font-size: 12px;
+        padding: 5px 12px;
+        border-radius: 20px;
+        background: #F3F1E7;
+        color: #1F3B2C;
+        font-weight: 500;
+    }
+
+    .tp-cta {
+        background: #FAF9F4;
+        border-radius: 12px;
+        padding: 18px;
+        text-align: center;
+        border: 1.5px solid #E5E1D3;
+        margin-top: 22px;
+    }
+
+        .tp-cta p {
+            font-size: 13px;
+            color: #6B7568;
+            margin: 0 0 12px;
+            line-height: 1.5;
+        }
+
+    .ft-form .form-intro {
+        background: #FAF9F4;
+        border-radius: 12px;
+        padding: 14px 16px;
+        margin-bottom: 22px;
+        border-left: 3px solid #1F3B2C;
+    }
+
+        .ft-form .form-intro p {
+            font-size: 13px;
+            color: #5B6B5E;
+            margin: 0;
+            line-height: 1.6;
+        }
+
+        .ft-form .form-intro strong {
+            color: #1F3B2C;
+        }
+
+    .ft-form .form-section-label {
+        font-size: 11.5px;
+        font-weight: 700;
+        color: #8A9188;
+        text-transform: uppercase;
+        letter-spacing: 0.8px;
+        margin: 22px 0 12px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+        .ft-form .form-section-label:first-child {
+            margin-top: 0;
+        }
+
+        .ft-form .form-section-label::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: #eee;
+        }
+
+    .ft-form .field {
+        margin-bottom: 14px;
+    }
+
+        .ft-form .field label {
+            display: block;
+            font-size: 12.5px;
+            font-weight: 600;
+            color: #1F3B2C;
+            margin-bottom: 6px;
+        }
+
+            .ft-form .field label .req {
+                color: #e74c3c;
+            }
+
+        .ft-form .field input,
+        .ft-form .field select,
+        .ft-form .field textarea {
+            width: 100%;
+            border-radius: 10px;
+            border: 1.5px solid #E5E1D3;
+            padding: 11px 14px;
+            font-size: 14px;
+            background: #FAF9F4;
+            outline: none;
+            transition: all 0.25s;
+            font-family: inherit;
+            color: #1F3B2C;
+        }
+
+            .ft-form .field input:focus,
+            .ft-form .field select:focus,
+            .ft-form .field textarea:focus {
+                border-color: #1F3B2C;
+                background: white;
+                box-shadow: 0 0 0 3px rgba(31,59,44,0.08);
+            }
+
+        .ft-form .field textarea {
+            resize: vertical;
+            min-height: 78px;
+        }
+
+    .ft-form .form-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+    }
+
+    .ft-form .btn-submit {
+        width: 100%;
+        background: #1F3B2C;
+        color: white;
+        border: none;
+        padding: 15px;
+        border-radius: 10px;
+        font-weight: 700;
+        font-size: 15px;
+        cursor: pointer;
+        transition: opacity 0.25s;
+        margin-top: 22px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 9px;
+    }
+
+        .ft-form .btn-submit:hover {
+            opacity: 0.88;
+        }
+
+    .success-panel {
+        text-align: center;
+        padding: 20px 10px;
+    }
+
+        .success-panel .success-icon {
+            width: 84px;
+            height: 84px;
+            border-radius: 50%;
+            background: #d4edda;
+            color: #2ecc71;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 40px;
+            margin-bottom: 18px;
+            animation: successPop 0.5s ease;
+        }
+
+    @@keyframes successPop {
+        0% {
+            transform: scale(0.6);
+            opacity: 0;
+        }
+
+        100% {
+            transform: scale(1);
+            opacity: 1;
+        }
+    }
+
+    .success-panel h4 {
+        font-size: 20px;
+        font-weight: 700;
+        color: #1F3B2C;
+        margin: 0 0 10px;
+    }
+
+    .success-panel p {
+        font-size: 14px;
+        color: #6B7568;
+        line-height: 1.65;
+        margin: 0 auto 22px;
+        max-width: 420px;
+    }
+
+    .success-req-id {
+        background: #F3F1E7;
+        border-radius: 12px;
+        padding: 16px;
+        margin-bottom: 20px;
+        display: inline-block;
+    }
+
+        .success-req-id .req-label {
+            font-size: 11px;
+            color: #8A9188;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 700;
+            display: block;
+            margin-bottom: 4px;
+        }
+
+        .success-req-id .req-value {
+            font-size: 18px;
+            font-weight: 800;
+            color: #1F3B2C;
+            font-family: 'Courier New', monospace;
+            letter-spacing: 1px;
+        }
+
+    .success-panel .btn-ok {
+        background: #1F3B2C;
+        color: white;
+        border: none;
+        padding: 12px 42px;
+        border-radius: 10px;
+        font-weight: 600;
+        font-size: 14px;
+        cursor: pointer;
+        transition: opacity 0.25s;
+    }
+
+        .success-panel .btn-ok:hover {
+            opacity: 0.88;
+        }
+
+    @@media (max-width: 992px) {
+        .ft-layout {
+            grid-template-columns: 1fr;
+        }
+
+        .ft-sidebar {
+            position: static;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        .area-tuition-card {
+            grid-column: 1 / -1;
+        }
+
+        .tutor-row {
+            grid-template-columns: 80px 1fr;
+        }
+
+            .tutor-row .tr-actions {
+                grid-column: 1 / -1;
+                flex-direction: row;
+                align-items: center;
+            }
+
+        .tr-fee {
+            text-align: left;
+            flex: 1;
+        }
+
+        .tr-actions .btn-view-tr,
+        .tr-actions .btn-request-tr {
+            flex: 1;
+        }
+    }
+
+    @@media (max-width: 640px) {
+        .ft-page {
+            padding: 26px 14px 60px;
+        }
+
+        .ft-header h1 {
+            font-size: 26px;
+        }
+
+        .ft-header p {
+            font-size: 14px;
+        }
+
+        .ft-search {
+            flex-direction: column;
+            padding: 12px;
+            border-radius: 16px;
+        }
+
+            .ft-search button {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .ft-search input {
+                text-align: center;
+                padding: 10px 0;
+            }
+
+        .ft-sidebar {
+            grid-template-columns: 1fr;
+        }
+
+        .tutor-row {
+            grid-template-columns: 1fr;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .tr-avatar {
+            margin: 0 auto;
+        }
+
+        .tr-name-line {
+            justify-content: center;
+        }
+
+        .tr-rating-line {
+            justify-content: center;
+        }
+
+        .tr-meta {
+            grid-template-columns: 1fr;
+            text-align: left;
+        }
+
+        .tr-tags {
+            justify-content: center;
+        }
+
+        .tr-actions {
+            flex-direction: column;
+        }
+
+        .list-header {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+            .list-header .sort-wrap {
+                justify-content: flex-end;
+            }
+
+        .tp-header {
+            flex-direction: column;
+            text-align: center;
+        }
+
+        .tp-stat-row, .tp-info-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .ft-form .form-row {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+
+<section class="ft-page">
+    <div class="ft-layout">
+
+        <div class="ft-header">
+            <h1>Find Your Perfect Tutor</h1>
+            <p>
+                Browse verified tutors — name, qualification, experience, and skills at a glance.
+                All communication goes through our admin team to keep your privacy safe.
+            </p>
+
+            <div class="ft-search">
+                <i class="fas fa-search"></i>
+                <input type="text" id="mainSearch" placeholder="Search tutor by name, subject, or Tutor ID..." />
+                <button onclick="applySearch()"><i class="fas fa-search"></i> Search</button>
+            </div>
+
+            <div class="quick-chips">
+                <span class="quick-chip active" data-filter="all" onclick="setQuickFilter(this,'all')">All Tutors</span>
+                <span class="quick-chip" data-filter="top" onclick="setQuickFilter(this,'top')">⭐ Top Rated</span>
+                <span class="quick-chip" data-filter="verified" onclick="setQuickFilter(this,'verified')">✔ Verified</span>
+                <span class="quick-chip" data-filter="online" onclick="setQuickFilter(this,'online')">💻 Online</span>
+                <span class="quick-chip" data-filter="offline" onclick="setQuickFilter(this,'offline')">🏢 Offline</span>
+            </div>
+        </div>
+
+        <div class="ft-list-wrap">
+            <div class="list-header">
+                <h3>
+                    <i class="fas fa-user-graduate"></i> Our Tutors
+                    <span class="count-badge" id="countBadge">0</span>
+                </h3>
+                <div class="sort-wrap">
+                    <span>Sort:</span>
+                    <select id="sortSelect" onchange="applySearch()">
+                        <option value="rating">Top Rated</option>
+                        <option value="fee-low">Fee: Low to High</option>
+                        <option value="fee-high">Fee: High to Low</option>
+                        <option value="experience">Most Experienced</option>
+                    </select>
+                </div>
+            </div>
+
+            <div id="tutorList"></div>
+        </div>
+
+        <aside class="ft-sidebar">
+            <div class="area-tuition-card">
+                <div class="atc-icon"><i class="fas fa-map-marked-alt"></i></div>
+                <h3>Get Tuition in Your Area</h3>
+                <p>Want a tutor in your own area? Contact our admin and we'll help you find the right tutor near you — quickly and safely.</p>
+
+                <ul class="atc-features">
+                    <li><i class="fas fa-check-circle"></i> Verified tutors in your locality</li>
+                    <li><i class="fas fa-check-circle"></i> Match by class, subject &amp; budget</li>
+                    <li><i class="fas fa-check-circle"></i> Admin handles everything for you</li>
+                    <li><i class="fas fa-check-circle"></i> 100% privacy protected</li>
+                </ul>
+
+                <button class="btn-area-contact" onclick="openAreaTuitionModal()">
+                    <i class="fas fa-headset"></i> Contact Admin
+                </button>
+            </div>
+
+            <div class="sidebar-card helper-card">
+                <h4><i class="fas fa-hands-helping"></i> Need a Tutor?</h4>
+                <p>Can't find the right tutor? Send us your requirements and our admin will match you with the perfect tutor.</p>
+                <button class="btn-helper" onclick="openNeedTutorModal()">
+                    <i class="fas fa-paper-plane"></i> Send Request to Admin
+                </button>
+            </div>
+
+            <div class="tid-card">
+                <h5><i class="fas fa-id-badge"></i> Have a Tutor ID?</h5>
+                <p>Enter the Tutor ID you received to open the profile instantly.</p>
+                <div class="tid-input">
+                    <input type="text" id="tidInput" placeholder="TCH-1024" />
+                    <button onclick="findByTutorId()"><i class="fas fa-search"></i></button>
+                </div>
+            </div>
+        </aside>
+
+    </div>
+</section>
+
+<!-- MODALS -->
+<div class="modal fade ft-modal" id="tutorProfileModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="fas fa-user-tie"></i> Tutor Profile</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="tutorProfileBody"></div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade ft-modal" id="requestTutorModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="fas fa-paper-plane"></i> Request This Tutor</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="requestTutorBody"></div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade ft-modal" id="needTutorModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="fas fa-hands-helping"></i> I Need a Tutor</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="needTutorBody"></div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade ft-modal" id="areaTuitionModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="fas fa-map-marked-alt"></i> Get Tuition in Your Area</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="areaTuitionBody"></div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @using System.Text.Json
+@{
+        // JSON serialize with camelCase so JS properties match
+        var jsonOptions = new JsonSerializerOptions
+        {
+            PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+        };
+        var tutorsJson = JsonSerializer.Serialize(Model, jsonOptions);
+    }
+
+    <script>
+        // Razor থেকে Tutor ডেটা camelCase-এ inject
+        window.allTutors = @Html.Raw(tutorsJson);
+
+        console.log('✅ Total tutors loaded:', window.allTutors.length);
+        if (window.allTutors.length > 0) {
+            console.log('First tutor:', window.allTutors[0]);
+        }
+
+        (function () {
+            'use strict';
+
+            var allTutors = window.allTutors || [];
+            var currentQuickFilter = 'all';
+
+            function stars(rating) {
+                var full = Math.floor(rating);
+                var half = rating - full >= 0.5;
+                var s = '';
+                for (var i = 0; i < full; i++) s += '★';
+                if (half) s += '⯨';
+                return s;
+            }
+
+            function escapeHtml(text) {
+                if (!text) return '';
+                return String(text)
+                    .replace(/&/g, '&amp;')
+                    .replace(/</g, '&lt;')
+                    .replace(/>/g, '&gt;')
+                    .replace(/"/g, '&quot;')
+                    .replace(/'/g, '&#39;');
+            }
+
+            function generateRequestId() {
+                var d = new Date();
+                var datePart = d.getFullYear().toString()
+                    + String(d.getMonth() + 1).padStart(2, '0')
+                    + String(d.getDate()).padStart(2, '0');
+                var seq = String(Math.floor(Math.random() * 900) + 100);
+                return 'REQ-' + datePart + '-' + seq;
+            }
+
+            function closeModal(modalId) {
+                var m = bootstrap.Modal.getInstance(document.getElementById(modalId));
+                if (m) m.hide();
+            }
+
+            function createRow(t) {
+                var verifiedTick = t.isVerified
+                    ? '<div class="v-tick" title="Verified Tutor"><i class="fas fa-check"></i></div>'
+                    : '';
+                var topBadge = t.isTopRated
+                    ? '<span class="tr-top-badge"><i class="fas fa-crown me-1"></i>Top</span>'
+                    : '';
+
+                var classTags = (t.classes || []).slice(0, 3).map(function (c) {
+                    return '<span class="tr-tag">' + escapeHtml(c) + '</span>';
+                }).join('');
+
+                var moreClasses = (t.classes || []).length > 3
+                    ? '<span class="tr-tag" style="background:#E7E4D9;">+' + (t.classes.length - 3) + '</span>'
+                    : '';
+
+                var modeIcon = t.teachingMode === 'Online' ? 'fa-laptop'
+                    : (t.teachingMode === 'Offline' ? 'fa-building' : 'fa-globe');
+
+                var avatarContent = (t.photoUrl && t.photoUrl.trim() !== '')
+                    ? '<img src="' + escapeHtml(t.photoUrl) + '" alt="' + escapeHtml(t.fullName) + '" />'
+                    : escapeHtml(t.initials);
+
+                return ''
+                    + '<div class="tutor-row">'
+                    + '  <div class="tr-avatar">'
+                    + '    <div class="avatar-circle">' + avatarContent + '</div>'
+                    +      verifiedTick
+                    + '  </div>'
+                    + '  <div class="tr-info">'
+                    + '    <div class="tr-name-line">'
+                    + '      <h4 class="tr-name">' + escapeHtml(t.fullName) + '</h4>'
+                    + '      <span class="tr-id">' + escapeHtml(t.tutorId) + '</span>'
+                    +        topBadge
+                    + '    </div>'
+                    + '    <div class="tr-rating-line">'
+                    + '      <span class="stars">' + stars(t.rating) + '</span>'
+                    + '      <span><strong>' + t.rating + '</strong></span>'
+                    + '      <span class="count">(' + t.totalReviews + ' reviews)</span>'
+                    + '    </div>'
+                    + '    <div class="tr-meta">'
+                    + '      <div class="m-item"><i class="fas fa-graduation-cap"></i><span>' + escapeHtml(t.qualification) + '</span></div>'
+                    + '      <div class="m-item"><i class="fas fa-university"></i><span>' + escapeHtml(t.institution) + '</span></div>'
+                    + '      <div class="m-item"><i class="fas fa-briefcase"></i><span>' + t.experienceYears + '+ years experience</span></div>'
+                    + '      <div class="m-item"><i class="fas fa-map-marker-alt"></i><span>' + escapeHtml(t.location) + '</span></div>'
+                    + '    </div>'
+                    + '    <div class="tr-tags">'
+                    + '      <span class="tr-tag mode"><i class="fas ' + modeIcon + ' me-1"></i>' + escapeHtml(t.teachingMode) + '</span>'
+                    +        classTags
+                    +        moreClasses
+                    + '    </div>'
+                    + '  </div>'
+                    + '  <div class="tr-actions">'
+                    + '    <div class="tr-fee">'
+                    + '      <div class="fee-val">৳' + Number(t.monthlyFee).toLocaleString() + '</div>'
+                    + '      <div class="fee-lbl">Monthly Fee</div>'
+                    + '    </div>'
+                    + '    <button class="btn-view-tr" onclick="viewProfile(' + t.id + ')">'
+                    + '      <i class="fas fa-eye"></i> View Profile'
+                    + '    </button>'
+                    + '    <button class="btn-request-tr" onclick="openRequestTutorModal(' + t.id + ')">'
+                    + '      <i class="fas fa-paper-plane"></i> Request'
+                    + '    </button>'
+                    + '  </div>'
+                    + '</div>';
+            }
+
+            function renderList(tutors) {
+                var wrap = document.getElementById('tutorList');
+                var badge = document.getElementById('countBadge');
+                badge.textContent = tutors.length;
+
+                if (!tutors || tutors.length === 0) {
+                    wrap.innerHTML = ''
+                        + '<div class="empty-state">'
+                        + '  <div class="es-icon"><i class="fas fa-search"></i></div>'
+                        + '  <h4>No tutors found</h4>'
+                        + '  <p>Try a different search, or let our admin team find a tutor for you.</p>'
+                        + '  <button class="btn-helper" onclick="openNeedTutorModal()" style="max-width:280px; margin:0 auto;">'
+                        + '    <i class="fas fa-hands-helping"></i> Request a Tutor'
+                        + '  </button>'
+                        + '</div>';
+                    return;
+                }
+
+                wrap.innerHTML = tutors.map(createRow).join('');
+            }
+
+            function applySearch() {
+                var query = document.getElementById('mainSearch').value.toLowerCase().trim();
+                var sort = document.getElementById('sortSelect').value;
+
+                var list = allTutors.slice();
+
+                if (query) {
+                    list = list.filter(function (t) {
+                        return t.fullName.toLowerCase().indexOf(query) !== -1
+                            || t.tutorId.toLowerCase().indexOf(query) !== -1
+                            || (t.subjects || []).some(function (s) { return s.toLowerCase().indexOf(query) !== -1; })
+                            || (t.qualification || '').toLowerCase().indexOf(query) !== -1
+                            || (t.institution || '').toLowerCase().indexOf(query) !== -1;
+                    });
+                }
+
+                switch (currentQuickFilter) {
+                    case 'top':      list = list.filter(function (t) { return t.isTopRated; }); break;
+                    case 'verified': list = list.filter(function (t) { return t.isVerified; }); break;
+                    case 'online':   list = list.filter(function (t) { return t.teachingMode === 'Online' || t.teachingMode === 'Both'; }); break;
+                    case 'offline':  list = list.filter(function (t) { return t.teachingMode === 'Offline' || t.teachingMode === 'Both'; }); break;
+                }
+
+                switch (sort) {
+                    case 'rating':     list.sort(function (a, b) { return b.rating - a.rating; }); break;
+                    case 'fee-low':    list.sort(function (a, b) { return a.monthlyFee - b.monthlyFee; }); break;
+                    case 'fee-high':   list.sort(function (a, b) { return b.monthlyFee - a.monthlyFee; }); break;
+                    case 'experience': list.sort(function (a, b) { return b.experienceYears - a.experienceYears; }); break;
+                }
+
+                renderList(list);
+            }
+
+            function setQuickFilter(el, filter) {
+                document.querySelectorAll('.quick-chip').forEach(function (c) { c.classList.remove('active'); });
+                el.classList.add('active');
+                currentQuickFilter = filter;
+                applySearch();
+            }
+
+            function viewProfile(id) {
+                var t = allTutors.find(function (x) { return x.id === id; });
+                if (!t) return;
+
+                var verifiedIcon = t.isVerified
+                    ? '<i class="fas fa-check-circle" style="color:#2ecc71;"></i>' : '';
+                var topBadge = t.isTopRated
+                    ? '<span style="background:linear-gradient(135deg,#D98E1F,#B8760F);color:#fff;font-size:10px;font-weight:700;padding:4px 10px;border-radius:20px;text-transform:uppercase;letter-spacing:0.5px;"><i class="fas fa-crown me-1"></i>Top Rated</span>'
+                    : '';
+                var verifiedTick = t.isVerified
+                    ? '<div class="v-tick"><i class="fas fa-check"></i></div>' : '';
+
+                var classChips = (t.classes || []).map(function (c) { return '<span class="tp-chip">' + escapeHtml(c) + '</span>'; }).join('');
+                var subjectChips = (t.subjects || []).map(function (s) { return '<span class="tp-chip">' + escapeHtml(s) + '</span>'; }).join('');
+
+                var avatarContent = (t.photoUrl && t.photoUrl.trim() !== '')
+                    ? '<img src="' + escapeHtml(t.photoUrl) + '" alt="' + escapeHtml(t.fullName) + '" />'
+                    : escapeHtml(t.initials);
+
+                document.getElementById('tutorProfileBody').innerHTML = ''
+                    + '<div class="tp-header">'
+                    + '  <div class="tp-avatar">' + avatarContent + verifiedTick + '</div>'
+                    + '  <div style="flex:1; min-width:0;">'
+                    + '    <h4 class="tp-name">' + escapeHtml(t.fullName) + ' ' + verifiedIcon + '</h4>'
+                    + '    <span class="tp-id">' + escapeHtml(t.tutorId) + '</span>'
+                    + '    <div class="tp-rating-line">'
+                    + '      <span>' + stars(t.rating) + '</span>'
+                    + '      <span>' + t.rating + '</span>'
+                    + '      <span class="count">· ' + t.totalReviews + ' reviews</span>'
+                    + '    </div>'
+                    + '    <div style="margin-top:8px;">' + topBadge + '</div>'
+                    + '  </div>'
+                    + '</div>'
+                    + '<div class="tp-stat-row">'
+                    + '  <div class="tp-stat"><div class="num">৳' + Number(t.monthlyFee).toLocaleString() + '</div><div class="lbl">Monthly Fee</div></div>'
+                    + '  <div class="tp-stat"><div class="num">' + t.experienceYears + '+</div><div class="lbl">Years Exp.</div></div>'
+                    + '  <div class="tp-stat"><div class="num">' + escapeHtml(t.gender) + '</div><div class="lbl">Gender</div></div>'
+                    + '</div>'
+                    + '<div class="tp-block"><div class="tp-block-title"><i class="fas fa-user"></i>About Tutor</div><p>' + escapeHtml(t.about) + '</p></div>'
+                    + '<div class="tp-block"><div class="tp-block-title"><i class="fas fa-graduation-cap"></i>Education</div>'
+                    + '  <div class="tp-info-grid">'
+                    + '    <div class="tp-info-item"><div class="label">Qualification</div><div class="value">' + escapeHtml(t.qualification) + '</div></div>'
+                    + '    <div class="tp-info-item"><div class="label">Institution</div><div class="value">' + escapeHtml(t.institution) + '</div></div>'
+                    + '  </div>'
+                    + '</div>'
+                    + '<div class="tp-block"><div class="tp-block-title"><i class="fas fa-book"></i>Subjects</div><div class="tp-chips">' + subjectChips + '</div></div>'
+                    + '<div class="tp-block"><div class="tp-block-title"><i class="fas fa-users"></i>Classes Taught</div><div class="tp-chips">' + classChips + '</div></div>'
+                    + '<div class="tp-block"><div class="tp-block-title"><i class="fas fa-info-circle"></i>Details</div>'
+                    + '  <div class="tp-info-grid">'
+                    + '    <div class="tp-info-item"><div class="label">Location</div><div class="value">' + escapeHtml(t.location) + '</div></div>'
+                    + '    <div class="tp-info-item"><div class="label">Teaching Mode</div><div class="value">' + escapeHtml(t.teachingMode) + '</div></div>'
+                    + '    <div class="tp-info-item"><div class="label">Available Time</div><div class="value">' + escapeHtml(t.availableTime) + '</div></div>'
+                    + '    <div class="tp-info-item"><div class="label">Experience</div><div class="value">' + t.experienceYears + '+ years</div></div>'
+                    + '  </div>'
+                    + '</div>'
+                    + '<div class="tp-cta">'
+                    + '  <p><i class="fas fa-shield-alt me-1"></i> For privacy, we never share tutor contact details. All requests go through our admin team.</p>'
+                    + '  <button class="btn-request-tr" style="width:100%; padding:14px;" onclick="switchToRequest(' + t.id + ')">'
+                    + '    <i class="fas fa-paper-plane"></i> Request This Tutor'
+                    + '  </button>'
+                    + '</div>';
+
+                new bootstrap.Modal(document.getElementById('tutorProfileModal')).show();
+            }
+
+            function switchToRequest(id) {
+                var m = bootstrap.Modal.getInstance(document.getElementById('tutorProfileModal'));
+                if (m) m.hide();
+                setTimeout(function () { openRequestTutorModal(id); }, 260);
+            }
+
+            function openRequestTutorModal(tutorId) {
+                var t = tutorId ? allTutors.find(function (x) { return x.id === tutorId; }) : null;
+
+                var headerInfo = t
+                    ? '<div class="form-intro"><p>Requesting <strong>' + escapeHtml(t.fullName) + '</strong> '
+                      + '(<span style="font-family:monospace;">' + escapeHtml(t.tutorId) + '</span>) — '
+                      + escapeHtml((t.subjects || []).join(', ')) + '. Your request goes to our admin team.</p></div>'
+                    : '<div class="form-intro"><p>Already know your tutor? Select them below and submit your request. Our admin team will forward it.</p></div>';
+
+                var tutorOptions = allTutors.map(function (x) {
+                    var sel = (t && t.id === x.id) ? ' selected' : '';
+                    return '<option value="' + x.id + '"' + sel + '>'
+                        + escapeHtml(x.tutorId) + ' — ' + escapeHtml(x.fullName)
+                        + ' (' + escapeHtml((x.subjects || []).join(', ')) + ')</option>';
+                }).join('');
+
+                document.getElementById('requestTutorBody').innerHTML = ''
+                    + '<form class="ft-form" onsubmit="submitTutorRequest(event)">'
+                    +   headerInfo
+                    + '  <div class="form-section-label">Tutor Selection</div>'
+                    + '  <div class="field"><label>Tutor <span class="req">*</span></label>'
+                    + '    <select id="rtTutor" required>'
+                    + '      <option value="">— Select a Tutor —</option>'
+                    +        tutorOptions
+                    + '    </select>'
+                    + '  </div>'
+                    + '  <div class="form-section-label">Student Information</div>'
+                    + '  <div class="form-row">'
+                    + '    <div class="field"><label>Student Name <span class="req">*</span></label><input type="text" id="rtName" required /></div>'
+                    + '    <div class="field"><label>Phone Number <span class="req">*</span></label><input type="tel" id="rtPhone" required /></div>'
+                    + '  </div>'
+                    + '  <div class="field"><label>Email</label><input type="email" id="rtEmail" /></div>'
+                    + '  <div class="form-section-label">Requirement Details</div>'
+                    + '  <div class="form-row">'
+                    + '    <div class="field"><label>Student Class <span class="req">*</span></label>'
+                    + '      <select id="rtClass" required>'
+                    + '        <option value="">Select Class</option>'
+                    + '        <option>Class 6-8</option><option>Class 9-10</option>'
+                    + '        <option>HSC</option><option>Admission</option>'
+                    + '        <option>University</option><option>Professional</option>'
+                    + '      </select>'
+                    + '    </div>'
+                    + '    <div class="field"><label>Required Subject <span class="req">*</span></label><input type="text" id="rtSubject" required /></div>'
+                    + '  </div>'
+                    + '  <div class="form-row">'
+                    + '    <div class="field"><label>Preferred Area</label><input type="text" id="rtArea" /></div>'
+                    + '    <div class="field"><label>Teaching Mode</label>'
+                    + '      <select id="rtMode"><option>Online</option><option>Offline</option><option selected>Both</option></select>'
+                    + '    </div>'
+                    + '  </div>'
+                    + '  <div class="form-row">'
+                    + '    <div class="field"><label>Preferred Days</label><input type="text" id="rtDays" /></div>'
+                    + '    <div class="field"><label>Preferred Time</label><input type="text" id="rtTime" /></div>'
+                    + '  </div>'
+                    + '  <div class="field"><label>Monthly Budget (৳)</label><input type="text" id="rtBudget" /></div>'
+                    + '  <div class="form-section-label">Additional</div>'
+                    + '  <div class="field"><label>Additional Requirements</label><textarea id="rtNotes"></textarea></div>'
+                    + '  <button type="submit" class="btn-submit"><i class="fas fa-paper-plane"></i> Send Tutor Request</button>'
+                    + '</form>';
+
+                new bootstrap.Modal(document.getElementById('requestTutorModal')).show();
+            }
+
+            function submitTutorRequest(e) {
+                e.preventDefault();
+                var tutorId = document.getElementById('rtTutor').value;
+                var tutor = allTutors.find(function (x) { return x.id == tutorId; });
+                var reqId = generateRequestId();
+
+                var tutorLine = tutor
+                    ? 'Your request for <strong>' + escapeHtml(tutor.fullName) + '</strong> (' + escapeHtml(tutor.tutorId) + ') '
+                    : '';
+
+                document.getElementById('requestTutorBody').innerHTML = ''
+                    + '<div class="success-panel">'
+                    + '  <div class="success-icon"><i class="fas fa-check"></i></div>'
+                    + '  <h4>Request Submitted Successfully!</h4>'
+                    + '  <p>' + tutorLine + 'has been received. Our admin team will review your requirements and contact you soon.</p>'
+                    + '  <div class="success-req-id"><span class="req-label">Request ID</span><span class="req-value">' + reqId + '</span></div>'
+                    + '  <button class="btn-ok" onclick="closeModal(\'requestTutorModal\')">OK</button>'
+                    + '</div>';
+            }
+
+            function openNeedTutorModal() {
+                document.getElementById('needTutorBody').innerHTML = ''
+                    + '<form class="ft-form" onsubmit="submitNeedTutor(event)">'
+                    + '  <div class="form-intro"><p>Don\'t have a specific tutor in mind? Tell us your requirements and our <strong>admin team</strong> will find the best tutor for you.</p></div>'
+                    + '  <div class="form-section-label">Your Information</div>'
+                    + '  <div class="form-row">'
+                    + '    <div class="field"><label>Student Name <span class="req">*</span></label><input type="text" id="ntName" required /></div>'
+                    + '    <div class="field"><label>Phone Number <span class="req">*</span></label><input type="tel" id="ntPhone" required /></div>'
+                    + '  </div>'
+                    + '  <div class="form-section-label">Requirement</div>'
+                    + '  <div class="form-row">'
+                    + '    <div class="field"><label>Student Class <span class="req">*</span></label>'
+                    + '      <select id="ntClass" required>'
+                    + '        <option value="">Select Class</option>'
+                    + '        <option>Class 6-8</option><option>Class 9-10</option>'
+                    + '        <option>HSC</option><option>Admission</option>'
+                    + '        <option>University</option><option>Professional</option>'
+                    + '      </select>'
+                    + '    </div>'
+                    + '    <div class="field"><label>Subject <span class="req">*</span></label><input type="text" id="ntSubject" required /></div>'
+                    + '  </div>'
+                    + '  <div class="form-row">'
+                    + '    <div class="field"><label>Preferred Area</label><input type="text" id="ntArea" /></div>'
+                    + '    <div class="field"><label>Preferred Tutor Gender</label>'
+                    + '      <select id="ntGender"><option>Any</option><option>Male</option><option>Female</option></select>'
+                    + '    </div>'
+                    + '  </div>'
+                    + '  <div class="form-row">'
+                    + '    <div class="field"><label>Teaching Mode</label>'
+                    + '      <select id="ntMode"><option>Online</option><option>Offline</option><option selected>Both</option></select>'
+                    + '    </div>'
+                    + '    <div class="field"><label>Monthly Budget (৳)</label><input type="text" id="ntBudget" /></div>'
+                    + '  </div>'
+                    + '  <div class="form-row">'
+                    + '    <div class="field"><label>Preferred Days</label><input type="text" id="ntDays" /></div>'
+                    + '    <div class="field"><label>Preferred Time</label><input type="text" id="ntTime" /></div>'
+                    + '  </div>'
+                    + '  <div class="field"><label>Additional Requirements</label><textarea id="ntNotes"></textarea></div>'
+                    + '  <button type="submit" class="btn-submit"><i class="fas fa-hands-helping"></i> Send Request to Admin</button>'
+                    + '</form>';
+
+                new bootstrap.Modal(document.getElementById('needTutorModal')).show();
+            }
+
+            function submitNeedTutor(e) {
+                e.preventDefault();
+                var reqId = generateRequestId();
+                document.getElementById('needTutorBody').innerHTML = ''
+                    + '<div class="success-panel">'
+                    + '  <div class="success-icon"><i class="fas fa-check"></i></div>'
+                    + '  <h4>Request Sent to Admin!</h4>'
+                    + '  <p>Our admin team will review your requirements and find the best tutor for you. We\'ll contact you shortly.</p>'
+                    + '  <div class="success-req-id"><span class="req-label">Request ID</span><span class="req-value">' + reqId + '</span></div>'
+                    + '  <button class="btn-ok" onclick="closeModal(\'needTutorModal\')">OK</button>'
+                    + '</div>';
+            }
+
+            function openAreaTuitionModal() {
+                document.getElementById('areaTuitionBody').innerHTML = ''
+                    + '<form class="ft-form" onsubmit="submitAreaTuition(event)">'
+                    + '  <div class="form-intro"><p>Want a tutor <strong>in your own area</strong>? Fill in the details below and our <strong>admin team</strong> will find suitable tutors near you.</p></div>'
+                    + '  <div class="form-section-label">Your Information</div>'
+                    + '  <div class="form-row">'
+                    + '    <div class="field"><label>Your Name <span class="req">*</span></label><input type="text" id="atName" required /></div>'
+                    + '    <div class="field"><label>Phone Number <span class="req">*</span></label><input type="tel" id="atPhone" required /></div>'
+                    + '  </div>'
+                    + '  <div class="form-section-label">Tuition Requirement</div>'
+                    + '  <div class="form-row">'
+                    + '    <div class="field"><label>Your Area / Locality <span class="req">*</span></label><input type="text" id="atArea" required /></div>'
+                    + '    <div class="field"><label>City / District</label><input type="text" id="atCity" /></div>'
+                    + '  </div>'
+                    + '  <div class="form-row">'
+                    + '    <div class="field"><label>Student Class <span class="req">*</span></label>'
+                    + '      <select id="atClass" required>'
+                    + '        <option value="">Select Class</option>'
+                    + '        <option>Class 6-8</option><option>Class 9-10</option>'
+                    + '        <option>HSC</option><option>Admission</option>'
+                    + '        <option>University</option>'
+                    + '      </select>'
+                    + '    </div>'
+                    + '    <div class="field"><label>Subject(s) <span class="req">*</span></label><input type="text" id="atSubject" required /></div>'
+                    + '  </div>'
+                    + '  <div class="form-row">'
+                    + '    <div class="field"><label>Tutor Preference</label>'
+                    + '      <select id="atGender"><option>Any</option><option>Male</option><option>Female</option></select>'
+                    + '    </div>'
+                    + '    <div class="field"><label>Teaching Mode</label>'
+                    + '      <select id="atMode"><option>Offline (Home)</option><option>Online</option><option selected>Both</option></select>'
+                    + '    </div>'
+                    + '  </div>'
+                    + '  <div class="form-row">'
+                    + '    <div class="field"><label>Preferred Days</label><input type="text" id="atDays" /></div>'
+                    + '    <div class="field"><label>Preferred Time</label><input type="text" id="atTime" /></div>'
+                    + '  </div>'
+                    + '  <div class="field"><label>Monthly Budget (৳)</label><input type="text" id="atBudget" /></div>'
+                    + '  <div class="field"><label>Additional Requirements</label><textarea id="atNotes"></textarea></div>'
+                    + '  <button type="submit" class="btn-submit"><i class="fas fa-headset"></i> Send to Admin</button>'
+                    + '  <p style="font-size:12px; color:#8A9188; text-align:center; margin:12px 0 0;"><i class="fas fa-shield-alt me-1"></i> Our admin team will contact you within 24 hours.</p>'
+                    + '</form>';
+
+                new bootstrap.Modal(document.getElementById('areaTuitionModal')).show();
+            }
+
+            function submitAreaTuition(e) {
+                e.preventDefault();
+                var reqId = generateRequestId();
+                document.getElementById('areaTuitionBody').innerHTML = ''
+                    + '<div class="success-panel">'
+                    + '  <div class="success-icon"><i class="fas fa-check"></i></div>'
+                    + '  <h4>Request Sent Successfully!</h4>'
+                    + '  <p>Our admin team will find tutors in your area and contact you soon.</p>'
+                    + '  <div class="success-req-id"><span class="req-label">Request ID</span><span class="req-value">' + reqId + '</span></div>'
+                    + '  <button class="btn-ok" onclick="closeModal(\'areaTuitionModal\')">OK</button>'
+                    + '</div>';
+            }
+
+            function findByTutorId() {
+                var input = document.getElementById('tidInput');
+                var id = input.value.trim().toUpperCase();
+                if (!id) { alert('Please enter a Tutor ID'); return; }
+                var tutor = allTutors.find(function (t) { return t.tutorId.toUpperCase() === id; });
+                if (tutor) viewProfile(tutor.id);
+                else alert('No tutor found with Tutor ID: ' + id);
+            }
+
+            // Expose to window for inline onclick
+            window.viewProfile = viewProfile;
+            window.openRequestTutorModal = openRequestTutorModal;
+            window.openNeedTutorModal = openNeedTutorModal;
+            window.openAreaTuitionModal = openAreaTuitionModal;
+            window.switchToRequest = switchToRequest;
+            window.submitTutorRequest = submitTutorRequest;
+            window.submitNeedTutor = submitNeedTutor;
+            window.submitAreaTuition = submitAreaTuition;
+            window.applySearch = applySearch;
+            window.setQuickFilter = setQuickFilter;
+            window.findByTutorId = findByTutorId;
+            window.closeModal = closeModal;
+
+            document.addEventListener('DOMContentLoaded', function () {
+                applySearch();
+
+                var mainSearch = document.getElementById('mainSearch');
+                if (mainSearch) {
+                    mainSearch.addEventListener('input', applySearch);
+                    mainSearch.addEventListener('keydown', function (e) {
+                        if (e.key === 'Enter') e.preventDefault();
+                    });
+                }
+
+                var tidInput = document.getElementById('tidInput');
+                if (tidInput) {
+                    tidInput.addEventListener('keydown', function (e) {
+                        if (e.key === 'Enter') findByTutorId();
+                    });
+                }
+            });
+        })();
+    </script>
+}

@@ -101,7 +101,7 @@
                             <label class="form-label">Email</label>
                             <input name="email" id="email" type="email" class="form-control form-control-transparent"
                                    placeholder="e.g. yourname@@gmail.com" autocomplete="off" required />
-                            <div class="invalid-feedback">Please enter a valid email address.</div>
+                            <div class="invalid-feedback">Only a valid Gmail address is allowed (e.g. yourname@@gmail.com).</div>
                         </div>
 
                         <div class="mb-3">
@@ -145,9 +145,12 @@
 
         const usernameRegex = /^[A-Za-z0-9_]{3,20}$/;
 
+    
+        // Gmail username rules: 6-30 chars, letters/numbers/dots only,
+        // must start & end with a letter or number, no consecutive dots.
         function isValidEmail(value) {
-            const formatRegex = /^[A-Za-z0-9._%+-]+@@[A-Za-z0-9.-]+\.[A-Za-z]{2,6}$/;
-            return formatRegex.test(value);
+            const gmailRegex = /^(?=.{6,30}@@)[a-z0-9]+(?:\.[a-z0-9]+)*@@gmail\.com$/i;
+            return gmailRegex.test(value);
         }
 
         function setState(input, valid, message) {
