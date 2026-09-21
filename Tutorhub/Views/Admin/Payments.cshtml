@@ -1,0 +1,672 @@
+﻿<!-- 📁 Views/Admin/Payments.cshtml -->
+<!-- লোকেশন: Tutorbub/Views/Admin/Payments.cshtml -->
+
+@model List<Tutorbub.Models.AdminPaymentViewModel>
+
+@{
+    ViewData["Title"] = "Payment Management";
+    Layout = "_Layout";
+}
+
+<style>
+    /* ===== সাইডবার ===== */
+    .admin-sidebar {
+        position: fixed;
+        top: 80px;
+        left: 0;
+        bottom: 0;
+        width: 250px;
+        background-color: #1F3B2C;
+        color: white;
+        padding: 20px 0;
+        overflow-y: auto;
+        z-index: 100;
+        transition: transform 0.3s ease;
+    }
+
+    .admin-sidebar-brand {
+        padding: 0 20px 20px 20px;
+        border-bottom: 1px solid rgba(255,255,255,0.1);
+        margin-bottom: 15px;
+    }
+
+        .admin-sidebar-brand h4 {
+            color: #F3F1E7;
+            font-weight: 600;
+            margin: 0;
+        }
+
+        .admin-sidebar-brand small {
+            color: #8A9188;
+            font-size: 12px;
+        }
+
+    .admin-sidebar-menu {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+        .admin-sidebar-menu li a {
+            display: flex;
+            align-items: center;
+            padding: 12px 20px;
+            color: #C7D0C9;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            border-left: 3px solid transparent;
+            font-size: 14px;
+            cursor: pointer;
+        }
+
+            .admin-sidebar-menu li a:hover,
+            .admin-sidebar-menu li a.active {
+                background-color: rgba(255,255,255,0.08);
+                color: #ffffff;
+                border-left-color: #F4C744;
+            }
+
+            .admin-sidebar-menu li a i {
+                width: 24px;
+                margin-right: 10px;
+                font-size: 16px;
+                text-align: center;
+            }
+
+            .admin-sidebar-menu li a .badge-sidebar {
+                margin-left: auto;
+                background-color: rgba(255,255,255,0.15);
+                padding: 2px 10px;
+                border-radius: 12px;
+                font-size: 11px;
+                color: #F3F1E7;
+            }
+
+    /* ===== মেইন কন্টেন্ট ===== */
+    .admin-main-content {
+        margin-left: 250px;
+        padding: 20px;
+        min-height: calc(100vh - 80px);
+    }
+
+    .sidebar-toggle {
+        display: none;
+        position: fixed;
+        top: 90px;
+        left: 15px;
+        z-index: 101;
+        background-color: #1F3B2C;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        padding: 10px 12px;
+        font-size: 18px;
+        cursor: pointer;
+    }
+
+    .sidebar-overlay {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: rgba(0,0,0,0.5);
+        z-index: 99;
+    }
+
+        .sidebar-overlay.active {
+            display: block;
+        }
+
+    /* ===== Stats Cards ===== */
+    .pay-stats {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 16px;
+        margin-bottom: 24px;
+    }
+
+    .pay-stat-card {
+        background: white;
+        border-radius: 14px;
+        padding: 20px;
+        box-shadow: 0 4px 16px rgba(0,0,0,0.06);
+        border-left: 4px solid #1F3B2C;
+    }
+
+        .pay-stat-card.pending {
+            border-left-color: #f39c12;
+        }
+
+        .pay-stat-card.approved {
+            border-left-color: #2ecc71;
+        }
+
+        .pay-stat-card.rejected {
+            border-left-color: #e74c3c;
+        }
+
+        .pay-stat-card.revenue {
+            border-left-color: #9b59b6;
+        }
+
+        .pay-stat-card .num {
+            font-size: 28px;
+            font-weight: 800;
+            color: #1F3B2C;
+            line-height: 1.2;
+        }
+
+        .pay-stat-card .lbl {
+            font-size: 13px;
+            color: #6B7568;
+            margin-top: 4px;
+        }
+
+            .pay-stat-card .lbl i {
+                margin-right: 5px;
+            }
+
+    /* ===== Filter Tabs ===== */
+    .filter-tabs {
+        display: flex;
+        gap: 8px;
+        margin-bottom: 20px;
+        flex-wrap: wrap;
+    }
+
+    .filter-tab {
+        padding: 9px 22px;
+        border-radius: 30px;
+        font-size: 13px;
+        font-weight: 600;
+        text-decoration: none;
+        transition: all 0.25s;
+        border: 1.5px solid #E5E1D3;
+        color: #5B6B5E;
+        background: white;
+    }
+
+        .filter-tab:hover {
+            border-color: #1F3B2C;
+            color: #1F3B2C;
+        }
+
+        .filter-tab.active {
+            background: #1F3B2C;
+            color: white;
+            border-color: #1F3B2C;
+        }
+
+    /* ===== Payment Cards ===== */
+    .payment-item {
+        background: white;
+        border-radius: 16px;
+        padding: 20px;
+        margin-bottom: 14px;
+        box-shadow: 0 4px 16px rgba(0,0,0,0.05);
+        border: 1px solid rgba(0,0,0,0.04);
+        display: flex;
+        gap: 20px;
+        align-items: center;
+        flex-wrap: wrap;
+    }
+
+        .payment-item .course-thumb {
+            width: 70px;
+            height: 70px;
+            border-radius: 12px;
+            object-fit: cover;
+            flex-shrink: 0;
+        }
+
+        .payment-item .pay-main {
+            flex: 1;
+            min-width: 250px;
+        }
+
+            .payment-item .pay-main h5 {
+                font-size: 16px;
+                font-weight: 700;
+                color: #1F3B2C;
+                margin: 0 0 6px;
+            }
+
+            .payment-item .pay-main .user-info {
+                font-size: 13px;
+                color: #6B7568;
+                margin-bottom: 8px;
+            }
+
+                .payment-item .pay-main .user-info strong {
+                    color: #1F3B2C;
+                }
+
+            .payment-item .pay-main .tx-details {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 8px;
+            }
+
+    .tx-tag {
+        font-size: 12px;
+        padding: 4px 12px;
+        border-radius: 20px;
+        background: #F3F1E7;
+        color: #1F3B2C;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+    }
+
+        .tx-tag.method {
+            background: #E8F4FD;
+            color: #0c6b7c;
+        }
+
+        .tx-tag.amount {
+            background: #d4edda;
+            color: #155724;
+        }
+
+    .payment-item .pay-actions {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        align-items: stretch;
+        min-width: 140px;
+    }
+
+    .status-pill {
+        text-align: center;
+        padding: 6px 14px;
+        border-radius: 30px;
+        font-size: 11px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 4px;
+    }
+
+        .status-pill.pending {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .status-pill.approved {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status-pill.rejected {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+    .btn-approve {
+        background: #2ecc71;
+        color: white;
+        border: none;
+        padding: 10px 16px;
+        border-radius: 10px;
+        font-weight: 600;
+        font-size: 13px;
+        cursor: pointer;
+        transition: all 0.25s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+    }
+
+        .btn-approve:hover {
+            background: #27ae60;
+            transform: translateY(-1px);
+        }
+
+    .btn-reject {
+        background: white;
+        color: #e74c3c;
+        border: 1.5px solid #e74c3c;
+        padding: 10px 16px;
+        border-radius: 10px;
+        font-weight: 600;
+        font-size: 13px;
+        cursor: pointer;
+        transition: all 0.25s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+    }
+
+        .btn-reject:hover {
+            background: #f8d7da;
+        }
+
+    .empty-state {
+        text-align: center;
+        padding: 60px 20px;
+        background: white;
+        border-radius: 16px;
+    }
+
+        .empty-state i {
+            font-size: 56px;
+            color: #E7E4D9;
+            margin-bottom: 16px;
+            display: block;
+        }
+
+        .empty-state h5 {
+            color: #1F3B2C;
+        }
+
+    /* ===== রেস্পন্সিভ ===== */
+    @@media (max-width: 992px) {
+        .admin-sidebar {
+            transform: translateX(-100%);
+        }
+
+            .admin-sidebar.open {
+                transform: translateX(0);
+            }
+
+        .sidebar-toggle {
+            display: block;
+        }
+
+        .admin-main-content {
+            margin-left: 0;
+            padding: 20px 15px;
+        }
+
+        .pay-stats {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+
+    @@media (max-width: 576px) {
+        .pay-stats {
+            grid-template-columns: 1fr;
+        }
+
+        .payment-item {
+            flex-direction: column;
+            text-align: center;
+        }
+
+            .payment-item .pay-actions {
+                flex-direction: row;
+                width: 100%;
+            }
+
+                .payment-item .pay-actions button {
+                    flex: 1;
+                }
+    }
+</style>
+
+<!-- ===== Sidebar Toggle (Mobile) ===== -->
+<button class="sidebar-toggle" id="sidebarToggle"><i class="fas fa-bars"></i></button>
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+<!-- ===== Admin Sidebar ===== -->
+<div class="admin-sidebar" id="sidebar">
+    <div class="admin-sidebar-brand">
+        <h4><i class="fas fa-shield-alt me-2"></i>Admin Panel</h4>
+        <small>Smart Tutor Hub</small>
+    </div>
+    <ul class="admin-sidebar-menu">
+        <li>
+            <a asp-controller="Admin" asp-action="Dashboard">
+                <i class="fas fa-chart-pie"></i> Dashboard
+            </a>
+        </li>
+        <li>
+            <a asp-controller="Admin" asp-action="TeacherRequests">
+                <i class="fas fa-user-graduate"></i> Teacher Requests
+                @if (ViewBag.PendingCount != null && ViewBag.PendingCount > 0)
+                {
+                    <span class="badge-sidebar" style="background-color:#F4C744; color:#1F3B2C;">@ViewBag.PendingCount</span>
+                }
+            </a>
+        </li>
+        <li>
+            <a asp-controller="Admin" asp-action="Payments" class="active">
+                <i class="fas fa-money-check-alt"></i> Payments
+                @if (ViewBag.PendingCount != null && ViewBag.PendingCount > 0)
+                {
+                    <span class="badge-sidebar" style="background-color:#F4C744; color:#1F3B2C;">@ViewBag.PendingCount</span>
+                }
+            </a>
+        </li>
+        <li style="border-top: 1px solid rgba(255,255,255,0.05); margin-top: 10px; padding-top: 10px;">
+            <form method="post" asp-controller="Account" asp-action="Logout" id="logoutForm">
+                @Html.AntiForgeryToken()
+                <a href="#" onclick="document.getElementById('logoutForm').submit(); return false;" style="color: #e74c3c;">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </a>
+            </form>
+        </li>
+    </ul>
+</div>
+
+<!-- ===== Main Content ===== -->
+<div class="admin-main-content">
+
+    <!-- Page Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+        <h2 style="color:#1F3B2C;"><i class="fas fa-money-check-alt me-2"></i>Payment Management</h2>
+        <span class="badge bg-warning text-dark">@(ViewBag.PendingCount ?? 0) Pending</span>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="pay-stats">
+        <div class="pay-stat-card pending">
+            <div class="num">@(ViewBag.PendingCount ?? 0)</div>
+            <div class="lbl"><i class="fas fa-clock"></i>Pending</div>
+        </div>
+        <div class="pay-stat-card approved">
+            <div class="num">@(ViewBag.ApprovedCount ?? 0)</div>
+            <div class="lbl"><i class="fas fa-check-circle"></i>Approved</div>
+        </div>
+        <div class="pay-stat-card rejected">
+            <div class="num">@(ViewBag.RejectedCount ?? 0)</div>
+            <div class="lbl"><i class="fas fa-times-circle"></i>Rejected</div>
+        </div>
+        <div class="pay-stat-card revenue">
+            <div class="num">৳@Convert.ToDecimal(ViewBag.TotalRevenue ?? 0).ToString("N0")</div>
+            <div class="lbl"><i class="fas fa-chart-line"></i>Total Revenue</div>
+        </div>
+    </div>
+
+    <!-- Filter Tabs -->
+    <div class="filter-tabs">
+        <a href="/Admin/Payments?status=all" class="filter-tab @(ViewBag.CurrentFilter == "all" ? "active" : "")">All</a>
+        <a href="/Admin/Payments?status=Pending" class="filter-tab @(ViewBag.CurrentFilter == "Pending" ? "active" : "")">Pending</a>
+        <a href="/Admin/Payments?status=Approved" class="filter-tab @(ViewBag.CurrentFilter == "Approved" ? "active" : "")">Approved</a>
+        <a href="/Admin/Payments?status=Rejected" class="filter-tab @(ViewBag.CurrentFilter == "Rejected" ? "active" : "")">Rejected</a>
+    </div>
+
+    <!-- Payment List -->
+    @if (Model == null || Model.Count == 0)
+    {
+        <div class="empty-state">
+            <i class="fas fa-inbox"></i>
+            <h5>No payments found</h5>
+            <p style="color:#8A9188;">There are no payments matching your filter.</p>
+        </div>
+    }
+    else
+    {
+        foreach (var p in Model)
+        {
+            var statusClass = p.PaymentStatus.ToLower();
+            <div class="payment-item" id="payment-@p.Id">
+                <img src="@(string.IsNullOrEmpty(p.CourseImage) ? "https://i.ibb.co/fd9sY88Y/IMG-6916-1.png" : p.CourseImage)"
+                     alt="@p.CourseName" class="course-thumb" />
+
+                <div class="pay-main">
+                    <h5>@p.CourseName</h5>
+                    <div class="user-info">
+                        <i class="fas fa-user me-1"></i> <strong>@p.UserFullName</strong>
+                        (@p.UserName)
+                        <span class="mx-1">•</span>
+                        <i class="fas fa-envelope me-1"></i>@p.UserEmail
+                    </div>
+                    <div class="tx-details">
+                        <span class="tx-tag method">
+                            <i class="fas fa-credit-card"></i> @p.PaymentMethod
+                        </span>
+                        <span class="tx-tag">
+                            <i class="fas fa-fingerprint"></i> @p.TransactionId
+                        </span>
+                        <span class="tx-tag">
+                            <i class="fas fa-mobile-alt"></i> @p.SenderMobileNumber
+                        </span>
+                        <span class="tx-tag amount">
+                            <i class="fas fa-money-bill-wave"></i> ৳@p.Price.ToString("N0")
+                        </span>
+                        <span class="tx-tag">
+                            <i class="fas fa-calendar"></i> @p.OrderDate.ToString("dd MMM, hh:mm tt")
+                        </span>
+                    </div>
+                </div>
+
+                <div class="pay-actions">
+                    <span class="status-pill @statusClass">@p.PaymentStatus</span>
+
+                    @if (p.PaymentStatus == "Pending")
+                    {
+                        <button class="btn-approve" onclick="approvePayment(@p.Id, '@p.UserFullName', '@p.CourseName')">
+                            <i class="fas fa-check"></i> Approve
+                        </button>
+                        <button class="btn-reject" onclick="rejectPayment(@p.Id, '@p.UserFullName')">
+                            <i class="fas fa-times"></i> Reject
+                        </button>
+                    }
+                </div>
+            </div>
+        }
+    }
+</div>
+
+<!-- ===== Admin Note Modal ===== -->
+<div class="modal fade" id="noteModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content" style="border-radius:16px; border:none;">
+            <div class="modal-header" style="background:#1F3B2C; color:white; border-radius:16px 16px 0 0;">
+                <h5 class="modal-title" id="noteModalTitle">Confirm Action</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" style="padding:24px;">
+                <input type="hidden" id="noteAction" />
+                <input type="hidden" id="noteOrderId" />
+                <p id="noteMessage" style="font-size:14px; color:#5B6B5E; margin-bottom:16px;"></p>
+                <label class="form-label fw-bold" style="font-size:13px; color:#1F3B2C;">
+                    Admin Note (Optional)
+                </label>
+                <textarea id="adminNote" class="form-control" rows="3"
+                          placeholder="Add a note (visible to the user)..."></textarea>
+            </div>
+            <div class="modal-footer" style="border-top:1px solid #f0f0f0;">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" style="border-radius:8px;">Cancel</button>
+                <button type="button" class="btn" id="confirmBtn" onclick="confirmAction()"
+                        style="background:#1F3B2C; color:white; border-radius:8px; padding:9px 28px; font-weight:600;">
+                    Confirm
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // ===== সাইডবার টগল (Mobile) =====
+        document.getElementById('sidebarToggle').addEventListener('click', function () {
+            document.getElementById('sidebar').classList.toggle('open');
+            document.getElementById('sidebarOverlay').classList.toggle('active');
+        });
+
+        document.getElementById('sidebarOverlay').addEventListener('click', function () {
+            document.getElementById('sidebar').classList.remove('open');
+            document.getElementById('sidebarOverlay').classList.remove('active');
+        });
+
+        // ===== Approve Payment =====
+        function approvePayment(id, userName, courseName) {
+            document.getElementById('noteAction').value = 'Approve';
+            document.getElementById('noteOrderId').value = id;
+            document.getElementById('noteModalTitle').innerHTML = '<i class="fas fa-check-circle me-2"></i>Approve Payment';
+            document.getElementById('noteMessage').innerHTML =
+                'Are you sure you want to approve the payment from <strong>' + userName +
+                '</strong> for <strong>' + courseName + '</strong>?<br>' +
+                '<small style="color:#2ecc71;">The user will get instant access to this course.</small>';
+            document.getElementById('confirmBtn').style.background = '#2ecc71';
+            document.getElementById('adminNote').value = '';
+
+            new bootstrap.Modal(document.getElementById('noteModal')).show();
+        }
+
+        // ===== Reject Payment =====
+        function rejectPayment(id, userName) {
+            document.getElementById('noteAction').value = 'Reject';
+            document.getElementById('noteOrderId').value = id;
+            document.getElementById('noteModalTitle').innerHTML = '<i class="fas fa-times-circle me-2"></i>Reject Payment';
+            document.getElementById('noteMessage').innerHTML =
+                'Are you sure you want to reject the payment from <strong>' + userName +
+                '</strong>?<br><small style="color:#e74c3c;">The user will be notified and can try again.</small>';
+            document.getElementById('confirmBtn').style.background = '#e74c3c';
+            document.getElementById('adminNote').value = '';
+
+            new bootstrap.Modal(document.getElementById('noteModal')).show();
+        }
+
+        // ===== Confirm Action (Approve/Reject) =====
+        function confirmAction() {
+            var action = document.getElementById('noteAction').value;
+            var orderId = document.getElementById('noteOrderId').value;
+            var note = document.getElementById('adminNote').value;
+
+            var url = action === 'Approve' ? '/Admin/ApprovePayment' : '/Admin/RejectPayment';
+
+            var formData = new FormData();
+            formData.append('id', orderId);
+            formData.append('adminNote', note);
+
+            // Anti-forgery token
+            var token = document.querySelector('input[name="__RequestVerificationToken"]');
+            var headers = {};
+            if (token) { headers['RequestVerificationToken'] = token.value; }
+
+            var btn = document.getElementById('confirmBtn');
+            var originalText = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> Processing...';
+            btn.disabled = true;
+
+            fetch(url, {
+                method: 'POST',
+                body: formData,
+                headers: headers
+            })
+            .then(function (response) { return response.json(); })
+            .then(function (data) {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+
+                alert(data.message);
+                if (data.success) {
+                    location.reload();
+                }
+            })
+            .catch(function (error) {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+                alert('Error: ' + error.message);
+            });
+        }
+    </script>
+}

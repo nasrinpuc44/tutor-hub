@@ -205,8 +205,28 @@
         <small>Smart Tutor Hub</small>
     </div>
     <ul class="admin-sidebar-menu">
-        <li><a asp-controller="Admin" asp-action="Dashboard"><i class="fas fa-chart-pie"></i> Dashboard <span class="badge-sidebar">@ViewBag.UserCount</span></a></li>
-        <li><a asp-controller="Admin" asp-action="TeacherRequests" class="active"><i class="fas fa-user-graduate"></i> Teacher Requests <span class="badge-sidebar" style="background-color:#F4C744; color:#1F3B2C;">@ViewBag.PendingCount</span></a></li>
+        <li>
+            <a asp-controller="Admin" asp-action="Dashboard">
+                <i class="fas fa-chart-pie"></i> Dashboard
+                <span class="badge-sidebar">@ViewBag.UserCount</span>
+            </a>
+        </li>
+        <li>
+            <a asp-controller="Admin" asp-action="TeacherRequests" class="active">
+                <i class="fas fa-user-graduate"></i> Teacher Requests
+                <span class="badge-sidebar" style="background-color:#F4C744; color:#1F3B2C;">@ViewBag.PendingCount</span>
+            </a>
+        </li>
+        <!-- ✅ Payments লিংক যোগ করা -->
+        <li>
+            <a asp-controller="Admin" asp-action="Payments">
+                <i class="fas fa-money-check-alt"></i> Payments
+                @if (ViewBag.PendingPayments != null && ViewBag.PendingPayments > 0)
+                {
+                    <span class="badge-sidebar" style="background-color:#F4C744; color:#1F3B2C;">@ViewBag.PendingPayments</span>
+                }
+            </a>
+        </li>
         <li style="border-top: 1px solid rgba(255,255,255,0.05); margin-top: 10px; padding-top: 10px;">
             <form method="post" asp-controller="Account" asp-action="Logout" id="logoutForm">
                 @Html.AntiForgeryToken()

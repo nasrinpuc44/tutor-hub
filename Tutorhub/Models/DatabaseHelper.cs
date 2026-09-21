@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 ﻿// 📁 DatabaseHelper.cs
+=======
+﻿// 📁 Models/DatabaseHelper.cs
+>>>>>>> 9c75139 (add new update)
 // লোকেশন: Tutorbub/Models/DatabaseHelper.cs
 
 using Microsoft.Extensions.Configuration;
@@ -198,17 +202,25 @@ namespace Tutorbub.Models
 
         public bool RegisterUser(User user)
         {
+<<<<<<< HEAD
             // ===== শুধু trim (lowercase করব না) =====
             var trimmedEmail = (user.Email ?? string.Empty).Trim();
 
             // ===== @gmail.com হুবহু lowercase-এ শেষ হয়েছে কিনা চেক =====
+=======
+            var trimmedEmail = (user.Email ?? string.Empty).Trim();
+
+>>>>>>> 9c75139 (add new update)
             if (string.IsNullOrWhiteSpace(trimmedEmail) ||
                 !trimmedEmail.EndsWith("@gmail.com"))
             {
                 throw new Exception("Email must end with @gmail.com (all lowercase).");
             }
 
+<<<<<<< HEAD
             // ===== Gmail ফরম্যাট ভ্যালিডেশন =====
+=======
+>>>>>>> 9c75139 (add new update)
             var gmailRegex = new Regex(@"^[A-Za-z0-9._%+-]+@gmail\.com$");
             if (!gmailRegex.IsMatch(trimmedEmail))
             {
@@ -322,7 +334,10 @@ namespace Tutorbub.Models
 
         public bool EmailExists(string email)
         {
+<<<<<<< HEAD
             // Duplicate ধরার জন্য case-insensitive চেক
+=======
+>>>>>>> 9c75139 (add new update)
             var trimmed = (email ?? string.Empty).Trim();
 
             string query = "SELECT COUNT(*) FROM \"Users\" WHERE LOWER(\"Email\") = LOWER(@email)";
@@ -647,6 +662,554 @@ namespace Tutorbub.Models
         }
 
         // ============================================================
+<<<<<<< HEAD
+=======
+        // ===== PAYMENT / COURSE ORDER RELATED METHODS =====
+        // ============================================================
+
+        public bool CreateCourseOrder(CourseOrder order, out string? errorMessage)
+        {
+            errorMessage = null;
+            string query = @"
+                INSERT INTO ""CourseOrders"" 
+                (""UserId"", ""CourseId"", ""CourseName"", ""CourseImage"", ""Price"", 
+                 ""PaymentMethod"", ""TransactionId"", ""SenderMobileNumber"", 
+                 ""PaymentStatus"", ""OrderDate"")
+                VALUES 
+                (@userId, @courseId, @courseName, @courseImage, @price,
+                 @paymentMethod, @transactionId, @senderMobileNumber,
+                 'Pending', @orderDate)
+                RETURNING ""Id""";
+
+            try
+            {
+                using var connection = new NpgsqlConnection(_connectionString);
+                using var command = new NpgsqlCommand(query, connection);
+
+                command.Parameters.AddWithValue("@userId", order.UserId);
+                command.Parameters.AddWithValue("@courseId", order.CourseId);
+                command.Parameters.AddWithValue("@courseName", order.CourseName ?? (object)DBNull.Value);
+                command.Parameters.AddWithValue("@courseImage", order.CourseImage ?? (object)DBNull.Value);
+                command.Parameters.AddWithValue("@price", order.Price);
+                command.Parameters.AddWithValue("@paymentMethod", order.PaymentMethod ?? (object)DBNull.Value);
+                command.Parameters.AddWithValue("@transactionId", order.TransactionId ?? (object)DBNull.Value);
+                command.Parameters.AddWithValue("@senderMobileNumber", order.SenderMobileNumber ?? (object)DBNull.Value);
+                command.Parameters.AddWithValue("@orderDate", order.OrderDate);
+
+                connection.Open();
+                var result = command.ExecuteScalar();
+                if (result != null && int.TryParse(result.ToString(), out int newId))
+                {
+                    order.Id = newId;
+                    return true;
+                }
+                return false;
+            }
+            catch (Exception ex)
+            {
+                errorMessage = ex.Message;
+                return false;
+            }
+        }
+
+        public List<CourseOrder> GetUserOrders(int userId)
+        {
+            var orders = new List<CourseOrder>();
+            string query = @"
+                SELECT ""Id"", ""UserId"", ""CourseId"", ""CourseName"", ""CourseImage"", 
+                       ""Price"", ""PaymentMethod"", ""TransactionId"", ""SenderMobileNumber"",
+                       ""PaymentStatus"", ""AdminNote"", ""OrderDate"", ""VerifiedDate"", ""VerifiedBy""
+                FROM ""CourseOrders""
+                WHERE ""UserId"" = @userId
+                ORDER BY ""OrderDate"" DESC";
+
+            try
+            {
+                using var connection = new NpgsqlConnection(_connectionString);
+                using var command = new NpgsqlCommand(query, connection);
+                command.Parameters.AddWithValue("@userId", userId);
+                connection.Open();
+
+                using var reader = command.ExecuteReader();
+                while (reader.Read())
+                {
+                    orders.Add(MapCourseOrder(reader));
+                }
+                return orders;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Error getting user orders: " + ex.Message);
+                return new List<CourseOrder>();
+            }
+        }
+
+        public List<AdminPaymentViewModel> GetAllOrders(string? statusFilter = null)
+        {
+            var orders = new List<AdminPaymentViewModel>();
+            string query = @"
+                SELECT o.""Id"", o.""UserId"", o.""CourseId"", o.""CourseName"", o.""CourseImage"",
+                       o.""Price"", o.""PaymentMethod"", o.""TransactionId"", o.""SenderMobileNumber"",
+                       o.""PaymentStatus"", o.""AdminNote"", o.""OrderDate"", o.""VerifiedDate"",
+                       u.""UserName"", u.""FullName"", u.""Email"", u.""MobileNumber""
+                FROM ""CourseOrders"" o
+                LEFT JOIN ""Users"" u ON o.""UserId"" = u.""Id""";
+
+            if (!string.IsNullOrEmpty(statusFilter) && statusFilter != "all")
+            {
+                query += @" WHERE o.""PaymentStatus"" = @status";
+            }
+
+            query += @" ORDER BY o.""OrderDate"" DESC";
+
+            try
+            {
+                using var connection = new NpgsqlConnection(_connectionString);
+                using var command = new NpgsqlCommand(query, connection);
+
+                if (!string.IsNullOrEmpty(statusFilter) && statusFilter != "all")
+                {
+                    command.Parameters.AddWithValue("@status", statusFilter);
+                }
+
+                connection.Open();
+                using var reader = command.ExecuteReader();
+
+                while (reader.Read())
+                {
+                    orders.Add(new AdminPaymentViewModel
+                    {
+                        Id = reader.GetInt32(reader.GetOrdinal("Id")),
+                        UserId = reader.GetInt32(reader.GetOrdinal("UserId")),
+                        CourseId = reader.GetInt32(reader.GetOrdinal("CourseId")),
+                        CourseName = reader["CourseName"]?.ToString() ?? "",
+                        CourseImage = reader["CourseImage"]?.ToString() ?? "",
+                        Price = Convert.ToDecimal(reader["Price"]),
+                        PaymentMethod = reader["PaymentMethod"]?.ToString() ?? "",
+                        TransactionId = reader["TransactionId"]?.ToString() ?? "",
+                        SenderMobileNumber = reader["SenderMobileNumber"]?.ToString() ?? "",
+                        PaymentStatus = reader["PaymentStatus"]?.ToString() ?? "Pending",
+                        AdminNote = reader["AdminNote"]?.ToString(),
+                        OrderDate = reader["OrderDate"] as DateTime? ?? DateTime.UtcNow,
+                        VerifiedDate = reader["VerifiedDate"] as DateTime?,
+                        UserName = reader["UserName"]?.ToString() ?? "",
+                        UserFullName = reader["FullName"]?.ToString() ?? "",
+                        UserEmail = reader["Email"]?.ToString() ?? "",
+                        UserMobile = reader["MobileNumber"]?.ToString() ?? ""
+                    });
+                }
+                return orders;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Error getting all orders: " + ex.Message);
+                return new List<AdminPaymentViewModel>();
+            }
+        }
+
+        public CourseOrder? GetOrderById(int orderId)
+        {
+            string query = @"
+                SELECT ""Id"", ""UserId"", ""CourseId"", ""CourseName"", ""CourseImage"", 
+                       ""Price"", ""PaymentMethod"", ""TransactionId"", ""SenderMobileNumber"",
+                       ""PaymentStatus"", ""AdminNote"", ""OrderDate"", ""VerifiedDate"", ""VerifiedBy""
+                FROM ""CourseOrders""
+                WHERE ""Id"" = @id";
+
+            try
+            {
+                using var connection = new NpgsqlConnection(_connectionString);
+                using var command = new NpgsqlCommand(query, connection);
+                command.Parameters.AddWithValue("@id", orderId);
+                connection.Open();
+
+                using var reader = command.ExecuteReader();
+                if (reader.Read())
+                {
+                    return MapCourseOrder(reader);
+                }
+                return null;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Error getting order by id: " + ex.Message);
+                return null;
+            }
+        }
+
+        public bool ApproveOrder(int orderId, int adminId, string? adminNote = null)
+        {
+            string query = @"
+                UPDATE ""CourseOrders"" 
+                SET ""PaymentStatus"" = 'Approved', 
+                    ""VerifiedDate"" = @verifiedDate, 
+                    ""VerifiedBy"" = @verifiedBy,
+                    ""AdminNote"" = @adminNote
+                WHERE ""Id"" = @id";
+
+            try
+            {
+                using var connection = new NpgsqlConnection(_connectionString);
+                using var command = new NpgsqlCommand(query, connection);
+                command.Parameters.AddWithValue("@verifiedDate", DateTime.UtcNow);
+                command.Parameters.AddWithValue("@verifiedBy", adminId);
+                command.Parameters.AddWithValue("@adminNote", adminNote ?? (object)DBNull.Value);
+                command.Parameters.AddWithValue("@id", orderId);
+                connection.Open();
+                return command.ExecuteNonQuery() > 0;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Error approving order: " + ex.Message);
+                return false;
+            }
+        }
+
+        public bool RejectOrder(int orderId, int adminId, string? adminNote = null)
+        {
+            string query = @"
+                UPDATE ""CourseOrders"" 
+                SET ""PaymentStatus"" = 'Rejected', 
+                    ""VerifiedDate"" = @verifiedDate, 
+                    ""VerifiedBy"" = @verifiedBy,
+                    ""AdminNote"" = @adminNote
+                WHERE ""Id"" = @id";
+
+            try
+            {
+                using var connection = new NpgsqlConnection(_connectionString);
+                using var command = new NpgsqlCommand(query, connection);
+                command.Parameters.AddWithValue("@verifiedDate", DateTime.UtcNow);
+                command.Parameters.AddWithValue("@verifiedBy", adminId);
+                command.Parameters.AddWithValue("@adminNote", adminNote ?? (object)DBNull.Value);
+                command.Parameters.AddWithValue("@id", orderId);
+                connection.Open();
+                return command.ExecuteNonQuery() > 0;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Error rejecting order: " + ex.Message);
+                return false;
+            }
+        }
+
+        public bool IsUserEnrolled(int userId, int courseId)
+        {
+            string query = @"
+                SELECT COUNT(*) FROM ""CourseOrders"" 
+                WHERE ""UserId"" = @userId 
+                  AND ""CourseId"" = @courseId 
+                  AND ""PaymentStatus"" = 'Approved'";
+
+            try
+            {
+                using var connection = new NpgsqlConnection(_connectionString);
+                using var command = new NpgsqlCommand(query, connection);
+                command.Parameters.AddWithValue("@userId", userId);
+                command.Parameters.AddWithValue("@courseId", courseId);
+                connection.Open();
+                return Convert.ToInt64(command.ExecuteScalar()) > 0;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Error checking enrollment: " + ex.Message);
+                return false;
+            }
+        }
+
+        public List<int> GetUserEnrolledCourseIds(int userId)
+        {
+            var courseIds = new List<int>();
+            string query = @"
+                SELECT DISTINCT ""CourseId"" FROM ""CourseOrders"" 
+                WHERE ""UserId"" = @userId 
+                  AND ""PaymentStatus"" = 'Approved'";
+
+            try
+            {
+                using var connection = new NpgsqlConnection(_connectionString);
+                using var command = new NpgsqlCommand(query, connection);
+                command.Parameters.AddWithValue("@userId", userId);
+                connection.Open();
+
+                using var reader = command.ExecuteReader();
+                while (reader.Read())
+                {
+                    courseIds.Add(reader.GetInt32(0));
+                }
+                return courseIds;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Error getting enrolled courses: " + ex.Message);
+                return new List<int>();
+            }
+        }
+
+        // ============================================================
+        // ===== ENROLLED COURSES (MY CLASS) — NEW =====
+        // ============================================================
+
+        /// <summary>
+        /// ইউজারের Approved/Enrolled কোর্সগুলোর Full ডিটেইলস (My Class পেজের জন্য)
+        /// </summary>
+        public List<EnrolledCourseViewModel> GetUserEnrolledCourses(int userId)
+        {
+            var enrolled = new List<EnrolledCourseViewModel>();
+            string query = @"
+                SELECT DISTINCT ON (""CourseId"")
+                       ""CourseId"", ""CourseName"", ""CourseImage"", ""Price"", ""VerifiedDate"", ""OrderDate""
+                FROM ""CourseOrders""
+                WHERE ""UserId"" = @userId AND ""PaymentStatus"" = 'Approved'
+                ORDER BY ""CourseId"", ""OrderDate"" DESC";
+
+            try
+            {
+                using var connection = new NpgsqlConnection(_connectionString);
+                using var command = new NpgsqlCommand(query, connection);
+                command.Parameters.AddWithValue("@userId", userId);
+                connection.Open();
+
+                using var reader = command.ExecuteReader();
+                while (reader.Read())
+                {
+                    enrolled.Add(new EnrolledCourseViewModel
+                    {
+                        CourseId = reader.GetInt32(reader.GetOrdinal("CourseId")),
+                        CourseName = reader["CourseName"]?.ToString() ?? "",
+                        CourseImage = reader["CourseImage"]?.ToString() ?? "",
+                        Price = Convert.ToDecimal(reader["Price"]),
+                        EnrolledDate = (reader["VerifiedDate"] as DateTime?)
+                                        ?? (reader["OrderDate"] as DateTime?)
+                                        ?? DateTime.UtcNow
+                    });
+                }
+                return enrolled;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Error getting enrolled courses: " + ex.Message);
+                return new List<EnrolledCourseViewModel>();
+            }
+        }
+
+        public (int Pending, int Approved, int Rejected, decimal TotalRevenue) GetPaymentStats()
+        {
+            string query = @"
+                SELECT 
+                    COUNT(*) FILTER (WHERE ""PaymentStatus"" = 'Pending') as pending,
+                    COUNT(*) FILTER (WHERE ""PaymentStatus"" = 'Approved') as approved,
+                    COUNT(*) FILTER (WHERE ""PaymentStatus"" = 'Rejected') as rejected,
+                    COALESCE(SUM(""Price"") FILTER (WHERE ""PaymentStatus"" = 'Approved'), 0) as revenue
+                FROM ""CourseOrders""";
+
+            try
+            {
+                using var connection = new NpgsqlConnection(_connectionString);
+                using var command = new NpgsqlCommand(query, connection);
+                connection.Open();
+
+                using var reader = command.ExecuteReader();
+                if (reader.Read())
+                {
+                    return (
+                        Convert.ToInt32(reader["pending"]),
+                        Convert.ToInt32(reader["approved"]),
+                        Convert.ToInt32(reader["rejected"]),
+                        Convert.ToDecimal(reader["revenue"])
+                    );
+                }
+                return (0, 0, 0, 0);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Error getting payment stats: " + ex.Message);
+                return (0, 0, 0, 0);
+            }
+        }
+
+        // ============================================================
+        // ===== NOTIFICATION RELATED METHODS =====
+        // ============================================================
+
+        /// <summary>
+        /// নতুন নোটিফিকেশন তৈরি করা
+        /// </summary>
+        public bool CreateNotification(int userId, string title, string message,
+            string type = "info", string? link = null, string icon = "fa-bell")
+        {
+            string query = @"
+                INSERT INTO ""Notifications"" 
+                (""UserId"", ""Title"", ""Message"", ""Type"", ""Icon"", ""Link"", ""IsRead"", ""CreatedAt"")
+                VALUES 
+                (@userId, @title, @message, @type, @icon, @link, FALSE, @createdAt)";
+
+            try
+            {
+                using var connection = new NpgsqlConnection(_connectionString);
+                using var command = new NpgsqlCommand(query, connection);
+
+                command.Parameters.AddWithValue("@userId", userId);
+                command.Parameters.AddWithValue("@title", title ?? (object)DBNull.Value);
+                command.Parameters.AddWithValue("@message", message ?? (object)DBNull.Value);
+                command.Parameters.AddWithValue("@type", type ?? "info");
+                command.Parameters.AddWithValue("@icon", icon ?? "fa-bell");
+                command.Parameters.AddWithValue("@link", link ?? (object)DBNull.Value);
+                command.Parameters.AddWithValue("@createdAt", DateTime.UtcNow);
+
+                connection.Open();
+                return command.ExecuteNonQuery() > 0;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Error creating notification: " + ex.Message);
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// ইউজারের সব নোটিফিকেশন পাওয়া
+        /// </summary>
+        public List<Notification> GetUserNotifications(int userId, int limit = 20)
+        {
+            var notifications = new List<Notification>();
+            string query = @"
+                SELECT ""Id"", ""UserId"", ""Title"", ""Message"", ""Type"", ""Icon"", 
+                       ""Link"", ""IsRead"", ""CreatedAt""
+                FROM ""Notifications""
+                WHERE ""UserId"" = @userId
+                ORDER BY ""CreatedAt"" DESC
+                LIMIT @limit";
+
+            try
+            {
+                using var connection = new NpgsqlConnection(_connectionString);
+                using var command = new NpgsqlCommand(query, connection);
+                command.Parameters.AddWithValue("@userId", userId);
+                command.Parameters.AddWithValue("@limit", limit);
+                connection.Open();
+
+                using var reader = command.ExecuteReader();
+                while (reader.Read())
+                {
+                    notifications.Add(new Notification
+                    {
+                        Id = reader.GetInt32(reader.GetOrdinal("Id")),
+                        UserId = reader.GetInt32(reader.GetOrdinal("UserId")),
+                        Title = reader["Title"]?.ToString() ?? "",
+                        Message = reader["Message"]?.ToString() ?? "",
+                        Type = reader["Type"]?.ToString() ?? "info",
+                        Icon = reader["Icon"]?.ToString() ?? "fa-bell",
+                        Link = reader["Link"]?.ToString(),
+                        IsRead = reader["IsRead"] as bool? ?? false,
+                        CreatedAt = reader["CreatedAt"] as DateTime? ?? DateTime.UtcNow
+                    });
+                }
+                return notifications;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Error getting notifications: " + ex.Message);
+                return new List<Notification>();
+            }
+        }
+
+        /// <summary>
+        /// অপঠিত নোটিফিকেশন কাউন্ট
+        /// </summary>
+        public int GetUnreadNotificationCount(int userId)
+        {
+            string query = @"SELECT COUNT(*) FROM ""Notifications"" 
+                             WHERE ""UserId"" = @userId AND ""IsRead"" = FALSE";
+
+            try
+            {
+                using var connection = new NpgsqlConnection(_connectionString);
+                using var command = new NpgsqlCommand(query, connection);
+                command.Parameters.AddWithValue("@userId", userId);
+                connection.Open();
+                return Convert.ToInt32(command.ExecuteScalar());
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Error getting unread count: " + ex.Message);
+                return 0;
+            }
+        }
+
+        /// <summary>
+        /// একটি নোটিফিকেশন Read হিসেবে মার্ক করা
+        /// </summary>
+        public bool MarkNotificationAsRead(int notificationId, int userId)
+        {
+            string query = @"UPDATE ""Notifications"" 
+                             SET ""IsRead"" = TRUE 
+                             WHERE ""Id"" = @id AND ""UserId"" = @userId";
+
+            try
+            {
+                using var connection = new NpgsqlConnection(_connectionString);
+                using var command = new NpgsqlCommand(query, connection);
+                command.Parameters.AddWithValue("@id", notificationId);
+                command.Parameters.AddWithValue("@userId", userId);
+                connection.Open();
+                return command.ExecuteNonQuery() > 0;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Error marking as read: " + ex.Message);
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// সব নোটিফিকেশন Read হিসেবে মার্ক করা
+        /// </summary>
+        public bool MarkAllNotificationsAsRead(int userId)
+        {
+            string query = @"UPDATE ""Notifications"" 
+                             SET ""IsRead"" = TRUE 
+                             WHERE ""UserId"" = @userId AND ""IsRead"" = FALSE";
+
+            try
+            {
+                using var connection = new NpgsqlConnection(_connectionString);
+                using var command = new NpgsqlCommand(query, connection);
+                command.Parameters.AddWithValue("@userId", userId);
+                connection.Open();
+                return command.ExecuteNonQuery() >= 0;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Error marking all as read: " + ex.Message);
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// সব নোটিফিকেশন ডিলিট করা
+        /// </summary>
+        public bool ClearUserNotifications(int userId)
+        {
+            string query = @"DELETE FROM ""Notifications"" WHERE ""UserId"" = @userId";
+
+            try
+            {
+                using var connection = new NpgsqlConnection(_connectionString);
+                using var command = new NpgsqlCommand(query, connection);
+                command.Parameters.AddWithValue("@userId", userId);
+                connection.Open();
+                return command.ExecuteNonQuery() >= 0;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Error clearing notifications: " + ex.Message);
+                return false;
+            }
+        }
+
+        // ============================================================
+>>>>>>> 9c75139 (add new update)
         // ===== PRIVATE MAPPERS =====
         // ============================================================
 
@@ -712,5 +1275,29 @@ namespace Tutorbub.Models
                 AdminNote = reader["AdminNote"]?.ToString()
             };
         }
+<<<<<<< HEAD
+=======
+
+        private CourseOrder MapCourseOrder(NpgsqlDataReader reader)
+        {
+            return new CourseOrder
+            {
+                Id = reader.GetInt32(reader.GetOrdinal("Id")),
+                UserId = reader.GetInt32(reader.GetOrdinal("UserId")),
+                CourseId = reader.GetInt32(reader.GetOrdinal("CourseId")),
+                CourseName = reader["CourseName"]?.ToString() ?? "",
+                CourseImage = reader["CourseImage"]?.ToString() ?? "",
+                Price = Convert.ToDecimal(reader["Price"]),
+                PaymentMethod = reader["PaymentMethod"]?.ToString() ?? "",
+                TransactionId = reader["TransactionId"]?.ToString() ?? "",
+                SenderMobileNumber = reader["SenderMobileNumber"]?.ToString() ?? "",
+                PaymentStatus = reader["PaymentStatus"]?.ToString() ?? "Pending",
+                AdminNote = reader["AdminNote"]?.ToString(),
+                OrderDate = reader["OrderDate"] as DateTime? ?? DateTime.UtcNow,
+                VerifiedDate = reader["VerifiedDate"] as DateTime?,
+                VerifiedBy = reader["VerifiedBy"] as int?
+            };
+        }
+>>>>>>> 9c75139 (add new update)
     }
 }

@@ -1,0 +1,813 @@
+﻿@model Tutorbub.Models.ClassroomViewModel
+
+@{
+    ViewData["Title"] = Model.CourseTitle + " - Classroom";
+    Layout = "_Layout";
+}
+
+<style>
+    /* ===== Classroom wrapper ===== */
+    .cr-wrapper {
+        display: grid;
+        grid-template-columns: 1fr 380px;
+        gap: 24px;
+        background: #F3F1E7;
+        padding: 24px;
+        min-height: calc(100vh - 80px);
+    }
+
+    /* ===== LEFT: Video + Info ===== */
+    .cr-left {
+        min-width: 0;
+    }
+
+    .cr-video-wrap {
+        background: #1F3B2C;
+        border-radius: 16px;
+        overflow: hidden;
+        aspect-ratio: 16 / 9;
+        position: relative;
+        box-shadow: 0 10px 34px rgba(31,59,44,0.18);
+    }
+
+    .cr-video-wrap video {
+        width: 100%;
+        height: 100%;
+        display: block;
+        background: #1F3B2C;
+    }
+
+    /* ===== Lesson info card ===== */
+    .cr-info-card {
+        background: white;
+        border-radius: 16px;
+        padding: 22px 24px;
+        margin-top: 18px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+        border: 1px solid rgba(0,0,0,0.04);
+    }
+
+    .cr-eyebrow {
+        font-size: 11.5px;
+        color: #8A9188;
+        text-transform: uppercase;
+        letter-spacing: 1.2px;
+        font-weight: 700;
+        margin-bottom: 6px;
+    }
+
+    .cr-info-card h2 {
+        font-size: 22px;
+        font-weight: 700;
+        color: #1F3B2C;
+        margin: 0 0 12px;
+        line-height: 1.3;
+        font-family: 'Georgia', serif;
+    }
+
+    .cr-lesson-meta {
+        display: flex;
+        gap: 18px;
+        flex-wrap: wrap;
+        font-size: 13px;
+        color: #6B7568;
+        padding-top: 12px;
+        border-top: 1px solid #f0f0f0;
+    }
+
+    .cr-lesson-meta span i {
+        margin-right: 6px;
+        color: #1F3B2C;
+    }
+
+    .cr-nav-buttons {
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+        margin-top: 20px;
+        flex-wrap: wrap;
+    }
+
+    .cr-nav-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 12px 26px;
+        border-radius: 10px;
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.25s;
+        border: none;
+    }
+
+    .cr-nav-prev {
+        background: white;
+        color: #1F3B2C;
+        border: 1.5px solid #1F3B2C;
+    }
+
+    .cr-nav-prev:hover {
+        background: #F3F1E7;
+    }
+
+    .cr-nav-next {
+        background: #1F3B2C;
+        color: white;
+        box-shadow: 0 6px 18px rgba(31,59,44,0.25);
+    }
+
+    .cr-nav-next:hover {
+        opacity: 0.9;
+        transform: translateY(-1px);
+        box-shadow: 0 8px 22px rgba(31,59,44,0.35);
+    }
+
+    /* ===== Action tabs ===== */
+    .cr-tabs-card {
+        background: white;
+        border-radius: 16px;
+        margin-top: 18px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+        border: 1px solid rgba(0,0,0,0.04);
+        overflow: hidden;
+    }
+
+    .cr-tabs {
+        display: flex;
+        gap: 4px;
+        padding: 0 12px;
+        border-bottom: 1px solid #f0f0f0;
+        overflow-x: auto;
+        background: #FAF9F4;
+    }
+
+    .cr-tab {
+        background: transparent;
+        border: none;
+        color: #6B7568;
+        padding: 15px 20px;
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+        border-bottom: 3px solid transparent;
+        transition: all 0.2s;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        white-space: nowrap;
+    }
+
+    .cr-tab:hover {
+        color: #1F3B2C;
+    }
+
+    .cr-tab.active {
+        color: #1F3B2C;
+        border-bottom-color: #1F3B2C;
+    }
+
+    .cr-tab i { font-size: 14px; }
+
+    .cr-tab-content {
+        padding: 22px 24px 26px;
+        color: #4B5648;
+        font-size: 14px;
+        line-height: 1.7;
+        min-height: 180px;
+    }
+
+    .cr-tab-content textarea {
+        width: 100%;
+        background: #FAF9F4;
+        border: 1.5px solid #E5E1D3;
+        border-radius: 10px;
+        color: #1F3B2C;
+        padding: 14px 16px;
+        font-family: inherit;
+        font-size: 14px;
+        outline: none;
+        resize: vertical;
+        min-height: 120px;
+        transition: border-color 0.2s;
+    }
+
+    .cr-tab-content textarea:focus {
+        border-color: #1F3B2C;
+        box-shadow: 0 0 0 3px rgba(31,59,44,0.08);
+        background: white;
+    }
+
+    .cr-btn-save {
+        background: #1F3B2C;
+        color: white;
+        border: none;
+        padding: 11px 28px;
+        border-radius: 8px;
+        font-weight: 600;
+        font-size: 13.5px;
+        cursor: pointer;
+        margin-top: 14px;
+        transition: all 0.2s;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .cr-btn-save:hover {
+        opacity: 0.9;
+        transform: translateY(-1px);
+    }
+
+    /* ===== RIGHT: Module Sidebar ===== */
+    .cr-right {
+        background: white;
+        border-radius: 16px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+        border: 1px solid rgba(0,0,0,0.04);
+        overflow: hidden;
+        position: sticky;
+        top: 100px;
+        max-height: calc(100vh - 120px);
+        display: flex;
+        flex-direction: column;
+    }
+
+    .cr-right-head {
+        padding: 20px 20px 16px;
+        border-bottom: 1px solid #f0f0f0;
+        background: #FAF9F4;
+    }
+
+    .cr-search {
+        position: relative;
+        margin-bottom: 16px;
+    }
+
+    .cr-search input {
+        width: 100%;
+        background: white;
+        border: 1.5px solid #E5E1D3;
+        border-radius: 10px;
+        color: #1F3B2C;
+        padding: 11px 14px 11px 42px;
+        font-size: 13.5px;
+        outline: none;
+        transition: all 0.2s;
+    }
+
+    .cr-search input::placeholder { color: #A8B5A9; }
+
+    .cr-search input:focus {
+        border-color: #1F3B2C;
+        box-shadow: 0 0 0 3px rgba(31,59,44,0.08);
+    }
+
+    .cr-search i {
+        position: absolute;
+        left: 15px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #8A9188;
+        font-size: 14px;
+    }
+
+    .cr-progress-info {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-size: 12.5px;
+        color: #6B7568;
+        margin-bottom: 8px;
+        font-weight: 500;
+    }
+
+    .cr-progress-info strong { color: #1F3B2C; }
+
+    .cr-progress-bar {
+        height: 6px;
+        background: #E5E1D3;
+        border-radius: 10px;
+        overflow: hidden;
+    }
+
+    .cr-progress-bar-fill {
+        height: 100%;
+        background: linear-gradient(90deg, #1F3B2C, #2ecc71);
+        border-radius: 10px;
+        transition: width 0.6s ease;
+    }
+
+    /* ===== Modules list ===== */
+    .cr-modules {
+        flex: 1;
+        overflow-y: auto;
+        padding: 14px;
+    }
+
+    .cr-modules::-webkit-scrollbar { width: 6px; }
+    .cr-modules::-webkit-scrollbar-thumb {
+        background: #D5CFB8;
+        border-radius: 10px;
+    }
+
+    .cr-module {
+        background: #FAF9F4;
+        border-radius: 12px;
+        margin-bottom: 10px;
+        overflow: hidden;
+        border: 1.5px solid #EFECE0;
+        transition: border-color 0.2s;
+    }
+
+    .cr-module:hover {
+        border-color: #D5CFB8;
+    }
+
+    .cr-module.open {
+        border-color: #1F3B2C;
+    }
+
+    .cr-module-header {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        padding: 14px 16px;
+        cursor: pointer;
+        user-select: none;
+        transition: background 0.2s;
+    }
+
+    .cr-module-header:hover {
+        background: rgba(31,59,44,0.03);
+    }
+
+    .cr-module-title {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .cr-module-title h6 {
+        font-size: 13.5px;
+        font-weight: 700;
+        color: #1F3B2C;
+        margin: 0 0 4px;
+        line-height: 1.4;
+    }
+
+    .cr-module-title .cr-mod-meta {
+        font-size: 11.5px;
+        color: #8A9188;
+        display: flex;
+        gap: 8px;
+        align-items: center;
+        font-weight: 500;
+    }
+
+    .cr-module-title .cr-mod-meta i {
+        font-size: 10px;
+        color: #1F3B2C;
+    }
+
+    .cr-module-caret {
+        color: #8A9188;
+        font-size: 13px;
+        margin-left: 10px;
+        transition: transform 0.25s;
+        margin-top: 4px;
+    }
+
+    .cr-module.open .cr-module-caret {
+        transform: rotate(180deg);
+        color: #1F3B2C;
+    }
+
+    .cr-module-lessons {
+        display: none;
+        padding: 0 8px 10px;
+        background: white;
+    }
+
+    .cr-module.open .cr-module-lessons {
+        display: block;
+    }
+
+    .cr-lesson-item {
+        display: flex;
+        align-items: flex-start;
+        gap: 12px;
+        padding: 11px 12px;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: background 0.2s;
+        text-decoration: none;
+        color: inherit;
+        margin-top: 4px;
+    }
+
+    .cr-lesson-item:hover {
+        background: #F3F1E7;
+    }
+
+    .cr-lesson-item.active {
+        background: #F3F1E7;
+        border-left: 3px solid #1F3B2C;
+        padding-left: 9px;
+    }
+
+    .cr-lesson-icon {
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        font-size: 11px;
+        margin-top: 1px;
+    }
+
+    .cr-lesson-icon.completed {
+        background: #2ecc71;
+        color: #fff;
+    }
+
+    .cr-lesson-icon.pending {
+        background: #E5E1D3;
+        color: #6B7568;
+    }
+
+    .cr-lesson-icon.active-icon {
+        background: #1F3B2C;
+        color: #fff;
+    }
+
+    .cr-lesson-text {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .cr-lesson-text .lt {
+        font-size: 13px;
+        color: #4B5648;
+        font-weight: 500;
+        line-height: 1.4;
+        margin: 0 0 3px;
+    }
+
+    .cr-lesson-item.active .lt {
+        color: #1F3B2C;
+        font-weight: 700;
+    }
+
+    .cr-lesson-text .lt-meta {
+        font-size: 11.5px;
+        color: #8A9188;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+    }
+
+    .cr-lesson-text .lt-meta i {
+        font-size: 10px;
+    }
+
+    /* ===== Responsive ===== */
+    @@media (max-width: 1100px) {
+        .cr-wrapper {
+            grid-template-columns: 1fr;
+            padding: 16px;
+        }
+        .cr-right {
+            position: static;
+            max-height: none;
+        }
+    }
+
+    @@media (max-width: 576px) {
+        .cr-wrapper { padding: 10px; gap: 14px; }
+        .cr-info-card { padding: 18px 16px; }
+        .cr-info-card h2 { font-size: 17px; }
+        .cr-nav-btn { padding: 10px 18px; font-size: 13px; }
+        .cr-nav-buttons { justify-content: stretch; }
+        .cr-nav-btn { flex: 1; justify-content: center; }
+        .cr-tab { padding: 13px 14px; font-size: 13px; }
+        .cr-tab-content { padding: 18px 16px; }
+        .cr-right-head { padding: 16px 14px 12px; }
+        .cr-modules { padding: 10px; }
+    }
+</style>
+
+<div class="cr-wrapper">
+
+    <!-- ================= LEFT: Video + Info ================= -->
+    <div class="cr-left">
+
+        <div class="cr-video-wrap">
+            <video id="mainVideo"
+                   controls
+                   controlsList="nodownload"
+                   poster="@Model.CourseImage"
+                   preload="metadata">
+                <source src="@Model.ActiveLessonVideoUrl" type="video/mp4" />
+                Your browser does not support the video tag.
+            </video>
+        </div>
+
+        <!-- Lesson info card -->
+        <div class="cr-info-card">
+            <div class="cr-eyebrow">Now Playing</div>
+            <h2 id="activeLessonTitle">@Model.ActiveLessonTitle</h2>
+            <div class="cr-lesson-meta">
+                <span><i class="fas fa-user-graduate"></i> @Model.Instructor</span>
+                <span><i class="fas fa-clock"></i> @Model.ActiveLessonDuration</span>
+                <span><i class="fas fa-signal"></i> @Model.Level</span>
+                <span><i class="fas fa-book"></i> @Model.CourseTitle</span>
+            </div>
+
+            <!-- Prev / Next buttons -->
+            <div class="cr-nav-buttons">
+                <button class="cr-nav-btn cr-nav-prev" onclick="goPrev()">
+                    <i class="fas fa-chevron-left"></i> Previous
+                </button>
+                <button class="cr-nav-btn cr-nav-next" onclick="goNext()">
+                    Next <i class="fas fa-chevron-right"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Tabs card -->
+        <div class="cr-tabs-card">
+            <div class="cr-tabs">
+                <button class="cr-tab active" data-tab="notes">
+                    <i class="fas fa-book"></i> Notes
+                </button>
+                <button class="cr-tab" data-tab="reward">
+                    <i class="fas fa-gift"></i> Reward
+                </button>
+                <button class="cr-tab" data-tab="bookmarks">
+                    <i class="fas fa-bookmark"></i> Bookmarks
+                </button>
+                <button class="cr-tab" data-tab="copyright">
+                    <i class="fas fa-info-circle"></i> Copyright Warning
+                </button>
+            </div>
+
+            <div class="cr-tab-content">
+                <!-- Notes tab -->
+                <div class="cr-tab-panel" id="tab-notes">
+                    <p style="margin:0 0 12px; color:#6B7568;">Write down your notes for this lesson — they'll help you revise later.</p>
+                    <textarea id="lessonNote" placeholder="Start typing your notes here..."></textarea>
+                    <button class="cr-btn-save" onclick="saveNote()">
+                        <i class="fas fa-save"></i> Save Note
+                    </button>
+                </div>
+
+                <!-- Reward tab -->
+                <div class="cr-tab-panel" id="tab-reward" style="display:none;">
+                    <div style="text-align:center; padding: 24px 12px;">
+                        <div style="width:80px; height:80px; margin:0 auto 16px; border-radius:50%; background:#FCEACB; display:flex; align-items:center; justify-content:center;">
+                            <i class="fas fa-gift" style="font-size:34px; color:#D98E1F;"></i>
+                        </div>
+                        <h5 style="color:#1F3B2C; margin-bottom:8px; font-weight:700;">Reward Coming Soon</h5>
+                        <p style="margin:0; color:#6B7568;">Complete this lesson to earn <strong style="color:#D98E1F;">+10 points</strong> and unlock the next badge.</p>
+                    </div>
+                </div>
+
+                <!-- Bookmarks tab -->
+                <div class="cr-tab-panel" id="tab-bookmarks" style="display:none;">
+                    <div style="text-align:center; padding: 24px 12px;">
+                        <div style="width:80px; height:80px; margin:0 auto 16px; border-radius:50%; background:#E7E4D9; display:flex; align-items:center; justify-content:center;">
+                            <i class="fas fa-bookmark" style="font-size:34px; color:#1F3B2C;"></i>
+                        </div>
+                        <h5 style="color:#1F3B2C; margin-bottom:8px; font-weight:700;">No Bookmarks Yet</h5>
+                        <p style="margin:0; color:#6B7568;">Bookmark important lessons to quickly find them later.</p>
+                    </div>
+                </div>
+
+                <!-- Copyright Warning tab -->
+                <div class="cr-tab-panel" id="tab-copyright" style="display:none;">
+                    <div style="text-align:center; padding: 24px 12px;">
+                        <div style="width:80px; height:80px; margin:0 auto 16px; border-radius:50%; background:#FCEACB; display:flex; align-items:center; justify-content:center;">
+                            <i class="fas fa-exclamation-triangle" style="font-size:34px; color:#D98E1F;"></i>
+                        </div>
+                        <h5 style="color:#1F3B2C; margin-bottom:8px; font-weight:700;">Copyright Warning</h5>
+                        <p style="margin:0; color:#6B7568; max-width:520px; margin-left:auto; margin-right:auto;">
+                            All course materials, videos, and content are the property of <strong style="color:#1F3B2C;">Smart Tutor Hub</strong> and their respective instructors. Downloading, recording, or redistributing this content is strictly prohibited and may result in legal action.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- ================= RIGHT: Module/Lesson List ================= -->
+    <aside class="cr-right">
+        <div class="cr-right-head">
+
+            <!-- Search -->
+            <div class="cr-search">
+                <i class="fas fa-search"></i>
+                <input type="text" id="lessonSearch" placeholder="Search Lesson" />
+            </div>
+
+            <!-- Progress -->
+            @{
+                var totalLessons = Model.Modules.Sum(m => m.TotalLessons);
+                var completedLessons = Model.Modules.Sum(m => m.CompletedLessons);
+                var percent = totalLessons > 0 ? (int)Math.Round((double)completedLessons / totalLessons * 100) : 0;
+            }
+            <div class="cr-progress-info">
+                <span>Running Module : <strong>@(Model.Modules.FirstOrDefault()?.ModuleNumber ?? 1)</strong></span>
+                <span><strong>@completedLessons</strong>/@totalLessons</span>
+            </div>
+            <div class="cr-progress-bar">
+                <div class="cr-progress-bar-fill" style="width: @percent%;"></div>
+            </div>
+        </div>
+
+        <!-- Modules -->
+        <div class="cr-modules" id="moduleList">
+            @foreach (var module in Model.Modules)
+            {
+                var isOpen = module.ModuleNumber == (Model.Modules.FirstOrDefault()?.ModuleNumber ?? 1);
+                <div class="cr-module @(isOpen ? "open" : "")" data-module="@module.ModuleNumber">
+                    <div class="cr-module-header" onclick="toggleModule(this)">
+                        <div class="cr-module-title">
+                            <h6>Module @module.ModuleNumber: @module.Title</h6>
+                            <div class="cr-mod-meta">
+                                <span><i class="fas fa-clock"></i> @module.TotalDuration</span>
+                                <span>•</span>
+                                <span>@module.CompletedLessons/@module.TotalLessons</span>
+                            </div>
+                        </div>
+                        <i class="fas fa-chevron-up cr-module-caret"></i>
+                    </div>
+                    <div class="cr-module-lessons">
+                        @foreach (var lesson in module.Lessons)
+                        {
+                            var isActive = lesson.Id == Model.ActiveLessonId;
+                            string iconClass;
+                            string iconHtml;
+                            if (isActive)
+                            {
+                                iconClass = "active-icon";
+                                iconHtml = "<i class=\"fas fa-play\"></i>";
+                            }
+                            else if (lesson.IsCompleted)
+                            {
+                                iconClass = "completed";
+                                iconHtml = "<i class=\"fas fa-check\"></i>";
+                            }
+                            else
+                            {
+                                iconClass = "pending";
+                                iconHtml = "<i class=\"fas fa-play\"></i>";
+                            }
+
+                            <div class="cr-lesson-item @(isActive ? "active" : "")"
+                                 data-lesson-id="@lesson.Id"
+                                 data-video="@lesson.VideoUrl"
+                                 data-title="@lesson.Title"
+                                 data-duration="@lesson.Duration"
+                                 onclick="playLesson(this)">
+                                <div class="cr-lesson-icon @iconClass">@Html.Raw(iconHtml)</div>
+                                <div class="cr-lesson-text">
+                                    <p class="lt">@lesson.Title</p>
+                                    <p class="lt-meta"><i class="far fa-clock"></i> @lesson.Duration</p>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            }
+        </div>
+    </aside>
+</div>
+
+@section Scripts {
+    <script>
+        // ===== All lessons (flat) for prev/next =====
+        const allLessons = [];
+        document.querySelectorAll('.cr-lesson-item').forEach(el => {
+            allLessons.push({
+                id: el.dataset.lessonId,
+                title: el.dataset.title,
+                video: el.dataset.video,
+                duration: el.dataset.duration,
+                element: el
+            });
+        });
+
+        let currentIndex = allLessons.findIndex(l => l.element.classList.contains('active'));
+        if (currentIndex < 0) currentIndex = 0;
+
+        // ===== Play lesson =====
+        function playLesson(el) {
+            const video = document.getElementById('mainVideo');
+            const title = document.getElementById('activeLessonTitle');
+
+            // remove active from all
+            document.querySelectorAll('.cr-lesson-item').forEach(x => x.classList.remove('active'));
+            el.classList.add('active');
+
+            // update video
+            const src = el.dataset.video;
+            const source = video.querySelector('source');
+            source.src = src;
+            video.load();
+            video.play().catch(() => {});
+
+            // update title
+            title.textContent = el.dataset.title;
+
+            // update index
+            currentIndex = allLessons.findIndex(l => l.element === el);
+
+            // update icon (mark as active)
+            document.querySelectorAll('.cr-lesson-icon').forEach(ic => {
+                if (!ic.classList.contains('completed')) {
+                    ic.classList.remove('active-icon');
+                    ic.classList.add('pending');
+                    ic.innerHTML = '<i class="fas fa-play"></i>';
+                }
+            });
+            const icon = el.querySelector('.cr-lesson-icon');
+            icon.classList.remove('pending');
+            icon.classList.add('active-icon');
+            icon.innerHTML = '<i class="fas fa-play"></i>';
+        }
+
+        // ===== Toggle module open/close =====
+        function toggleModule(header) {
+            const module = header.closest('.cr-module');
+            module.classList.toggle('open');
+        }
+
+        // ===== Prev/Next =====
+        function goPrev() {
+            if (currentIndex > 0) {
+                const prev = allLessons[currentIndex - 1];
+                playLesson(prev.element);
+                prev.element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+        }
+
+        function goNext() {
+            if (currentIndex < allLessons.length - 1) {
+                const next = allLessons[currentIndex + 1];
+                playLesson(next.element);
+                next.element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            } else {
+                alert('🎉 Congratulations! You have completed all lessons in this course.');
+            }
+        }
+
+        // ===== Tabs =====
+        document.querySelectorAll('.cr-tab').forEach(tab => {
+            tab.addEventListener('click', function () {
+                document.querySelectorAll('.cr-tab').forEach(t => t.classList.remove('active'));
+                this.classList.add('active');
+
+                const tabName = this.dataset.tab;
+                document.querySelectorAll('.cr-tab-panel').forEach(p => p.style.display = 'none');
+                document.getElementById('tab-' + tabName).style.display = 'block';
+            });
+        });
+
+        // ===== Notes (localStorage) =====
+        const noteKey = 'note_course_@Model.CourseId';
+        const noteArea = document.getElementById('lessonNote');
+        if (noteArea) {
+            noteArea.value = localStorage.getItem(noteKey) || '';
+        }
+
+        function saveNote() {
+            if (!noteArea) return;
+            localStorage.setItem(noteKey, noteArea.value);
+            alert('✅ Your note has been saved.');
+        }
+
+        // ===== Search lessons =====
+        document.getElementById('lessonSearch').addEventListener('input', function () {
+            const query = this.value.toLowerCase().trim();
+            document.querySelectorAll('.cr-lesson-item').forEach(item => {
+                const title = item.dataset.title.toLowerCase();
+                const match = title.includes(query);
+                item.style.display = match ? 'flex' : 'none';
+
+                if (match && query.length > 0) {
+                    item.closest('.cr-module').classList.add('open');
+                }
+            });
+        });
+
+        // ===== Keyboard shortcuts =====
+        document.addEventListener('keydown', function (e) {
+            if (e.target.tagName === 'TEXTAREA' || e.target.tagName === 'INPUT') return;
+            if (e.key === 'ArrowRight') goNext();
+            else if (e.key === 'ArrowLeft') goPrev();
+        });
+    </script>
+}

@@ -387,12 +387,22 @@
                 <span class="badge-sidebar">@Model.Count</span>
             </a>
         </li>
-        <!-- ===== Users বাটন রিমুভ করা হয়েছে ===== -->
-        <!-- ===== Teacher Request বাটন যোগ করা হয়েছে ===== -->
+        <!-- ===== Users বাটন রিমুভ করা হয়েছে ===== -->
+        <!-- ===== Teacher Request বাটন ===== -->
         <li>
             <a asp-controller="Admin" asp-action="TeacherRequests">
                 <i class="fas fa-user-graduate"></i> Teacher Requests
                 <span class="badge-sidebar" style="background-color:#F4C744; color:#1F3B2C;">@ViewBag.PendingCount</span>
+            </a>
+        </li>
+        <!-- ✅ Payments বাটন (নতুন যোগ করা) -->
+        <li>
+            <a asp-controller="Admin" asp-action="Payments">
+                <i class="fas fa-money-check-alt"></i> Payments
+                @if (ViewBag.PendingPayments != null && ViewBag.PendingPayments > 0)
+                {
+                    <span class="badge-sidebar" style="background-color:#F4C744; color:#1F3B2C;">@ViewBag.PendingPayments</span>
+                }
             </a>
         </li>
         <li>
@@ -451,7 +461,7 @@
 
     <!-- Stats Cards -->
     <div class="row mb-4">
-        <div class="col-xl-4 col-md-6 mb-3">
+        <div class="col-xl-3 col-md-6 mb-3">
             <div class="card stats-card text-white" style="background: linear-gradient(135deg, #1F3B2C, #2d5a42);">
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-center">
@@ -466,7 +476,7 @@
                 </div>
             </div>
         </div>
-        <div class="col-xl-4 col-md-6 mb-3">
+        <div class="col-xl-3 col-md-6 mb-3">
             <div class="card stats-card text-white" style="background: linear-gradient(135deg, #2d7d46, #3a9e5a);">
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-center">
@@ -488,7 +498,7 @@
                 </div>
             </div>
         </div>
-        <div class="col-xl-4 col-md-6 mb-3">
+        <div class="col-xl-3 col-md-6 mb-3">
             <div class="card stats-card text-white" style="background: linear-gradient(135deg, #b8860b, #daa520);">
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-center">
@@ -505,6 +515,21 @@
                         </div>
                         <div style="font-size: 40px; opacity: 0.3;">
                             <i class="fas fa-user-cog"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6 mb-3">
+            <div class="card stats-card text-white" style="background: linear-gradient(135deg, #6f42c1, #8e63d9);">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6><i class="fas fa-money-check-alt me-2"></i>Pending Payments</h6>
+                            <h2 class="fw-bold">@(ViewBag.PendingPayments ?? 0)</h2>
+                        </div>
+                        <div style="font-size: 40px; opacity: 0.3;">
+                            <i class="fas fa-money-check-alt"></i>
                         </div>
                     </div>
                 </div>

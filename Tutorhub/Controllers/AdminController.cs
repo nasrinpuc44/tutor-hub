@@ -29,8 +29,13 @@ namespace Tutorbub.Controllers
             var requests = _dbHelper.GetAllTeacherRequests();
             var pendingCount = requests.Count(r => r.Status == "Pending");
 
+            var payStats = _dbHelper.GetPaymentStats();
+
             ViewBag.UserCount = users.Count;
             ViewBag.PendingCount = pendingCount;
+            ViewBag.PendingPayments = payStats.Pending;
+            ViewBag.TotalRevenue = payStats.TotalRevenue;
+
             return View(users);
         }
 
@@ -129,6 +134,30 @@ namespace Tutorbub.Controllers
 
             if (_dbHelper.ToggleUserStatus(id, isActive))
             {
+                // ✅ ইউজারকে নোটিফিকেশন পাঠান
+                if (isActive)
+                {
+                    _dbHelper.CreateNotification(
+                        id,
+                        "✅ Account Activated",
+                        "Your account has been activated. You can now log in.",
+                        "success",
+                        null,
+                        "fa-check-circle"
+                    );
+                }
+                else
+                {
+                    _dbHelper.CreateNotification(
+                        id,
+                        "⚠️ Account Deactivated",
+                        "Your account has been deactivated by an administrator.",
+                        "warning",
+                        null,
+                        "fa-exclamation-triangle"
+                    );
+                }
+
                 return Json(new { success = true, message = "User status updated successfully" });
             }
             return Json(new { success = false, message = "Failed to update user status" });
@@ -152,6 +181,16 @@ namespace Tutorbub.Controllers
 
             if (_dbHelper.UpdatePassword(id, newPassword))
             {
+                // ✅ ইউজারকে নোটিফিকেশন
+                _dbHelper.CreateNotification(
+                    id,
+                    "🔑 Password Changed",
+                    "Your account password was changed by an administrator.",
+                    "warning",
+                    null,
+                    "fa-key"
+                );
+
                 return Json(new { success = true, message = "Password updated successfully" });
             }
             return Json(new { success = false, message = "Failed to update password" });
@@ -168,14 +207,11 @@ namespace Tutorbub.Controllers
 
             var requests = _dbHelper.GetAllTeacherRequests();
             var users = _dbHelper.GetAllUsers();
+            var payStats = _dbHelper.GetPaymentStats();
+
             ViewBag.UserCount = users.Count;
             ViewBag.PendingCount = requests.Count(r => r.Status == "Pending");
-
-            Console.WriteLine($"Total Teacher Requests: {requests.Count}");
-            foreach (var req in requests)
-            {
-                Console.WriteLine($"Request: {req.FullName} - {req.Status} - {req.RequestDate}");
-            }
+            ViewBag.PendingPayments = payStats.Pending;
 
             return View(requests);
         }
@@ -197,28 +233,56 @@ namespace Tutorbub.Controllers
             }
 
             var status = action == "Approve" ? "Approved" : "Rejected";
+            var request = _dbHelper.GetTeacherRequestById(id);
 
             if (_dbHelper.UpdateTeacherRequest(id, status, adminNote))
             {
-                if (action == "Approve")
+                if (action == "Approve" && request != null)
                 {
-                    var request = _dbHelper.GetTeacherRequestById(id);
-                    if (request != null)
-                    {
-                        _dbHelper.MakeUserTeacher(request.UserId);
-                    }
+                    _dbHelper.MakeUserTeacher(request.UserId);
+
+                    // ✅ ইউজারকে নোটিফিকেশন
+                    _dbHelper.CreateNotification(
+                        request.UserId,
+                        "🎓 You're now a Teacher!",
+                        "Congratulations! Your teacher request has been approved. Access your Teacher Dashboard now.",
+                        "success",
+                        "/Teacher/TeacherDashboard",
+                        "fa-chalkboard-teacher"
+                    );
                 }
+                else if (action == "Reject" && request != null)
+                {
+                    // ✅ ইউজারকে নোটিফিকেশন
+                    var msg = string.IsNullOrEmpty(adminNote)
+                        ? "Your teacher request was not approved. You can try again later."
+                        : $"Your teacher request was not approved. Reason: {adminNote}";
+
+                    _dbHelper.CreateNotification(
+                        request.UserId,
+                        "❌ Teacher Request Rejected",
+                        msg,
+                        "danger",
+                        "/Teacher/RequestForm",
+                        "fa-times-circle"
+                    );
+                }
+
                 return Json(new { success = true, message = $"Teacher request {action.ToLower()}d successfully" });
             }
             return Json(new { success = false, message = "Failed to process request" });
         }
 
+<<<<<<< HEAD
         // ===== Teacher ডিলিট (ইউজার অ্যাকাউন্ট + Request দুটোই) =====
         // এখানে ইউজার আইডি (id) এবং request আইডি (requestId) দুটোই পাঠানো হয়।
         // ইউজার অ্যাকাউন্ট ডিলিটের চেষ্টা করা হয় (থাকলে তার সব request-ও
         // ক্যাসকেড হয়ে যায়), এবং আলাদাভাবে এই নির্দিষ্ট request রো-টাও সরাসরি
         // ডিলিট করার চেষ্টা করা হয় — যাতে ইউজার না থাকলেও (যেমন পুরনো/টেস্ট
         // ডেটা) কার্ডটা ঠিকই লিস্ট থেকে মুছে যায়।
+=======
+        // ===== Teacher ডিলিট =====
+>>>>>>> 9c75139 (add new update)
         [HttpPost]
         [ValidateAntiForgeryToken]
         public IActionResult DeleteTeacherAccount(int id, int requestId)
@@ -306,6 +370,103 @@ namespace Tutorbub.Controllers
                 });
             }
             return Json(new { success = false, message = "Request not found" });
+        }
+
+        // ============================================================
+        // ===== PAYMENT MANAGEMENT =====
+        // ============================================================
+
+        public IActionResult Payments(string status = "all")
+        {
+            var role = HttpContext.Session.GetString("UserRole");
+            if (role != "Admin")
+            {
+                return RedirectToAction("Login", "Account");
+            }
+
+            var payments = _dbHelper.GetAllOrders(status);
+            var stats = _dbHelper.GetPaymentStats();
+
+            ViewBag.PendingCount = stats.Pending;
+            ViewBag.ApprovedCount = stats.Approved;
+            ViewBag.RejectedCount = stats.Rejected;
+            ViewBag.TotalRevenue = stats.TotalRevenue;
+            ViewBag.CurrentFilter = status;
+            ViewBag.PendingPayments = stats.Pending;
+
+            return View(payments);
+        }
+
+        // ===== পেমেন্ট অ্যাপ্রুভ =====
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult ApprovePayment(int id, string? adminNote)
+        {
+            var role = HttpContext.Session.GetString("UserRole");
+            if (role != "Admin")
+            {
+                return Json(new { success = false, message = "Unauthorized" });
+            }
+
+            var adminId = int.Parse(HttpContext.Session.GetString("UserId") ?? "0");
+
+            if (_dbHelper.ApproveOrder(id, adminId, adminNote))
+            {
+                // ✅ ইউজারকে নোটিফিকেশন
+                var order = _dbHelper.GetOrderById(id);
+                if (order != null)
+                {
+                    _dbHelper.CreateNotification(
+                        order.UserId,
+                        "🎉 Payment Approved!",
+                        $"Your payment for \"{order.CourseName}\" has been approved. You can now access the course!",
+                        "success",
+                        $"/Learn/Details/{order.CourseId}",
+                        "fa-check-circle"
+                    );
+                }
+
+                return Json(new { success = true, message = "Payment approved successfully! User now has access to the course." });
+            }
+            return Json(new { success = false, message = "Failed to approve payment." });
+        }
+
+        // ===== পেমেন্ট রিজেক্ট =====
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult RejectPayment(int id, string? adminNote)
+        {
+            var role = HttpContext.Session.GetString("UserRole");
+            if (role != "Admin")
+            {
+                return Json(new { success = false, message = "Unauthorized" });
+            }
+
+            var adminId = int.Parse(HttpContext.Session.GetString("UserId") ?? "0");
+
+            if (_dbHelper.RejectOrder(id, adminId, adminNote))
+            {
+                // ✅ ইউজারকে নোটিফিকেশন
+                var order = _dbHelper.GetOrderById(id);
+                if (order != null)
+                {
+                    var reason = string.IsNullOrEmpty(adminNote)
+                        ? "Please check your transaction details and try again."
+                        : $"Reason: {adminNote}";
+
+                    _dbHelper.CreateNotification(
+                        order.UserId,
+                        "❌ Payment Rejected",
+                        $"Your payment for \"{order.CourseName}\" was rejected. {reason}",
+                        "danger",
+                        $"/Payment/Checkout?courseId={order.CourseId}",
+                        "fa-times-circle"
+                    );
+                }
+
+                return Json(new { success = true, message = "Payment rejected." });
+            }
+            return Json(new { success = false, message = "Failed to reject payment." });
         }
     }
 }

@@ -3,6 +3,7 @@
 @{
     ViewData["Title"] = Model.Title + " - Smart Tutor Hub";
     Layout = "_Layout";
+    bool isEnrolled = ViewBag.IsEnrolled == true;
 }
 
 <style>
@@ -133,6 +134,7 @@
         font-weight: 700;
         transition: opacity 0.3s;
         margin-top: 12px;
+        cursor: pointer;
     }
 
     .btn-buy:hover {
@@ -142,6 +144,54 @@
 
     .btn-buy i {
         margin-right: 8px;
+    }
+
+    .btn-enrolled {
+        width: 100%;
+        padding: 14px;
+        background: #2ecc71;
+        color: #fff;
+        border: none;
+        border-radius: 10px;
+        font-size: 18px;
+        font-weight: 700;
+        margin-top: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        cursor: pointer;
+        text-decoration: none;
+        transition: all 0.3s;
+    }
+
+    .btn-enrolled:hover {
+        background: #27ae60;
+        color: #fff;
+    }
+
+    .btn-pending {
+        width: 100%;
+        padding: 14px;
+        background: #f39c12;
+        color: #fff;
+        border: none;
+        border-radius: 10px;
+        font-size: 16px;
+        font-weight: 700;
+        margin-top: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        cursor: pointer;
+        text-decoration: none;
+        transition: all 0.3s;
+    }
+
+    .btn-pending:hover {
+        background: #e67e22;
+        color: #fff;
     }
 
     .sidebar-info {
@@ -338,9 +388,21 @@
         <div class="sidebar-card">
             <div class="sidebar-price">৳@Model.Price.ToString("N0") <span>BDT</span></div>
 
-            <button class="btn-buy" onclick="buyCourse(@Model.Id)">
-                <i class="fas fa-shopping-cart"></i> Enroll Now
-            </button>
+            @if (isEnrolled)
+            {
+                <a href="/Payment/MyOrders" class="btn-enrolled">
+                    <i class="fas fa-check-circle"></i> Already Enrolled
+                </a>
+                <p style="text-align:center; font-size:12px; color:#2ecc71; margin-top:8px;">
+                    <i class="fas fa-check me-1"></i>You have full access to this course
+                </p>
+            }
+            else
+            {
+                <button class="btn-buy" onclick="buyCourse(@Model.Id)">
+                    <i class="fas fa-shopping-cart"></i> Enroll Now
+                </button>
+            }
 
             <div class="sidebar-info">
                 <div class="sidebar-info-item">
@@ -393,13 +455,11 @@
             { id: 3, title: "Complete React Front-end Developer", image: "https://i.ibb.co.com/rf3RgYqG/Complete-React-Front-end-developer-course.jpg", price: 2499, rating: 4.9 },
             { id: 4, title: "Complete Web Design", image: "https://i.ibb.co.com/XZSqdW0B/Complete-Web-Design-from-Figma-to-Webflow.jpg", price: 1799, rating: 4.7 },
             { id: 5, title: "Flutter Development Bootcamp", image: "https://i.ibb.co.com/qZ60Vqg/Flutter-Development-Bootcamp-with-Dart.jpg", price: 2299, rating: 4.8 },
-            { id: 6, title: "The Ultimate Figma Course", image: "https://i.ibb.co.com/rGttSLJy/The-Ultimate-Figma-Course-From-Zero-to-Expert.jpg", price: 1599, rating: 4.9 },
-            { id: 7, title: "Node.js & Express Backend", image: "https://i.ibb.co.com/7vZ6R3k/Node-js-Express-Backend.jpg", price: 2699, rating: 4.7 },
-            { id: 8, title: "Python Data Science & ML", image: "https://i.ibb.co.com/0j8wQ9K/Python-Data-Science.jpg", price: 2999, rating: 4.9 }
+            { id: 6, title: "The Ultimate Figma Course", image: "https://i.ibb.co.com/rGttSLJy/The-Ultimate-Figma-Course-From-Zero-to-Expert.jpg", price: 1599, rating: 4.9 }
         ];
 
-        // ===== বর্তমান কোর্সের আইডি (URL থেকে) =====
-        const currentId = parseInt(window.location.pathname.split('/').pop());
+        // ===== বর্তমান কোর্সের আইডি =====
+        const currentId = @Model.Id;
 
         // ===== সুপারিশকৃত কোর্স রেন্ডার =====
         function renderRecommended() {
@@ -425,16 +485,22 @@
             grid.innerHTML = html;
         }
 
-        // ===== কিনার ফাংশন =====
+        // ===== এনরোল ফাংশন =====
         function buyCourse(id) {
-            const isLoggedIn = '@Context.Session.GetString("UserName")' !== '';
+            var isLoggedIn = '@Context.Session.GetString("UserName")' !== '';
             if (!isLoggedIn) {
                 alert('Please login to enroll in this course.');
                 window.location.href = '/Account/Login';
                 return;
             }
-            alert('Course enrolled successfully! (Demo)');
-            // এখানে পেমেন্ট পেজ বা অর্ডার লজিক যোগ করতে পারেন
+
+            if (@(isEnrolled ? "true" : "false")) {
+                alert('You are already enrolled in this course!');
+                return;
+            }
+
+            // চেকআউট পেজে পাঠানো
+            window.location.href = '/Payment/Checkout?courseId=' + id;
         }
 
         document.addEventListener('DOMContentLoaded', function() {

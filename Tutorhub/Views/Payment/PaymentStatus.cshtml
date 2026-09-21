@@ -1,0 +1,199 @@
+﻿@model Tutorbub.Models.CourseOrder
+
+@{
+    ViewData["Title"] = "Payment Status";
+    Layout = "_Layout";
+}
+
+<style>
+    .status-wrapper {
+        max-width: 600px;
+        margin: 0 auto;
+        padding: 40px 20px;
+    }
+
+    .status-card {
+        background: white;
+        border-radius: 24px;
+        padding: 40px 30px;
+        box-shadow: 0 10px 50px rgba(0,0,0,0.1);
+        text-align: center;
+    }
+
+    .status-icon {
+        width: 100px;
+        height: 100px;
+        border-radius: 50%;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 48px;
+        margin-bottom: 20px;
+    }
+
+    .status-icon.pending {
+        background: #fff3cd;
+        color: #b8860b;
+    }
+
+    .status-icon.approved {
+        background: #d4edda;
+        color: #2ecc71;
+    }
+
+    .status-icon.rejected {
+        background: #f8d7da;
+        color: #e74c3c;
+    }
+
+    .status-card h2 {
+        font-size: 26px;
+        font-weight: 700;
+        margin-bottom: 10px;
+        color: #1F3B2C;
+    }
+
+    .status-card p {
+        color: #6B7568;
+        font-size: 15px;
+        line-height: 1.7;
+        margin-bottom: 24px;
+    }
+
+    .order-details {
+        background: #FAF9F4;
+        border-radius: 14px;
+        padding: 20px;
+        text-align: left;
+        margin-bottom: 24px;
+    }
+
+    .detail-row {
+        display: flex;
+        justify-content: space-between;
+        padding: 8px 0;
+        font-size: 14px;
+        border-bottom: 1px solid #eee;
+    }
+
+    .detail-row:last-child {
+        border-bottom: none;
+    }
+
+    .detail-row .label {
+        color: #8A9188;
+    }
+
+    .detail-row .value {
+        font-weight: 600;
+        color: #1F3B2C;
+    }
+
+    .btn-primary-custom {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 14px 36px;
+        background: #1F3B2C;
+        color: white;
+        border-radius: 12px;
+        font-weight: 700;
+        text-decoration: none;
+        transition: all 0.3s;
+        border: none;
+        cursor: pointer;
+        font-size: 15px;
+    }
+
+    .btn-primary-custom:hover {
+        opacity: 0.88;
+        color: white;
+        transform: translateY(-2px);
+    }
+</style>
+
+<div class="status-wrapper">
+    <div class="status-card">
+        @if (Model.PaymentStatus == "Pending")
+        {
+            <div class="status-icon pending"><i class="fas fa-clock"></i></div>
+            <h2>Payment Under Review</h2>
+            <p>Your payment has been submitted successfully. Our admin team will verify it shortly.</p>
+        }
+        else if (Model.PaymentStatus == "Approved")
+        {
+            <div class="status-icon approved"><i class="fas fa-check-circle"></i></div>
+            <h2>Payment Approved! 🎉</h2>
+            <p>Congratulations! You now have full access to this course. Start learning today!</p>
+        }
+        else
+        {
+            <div class="status-icon rejected"><i class="fas fa-times-circle"></i></div>
+            <h2>Payment Rejected</h2>
+            <p>Unfortunately, your payment could not be verified. Please check your transaction details and try again.</p>
+        }
+
+        <div class="order-details">
+            <div class="detail-row">
+                <span class="label">Order ID</span>
+                <span class="value">#@Model.Id</span>
+            </div>
+            <div class="detail-row">
+                <span class="label">Course</span>
+                <span class="value">@Model.CourseName</span>
+            </div>
+            <div class="detail-row">
+                <span class="label">Amount</span>
+                <span class="value">৳@Model.Price.ToString("N0")</span>
+            </div>
+            <div class="detail-row">
+                <span class="label">Payment Method</span>
+                <span class="value">@Model.PaymentMethod</span>
+            </div>
+            <div class="detail-row">
+                <span class="label">Transaction ID</span>
+                <span class="value">@Model.TransactionId</span>
+            </div>
+            <div class="detail-row">
+                <span class="label">Sender Number</span>
+                <span class="value">@Model.SenderMobileNumber</span>
+            </div>
+            <div class="detail-row">
+                <span class="label">Submitted On</span>
+                <span class="value">@Model.OrderDate.ToString("dd MMM yyyy, hh:mm tt")</span>
+            </div>
+            @if (!string.IsNullOrEmpty(Model.AdminNote))
+            {
+                <div class="detail-row">
+                    <span class="label">Admin Note</span>
+                    <span class="value" style="color:#e74c3c;">@Model.AdminNote</span>
+                </div>
+            }
+        </div>
+
+        @if (Model.PaymentStatus == "Approved")
+        {
+            <a href="/Learn/Details/@Model.CourseId" class="btn-primary-custom">
+                <i class="fas fa-play-circle"></i> Start Learning
+            </a>
+        }
+        else if (Model.PaymentStatus == "Rejected")
+        {
+            <a href="/Payment/Checkout?courseId=@Model.CourseId" class="btn-primary-custom">
+                <i class="fas fa-redo"></i> Try Again
+            </a>
+        }
+        else
+        {
+            <a href="/Payment/MyOrders" class="btn-primary-custom">
+                <i class="fas fa-list"></i> View My Orders
+            </a>
+        }
+
+        <div style="margin-top:16px;">
+            <a href="/Learn/Index" style="color:#8A9188; font-size:13px; text-decoration:none;">
+                <i class="fas fa-arrow-left me-1"></i> Browse More Courses
+            </a>
+        </div>
+    </div>
+</div>

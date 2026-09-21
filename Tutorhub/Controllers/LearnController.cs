@@ -1,4 +1,7 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿// 📁 Controllers/LearnController.cs
+// লোকেশন: Tutorbub/Controllers/LearnController.cs
+
+using Microsoft.AspNetCore.Mvc;
 using Tutorbub.Models;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,7 +10,14 @@ namespace Tutorbub.Controllers
 {
     public class LearnController : Controller
     {
-        // ডামি ডেটা (পরে ডেটাবেস থেকে আনা হবে)
+        private readonly DatabaseHelper _dbHelper;
+
+        public LearnController(IConfiguration configuration)
+        {
+            _dbHelper = new DatabaseHelper(configuration);
+        }
+
+        // ===== ডামি ডেটা =====
         private static readonly List<CourseDetailViewModel> Courses = new()
         {
             new CourseDetailViewModel
@@ -123,10 +133,10 @@ namespace Tutorbub.Controllers
         // ===== লার্ন পেজ (সমস্ত কোর্স) =====
         public IActionResult Index()
         {
-            return View("Learn");  // ← Learn.cshtml দেখাবে
+            return View("Learn");
         }
 
-        // ===== কোর্স ডিটেলস =====
+        // ===== কোর্স ডিটেলস (এনরোলমেন্ট চেক সহ) =====
         public IActionResult Details(int id)
         {
             var course = Courses.FirstOrDefault(c => c.Id == id);
@@ -134,6 +144,25 @@ namespace Tutorbub.Controllers
             {
                 return NotFound();
             }
+
+            // ইউজার লগইন করা থাকলে এনরোলমেন্ট চেক
+            var userIdStr = HttpContext.Session.GetString("UserId");
+            if (!string.IsNullOrEmpty(userIdStr) && int.TryParse(userIdStr, out int userId))
+            {
+                try
+                {
+                    ViewBag.IsEnrolled = _dbHelper.IsUserEnrolled(userId, id);
+                }
+                catch
+                {
+                    ViewBag.IsEnrolled = false;
+                }
+            }
+            else
+            {
+                ViewBag.IsEnrolled = false;
+            }
+
             return View(course);
         }
 
