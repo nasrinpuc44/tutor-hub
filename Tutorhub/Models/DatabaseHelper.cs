@@ -1,8 +1,4 @@
-<<<<<<< HEAD
-﻿// 📁 DatabaseHelper.cs
-=======
 ﻿// 📁 Models/DatabaseHelper.cs
->>>>>>> 9c75139 (add new update)
 // লোকেশন: Tutorbub/Models/DatabaseHelper.cs
 
 using Microsoft.Extensions.Configuration;
@@ -202,25 +198,14 @@ namespace Tutorbub.Models
 
         public bool RegisterUser(User user)
         {
-<<<<<<< HEAD
-            // ===== শুধু trim (lowercase করব না) =====
             var trimmedEmail = (user.Email ?? string.Empty).Trim();
 
-            // ===== @gmail.com হুবহু lowercase-এ শেষ হয়েছে কিনা চেক =====
-=======
-            var trimmedEmail = (user.Email ?? string.Empty).Trim();
-
->>>>>>> 9c75139 (add new update)
             if (string.IsNullOrWhiteSpace(trimmedEmail) ||
                 !trimmedEmail.EndsWith("@gmail.com"))
             {
                 throw new Exception("Email must end with @gmail.com (all lowercase).");
             }
 
-<<<<<<< HEAD
-            // ===== Gmail ফরম্যাট ভ্যালিডেশন =====
-=======
->>>>>>> 9c75139 (add new update)
             var gmailRegex = new Regex(@"^[A-Za-z0-9._%+-]+@gmail\.com$");
             if (!gmailRegex.IsMatch(trimmedEmail))
             {
@@ -334,10 +319,6 @@ namespace Tutorbub.Models
 
         public bool EmailExists(string email)
         {
-<<<<<<< HEAD
-            // Duplicate ধরার জন্য case-insensitive চেক
-=======
->>>>>>> 9c75139 (add new update)
             var trimmed = (email ?? string.Empty).Trim();
 
             string query = "SELECT COUNT(*) FROM \"Users\" WHERE LOWER(\"Email\") = LOWER(@email)";
@@ -662,8 +643,270 @@ namespace Tutorbub.Models
         }
 
         // ============================================================
-<<<<<<< HEAD
-=======
+        // ===== COURSE RELATED METHODS =====
+        // ============================================================
+
+        public bool CreateCourse(Course course, out string? errorMessage)
+        {
+            errorMessage = null;
+            string query = @"
+                INSERT INTO ""Courses"" 
+                (""Title"", ""Description"", ""Image"", ""Category"", ""Price"", 
+                 ""Instructor"", ""Duration"", ""Lessons"", ""Level"", ""IsNew"", ""IsPopular"", 
+                 ""IsEnrollmentOpen"", ""Features"", ""CreatedAt"")
+                VALUES 
+                (@title, @description, @image, @category, @price,
+                 @instructor, @duration, @lessons, @level, @isNew, @isPopular, 
+                 @isEnrollmentOpen, @features, @createdAt)
+                RETURNING ""Id""";
+
+            try
+            {
+                using var connection = new NpgsqlConnection(_connectionString);
+                using var command = new NpgsqlCommand(query, connection);
+
+                command.Parameters.AddWithValue("@title", course.Title ?? (object)DBNull.Value);
+                command.Parameters.AddWithValue("@description", course.Description ?? (object)DBNull.Value);
+                command.Parameters.AddWithValue("@image", course.Image ?? (object)DBNull.Value);
+                command.Parameters.AddWithValue("@category", course.Category ?? (object)DBNull.Value);
+                command.Parameters.AddWithValue("@price", course.Price);
+                command.Parameters.AddWithValue("@instructor", course.Instructor ?? (object)DBNull.Value);
+                command.Parameters.AddWithValue("@duration", course.Duration ?? (object)DBNull.Value);
+                command.Parameters.AddWithValue("@lessons", course.Lessons);
+                command.Parameters.AddWithValue("@level", course.Level ?? (object)DBNull.Value);
+                command.Parameters.AddWithValue("@isNew", course.IsNew);
+                command.Parameters.AddWithValue("@isPopular", course.IsPopular);
+                command.Parameters.AddWithValue("@isEnrollmentOpen", course.IsEnrollmentOpen);
+                command.Parameters.AddWithValue("@features", course.Features ?? (object)DBNull.Value);
+                command.Parameters.AddWithValue("@createdAt", course.CreatedAt);
+
+                connection.Open();
+                var result = command.ExecuteScalar();
+                if (result != null && int.TryParse(result.ToString(), out int newId))
+                {
+                    course.Id = newId;
+                    return true;
+                }
+                return false;
+            }
+            catch (Exception ex)
+            {
+                errorMessage = ex.Message;
+                return false;
+            }
+        }
+
+        public List<Course> GetAllCourses()
+        {
+            var courses = new List<Course>();
+            string query = @"SELECT * FROM ""Courses"" ORDER BY ""CreatedAt"" DESC";
+
+            try
+            {
+                using var connection = new NpgsqlConnection(_connectionString);
+                using var command = new NpgsqlCommand(query, connection);
+                connection.Open();
+                using var reader = command.ExecuteReader();
+
+                while (reader.Read())
+                {
+                    courses.Add(MapCourse(reader));
+                }
+                return courses;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Error getting courses: " + ex.Message);
+                return new List<Course>();
+            }
+        }
+
+        public Course? GetCourseById(int id)
+        {
+            string query = @"SELECT * FROM ""Courses"" WHERE ""Id"" = @id";
+
+            try
+            {
+                using var connection = new NpgsqlConnection(_connectionString);
+                using var command = new NpgsqlCommand(query, connection);
+                command.Parameters.AddWithValue("@id", id);
+                connection.Open();
+                using var reader = command.ExecuteReader();
+
+                if (reader.Read())
+                {
+                    return MapCourse(reader);
+                }
+                return null;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Error getting course by id: " + ex.Message);
+                return null;
+            }
+        }
+
+        // ===== কোর্স ডিলিট =====
+        public bool DeleteCourse(int courseId)
+        {
+            try
+            {
+                using var connection = new NpgsqlConnection(_connectionString);
+                connection.Open();
+
+                using (var deleteLessons = new NpgsqlCommand(
+                    @"DELETE FROM ""CourseLessons"" WHERE ""CourseId"" = @id", connection))
+                {
+                    deleteLessons.Parameters.AddWithValue("@id", courseId);
+                    deleteLessons.ExecuteNonQuery();
+                }
+
+                using (var deleteOrders = new NpgsqlCommand(
+                    @"DELETE FROM ""CourseOrders"" WHERE ""CourseId"" = @id", connection))
+                {
+                    deleteOrders.Parameters.AddWithValue("@id", courseId);
+                    deleteOrders.ExecuteNonQuery();
+                }
+
+                using var deleteCourse = new NpgsqlCommand(
+                    @"DELETE FROM ""Courses"" WHERE ""Id"" = @id", connection);
+                deleteCourse.Parameters.AddWithValue("@id", courseId);
+                return deleteCourse.ExecuteNonQuery() > 0;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Error deleting course: " + ex.Message);
+                return false;
+            }
+        }
+
+        // ===== Enrollment Open/Close Toggle =====
+        public bool ToggleEnrollment(int courseId, bool isOpen)
+        {
+            string query = @"UPDATE ""Courses"" 
+                             SET ""IsEnrollmentOpen"" = @isOpen 
+                             WHERE ""Id"" = @id";
+
+            try
+            {
+                using var connection = new NpgsqlConnection(_connectionString);
+                using var command = new NpgsqlCommand(query, connection);
+                command.Parameters.AddWithValue("@isOpen", isOpen);
+                command.Parameters.AddWithValue("@id", courseId);
+                connection.Open();
+                return command.ExecuteNonQuery() > 0;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Error toggling enrollment: " + ex.Message);
+                return false;
+            }
+        }
+
+        // ============================================================
+        // ===== COURSE LESSON / VIDEO METHODS (নতুন) =====
+        // ============================================================
+
+        public bool CreateCourseLesson(CourseLesson lesson, out string? errorMessage)
+        {
+            errorMessage = null;
+            string query = @"
+                INSERT INTO ""CourseLessons"" 
+                (""CourseId"", ""ModuleNumber"", ""LessonNumber"", ""Title"", 
+                 ""VideoUrl"", ""Duration"", ""Description"", ""CreatedAt"")
+                VALUES 
+                (@courseId, @moduleNumber, @lessonNumber, @title,
+                 @videoUrl, @duration, @description, @createdAt)
+                RETURNING ""Id""";
+
+            try
+            {
+                using var connection = new NpgsqlConnection(_connectionString);
+                using var command = new NpgsqlCommand(query, connection);
+
+                command.Parameters.AddWithValue("@courseId", lesson.CourseId);
+                command.Parameters.AddWithValue("@moduleNumber", lesson.ModuleNumber);
+                command.Parameters.AddWithValue("@lessonNumber", lesson.LessonNumber);
+                command.Parameters.AddWithValue("@title", lesson.Title ?? (object)DBNull.Value);
+                command.Parameters.AddWithValue("@videoUrl", lesson.VideoUrl ?? (object)DBNull.Value);
+                command.Parameters.AddWithValue("@duration", lesson.Duration ?? (object)DBNull.Value);
+                command.Parameters.AddWithValue("@description", lesson.Description ?? (object)DBNull.Value);
+                command.Parameters.AddWithValue("@createdAt", lesson.CreatedAt);
+
+                connection.Open();
+                var result = command.ExecuteScalar();
+                if (result != null && int.TryParse(result.ToString(), out int newId))
+                {
+                    lesson.Id = newId;
+                    return true;
+                }
+                return false;
+            }
+            catch (Exception ex)
+            {
+                errorMessage = ex.Message;
+                return false;
+            }
+        }
+
+        public List<CourseLesson> GetLessonsByCourseId(int courseId)
+        {
+            var lessons = new List<CourseLesson>();
+            string query = @"SELECT * FROM ""CourseLessons"" 
+                             WHERE ""CourseId"" = @courseId 
+                             ORDER BY ""ModuleNumber"", ""LessonNumber""";
+
+            try
+            {
+                using var connection = new NpgsqlConnection(_connectionString);
+                using var command = new NpgsqlCommand(query, connection);
+                command.Parameters.AddWithValue("@courseId", courseId);
+                connection.Open();
+
+                using var reader = command.ExecuteReader();
+                while (reader.Read())
+                {
+                    lessons.Add(new CourseLesson
+                    {
+                        Id = reader.GetInt32(reader.GetOrdinal("Id")),
+                        CourseId = reader.GetInt32(reader.GetOrdinal("CourseId")),
+                        ModuleNumber = Convert.ToInt32(reader["ModuleNumber"]),
+                        LessonNumber = Convert.ToInt32(reader["LessonNumber"]),
+                        Title = reader["Title"]?.ToString() ?? "",
+                        VideoUrl = reader["VideoUrl"]?.ToString() ?? "",
+                        Duration = reader["Duration"]?.ToString() ?? "",
+                        Description = reader["Description"]?.ToString(),
+                        CreatedAt = reader["CreatedAt"] as DateTime? ?? DateTime.UtcNow
+                    });
+                }
+                return lessons;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Error getting lessons: " + ex.Message);
+                return new List<CourseLesson>();
+            }
+        }
+
+        public bool DeleteCourseLesson(int lessonId)
+        {
+            string query = "DELETE FROM \"CourseLessons\" WHERE \"Id\" = @id";
+            try
+            {
+                using var connection = new NpgsqlConnection(_connectionString);
+                using var command = new NpgsqlCommand(query, connection);
+                command.Parameters.AddWithValue("@id", lessonId);
+                connection.Open();
+                return command.ExecuteNonQuery() > 0;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Error deleting lesson: " + ex.Message);
+                return false;
+            }
+        }
+
+        // ============================================================
         // ===== PAYMENT / COURSE ORDER RELATED METHODS =====
         // ============================================================
 
@@ -947,12 +1190,9 @@ namespace Tutorbub.Models
         }
 
         // ============================================================
-        // ===== ENROLLED COURSES (MY CLASS) — NEW =====
+        // ===== ENROLLED COURSES (MY CLASS) =====
         // ============================================================
 
-        /// <summary>
-        /// ইউজারের Approved/Enrolled কোর্সগুলোর Full ডিটেইলস (My Class পেজের জন্য)
-        /// </summary>
         public List<EnrolledCourseViewModel> GetUserEnrolledCourses(int userId)
         {
             var enrolled = new List<EnrolledCourseViewModel>();
@@ -1032,9 +1272,6 @@ namespace Tutorbub.Models
         // ===== NOTIFICATION RELATED METHODS =====
         // ============================================================
 
-        /// <summary>
-        /// নতুন নোটিফিকেশন তৈরি করা
-        /// </summary>
         public bool CreateNotification(int userId, string title, string message,
             string type = "info", string? link = null, string icon = "fa-bell")
         {
@@ -1067,9 +1304,6 @@ namespace Tutorbub.Models
             }
         }
 
-        /// <summary>
-        /// ইউজারের সব নোটিফিকেশন পাওয়া
-        /// </summary>
         public List<Notification> GetUserNotifications(int userId, int limit = 20)
         {
             var notifications = new List<Notification>();
@@ -1114,9 +1348,6 @@ namespace Tutorbub.Models
             }
         }
 
-        /// <summary>
-        /// অপঠিত নোটিফিকেশন কাউন্ট
-        /// </summary>
         public int GetUnreadNotificationCount(int userId)
         {
             string query = @"SELECT COUNT(*) FROM ""Notifications"" 
@@ -1137,9 +1368,6 @@ namespace Tutorbub.Models
             }
         }
 
-        /// <summary>
-        /// একটি নোটিফিকেশন Read হিসেবে মার্ক করা
-        /// </summary>
         public bool MarkNotificationAsRead(int notificationId, int userId)
         {
             string query = @"UPDATE ""Notifications"" 
@@ -1162,9 +1390,6 @@ namespace Tutorbub.Models
             }
         }
 
-        /// <summary>
-        /// সব নোটিফিকেশন Read হিসেবে মার্ক করা
-        /// </summary>
         public bool MarkAllNotificationsAsRead(int userId)
         {
             string query = @"UPDATE ""Notifications"" 
@@ -1186,9 +1411,6 @@ namespace Tutorbub.Models
             }
         }
 
-        /// <summary>
-        /// সব নোটিফিকেশন ডিলিট করা
-        /// </summary>
         public bool ClearUserNotifications(int userId)
         {
             string query = @"DELETE FROM ""Notifications"" WHERE ""UserId"" = @userId";
@@ -1209,7 +1431,6 @@ namespace Tutorbub.Models
         }
 
         // ============================================================
->>>>>>> 9c75139 (add new update)
         // ===== PRIVATE MAPPERS =====
         // ============================================================
 
@@ -1275,8 +1496,6 @@ namespace Tutorbub.Models
                 AdminNote = reader["AdminNote"]?.ToString()
             };
         }
-<<<<<<< HEAD
-=======
 
         private CourseOrder MapCourseOrder(NpgsqlDataReader reader)
         {
@@ -1298,6 +1517,29 @@ namespace Tutorbub.Models
                 VerifiedBy = reader["VerifiedBy"] as int?
             };
         }
->>>>>>> 9c75139 (add new update)
+
+        private Course MapCourse(NpgsqlDataReader reader)
+        {
+            return new Course
+            {
+                Id = reader.GetInt32(reader.GetOrdinal("Id")),
+                Title = reader["Title"]?.ToString() ?? "",
+                Description = reader["Description"]?.ToString() ?? "",
+                Image = reader["Image"]?.ToString() ?? "",
+                Category = reader["Category"]?.ToString() ?? "",
+                Price = Convert.ToDecimal(reader["Price"]),
+                Students = Convert.ToInt32(reader["Students"]),
+                Rating = Convert.ToDouble(reader["Rating"]),
+                Instructor = reader["Instructor"]?.ToString() ?? "",
+                Duration = reader["Duration"]?.ToString() ?? "",
+                Lessons = Convert.ToInt32(reader["Lessons"]),
+                Level = reader["Level"]?.ToString() ?? "",
+                IsNew = reader["IsNew"] as bool? ?? true,
+                IsPopular = reader["IsPopular"] as bool? ?? false,
+                IsEnrollmentOpen = reader["IsEnrollmentOpen"] as bool? ?? true,
+                Features = reader["Features"]?.ToString(),
+                CreatedAt = reader["CreatedAt"] as DateTime? ?? DateTime.UtcNow
+            };
+        }
     }
 }

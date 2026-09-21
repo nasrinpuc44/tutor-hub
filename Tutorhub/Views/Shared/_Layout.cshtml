@@ -1,9 +1,4 @@
-<<<<<<< HEAD
-﻿﻿
-<!DOCTYPE html>
-=======
 ﻿<!DOCTYPE html>
->>>>>>> 9c75139 (add new update)
 <html lang="en">
 <head>
     <meta charset="utf-8" />
@@ -529,215 +524,6 @@
             outline-offset: 2px;
         }
 
-<<<<<<< HEAD
-            .admin-sidebar-footer {
-                position: absolute;
-                bottom: 20px;
-                left: 0;
-                right: 0;
-                padding: 0 20px;
-                text-align: center;
-                border-top: 1px solid rgba(255,255,255,0.05);
-                padding-top: 15px;
-            }
-
-                .admin-sidebar-footer small {
-                    color: #6B7568;
-                    font-size: 11px;
-                }
-
-                .admin-sidebar-footer strong {
-                    color: #F3F1E7;
-                }
-
-            /* সাইডবার টগল বাটন */
-            .sidebar-toggle-btn {
-                display: none;
-                position: fixed;
-                top: 90px;
-                left: 15px;
-                z-index: 101;
-                background-color: #1F3B2C;
-                color: white;
-                border: none;
-                border-radius: 8px;
-                padding: 10px 12px;
-                font-size: 18px;
-                cursor: pointer;
-            }
-
-                .sidebar-toggle-btn:hover {
-                    background-color: #2d5a42;
-                }
-
-            @@media (max-width: 992px) {
-                .admin-sidebar {
-                    transform: translateX(-100%);
-                }
-
-                    .admin-sidebar.open {
-                        transform: translateX(0);
-                    }
-
-                .sidebar-toggle-btn {
-                    display: block;
-                }
-
-                .admin-page .main-content {
-                    margin-left: 0;
-                }
-            }
-
-            /* ===== ড্রপডাউন মেনু স্টাইল ===== */
-            .profile-dropdown .dropdown-toggle {
-                color: #1F3B2C !important;
-                text-decoration: none !important;
-                font-weight: 500;
-                transition: opacity 0.3s;
-                background: none;
-                border: none;
-                display: flex;
-                align-items: center;
-                gap: 6px;
-                padding: 0;
-                cursor: pointer;
-            }
-
-                .profile-dropdown .dropdown-toggle:hover {
-                    opacity: 0.7;
-                }
-
-                .profile-dropdown .dropdown-toggle i {
-                    font-size: 18px;
-                }
-
-                .profile-dropdown .dropdown-toggle .caret {
-                    font-size: 12px;
-                    margin-left: 4px;
-                }
-
-            .profile-dropdown .dropdown-menu {
-                border: none;
-                border-radius: 12px;
-                box-shadow: 0 8px 30px rgba(0,0,0,0.12);
-                padding: 8px 0;
-                min-width: 220px;
-                background: white;
-                margin-top: 8px;
-            }
-
-                .profile-dropdown .dropdown-menu .dropdown-header {
-                    padding: 10px 20px 6px;
-                    font-weight: 600;
-                    color: #1F3B2C;
-                    border-bottom: 1px solid #f0f0f0;
-                    margin-bottom: 4px;
-                }
-
-                    .profile-dropdown .dropdown-menu .dropdown-header small {
-                        display: block;
-                        font-weight: 400;
-                        color: #6B7568;
-                        font-size: 12px;
-                    }
-
-                .profile-dropdown .dropdown-menu .dropdown-item {
-                    padding: 10px 20px;
-                    color: #4B5648;
-                    font-size: 14px;
-                    font-weight: 500;
-                    transition: all 0.2s;
-                    display: flex;
-                    align-items: center;
-                    gap: 10px;
-                }
-
-                    .profile-dropdown .dropdown-menu .dropdown-item:hover {
-                        background-color: #F3F1E7;
-                        color: #1F3B2C;
-                    }
-
-                    .profile-dropdown .dropdown-menu .dropdown-item i {
-                        width: 20px;
-                        text-align: center;
-                        color: #6B7568;
-                        font-size: 14px;
-                    }
-
-                    .profile-dropdown .dropdown-menu .dropdown-item:hover i {
-                        color: #1F3B2C;
-                    }
-
-                .profile-dropdown .dropdown-menu .dropdown-divider {
-                    margin: 4px 0;
-                    border-color: #f0f0f0;
-                }
-
-                .profile-dropdown .dropdown-menu .dropdown-item.text-danger {
-                    color: #e74c3c;
-                }
-
-                    .profile-dropdown .dropdown-menu .dropdown-item.text-danger i {
-                        color: #e74c3c;
-                    }
-
-                    .profile-dropdown .dropdown-menu .dropdown-item.text-danger:hover {
-                        background-color: #fde8e8;
-                    }
-
-                .profile-dropdown .dropdown-menu .dropdown-item .badge-role {
-                    font-size: 10px;
-                    padding: 2px 10px;
-                    border-radius: 20px;
-                    font-weight: 600;
-                    background: #eef2f6;
-                    color: #6B7568;
-                    margin-left: auto;
-                }
-
-                    .profile-dropdown .dropdown-menu .dropdown-item .badge-role.teacher {
-                        background: #d1ecf1;
-                        color: #0c6b7c;
-                    }
-
-                    .profile-dropdown .dropdown-menu .dropdown-item .badge-role.admin {
-                        background: #fff3cd;
-                        color: #b8860b;
-                    }
-
-            /* ড্রপডাউন অ্যানিমেশন */
-            .profile-dropdown .dropdown-menu {
-                display: block;
-                opacity: 0;
-                visibility: hidden;
-                transform: translateY(-8px);
-                transition: all 0.2s ease;
-                pointer-events: none;
-            }
-
-            .profile-dropdown.show .dropdown-menu {
-                opacity: 1;
-                visibility: visible;
-                transform: translateY(0);
-                pointer-events: auto;
-            }
-
-            /* প্রোফাইল লিংক স্টাইল (পুরনো) */
-            .profile-link {
-                color: #1F3B2C !important;
-                text-decoration: none !important;
-                font-weight: 500;
-                transition: opacity 0.3s;
-            }
-
-                .profile-link:hover {
-                    opacity: 0.7;
-                }
-
-                .profile-link i {
-                    margin-right: 5px;
-                }
-=======
         @@media (prefers-reduced-motion: reduce) {
             html.no-vt main { animation: none; transition: none; }
             html.no-vt main.page-leaving { transform: none; }
@@ -748,7 +534,6 @@
             a.rounded-full[style*="background-color"]:hover,
             a.rounded-full[style*="background-color"]:active { transform: none; }
         }
->>>>>>> 9c75139 (add new update)
     </style>
 </head>
 <body>
@@ -780,13 +565,6 @@
                     <a asp-controller="Practice" asp-action="Index" class="text-sm font-medium transition hover:opacity-70" style="color:#4B5648;">Practice</a>
                     <a asp-controller="Progress" asp-action="Progress" class="text-sm font-medium transition hover:opacity-70" style="color:#4B5648;">Progress</a>
                     <a asp-controller="Leaderboard" asp-action="Leaderboard" class="text-sm font-medium transition hover:opacity-70" style="color:#4B5648;">Leaderboard</a>
-<<<<<<< HEAD
-                    <!-- ✅ Find Tutor (নতুন যোগ করা) -->
-                    <a asp-controller="FindTutor" asp-action="Index" class="text-sm font-medium transition hover:opacity-70" style="color:#4B5648;">Find Tutor</a>
-                </div>
-
-                <!-- Desktop Right Side - User Dropdown -->
-=======
                     <a asp-controller="FindTutor" asp-action="Index" class="text-sm font-medium transition hover:opacity-70" style="color:#4B5648;">Find Tutor</a>
                     @if (Context.Session.GetString("UserName") != null)
                     {
@@ -797,7 +575,6 @@
                 </div>
 
                 <!-- Desktop Right Side -->
->>>>>>> 9c75139 (add new update)
                 <div class="hidden lg:flex items-center">
                     @if (Context.Session.GetString("UserName") != null)
                     {
@@ -805,29 +582,6 @@
                         var isTeacher = userRole == "Teacher";
                         var isAdmin = userRole == "Admin";
                         var userFullName = Context.Session.GetString("UserFullName") ?? Context.Session.GetString("UserName");
-<<<<<<< HEAD
-                        var userInitials = "";
-                        if (!string.IsNullOrEmpty(userFullName))
-                        {
-                            var names = userFullName.Split(' ', StringSplitOptions.RemoveEmptyEntries);
-                            if (names.Length >= 2)
-                            {
-                                userInitials = names[0][0].ToString().ToUpper() + names[1][0].ToString().ToUpper();
-                            }
-                            else if (names.Length == 1 && names[0].Length > 0)
-                            {
-                                userInitials = names[0][0].ToString().ToUpper();
-                            }
-                            else
-                            {
-                                userInitials = "U";
-                            }
-                        }
-                        else
-                        {
-                            userInitials = "U";
-                        }
-=======
 
                         <!-- ✅ Notification Bell -->
                         <div class="notification-wrapper" id="notifWrapper">
@@ -858,7 +612,6 @@
                                 </div>
                             </div>
                         </div>
->>>>>>> 9c75139 (add new update)
 
                         <div class="profile-dropdown dropdown" id="profileDropdown">
                             <button class="dropdown-toggle" type="button" id="userMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
@@ -877,8 +630,6 @@
                                         <i class="fas fa-id-card"></i> My Profile
                                     </a>
                                 </li>
-<<<<<<< HEAD
-=======
                                 <li>
                                     <a class="dropdown-item" asp-controller="MyClass" asp-action="MyClass">
                                         <i class="fas fa-chalkboard"></i> My Class
@@ -889,7 +640,6 @@
                                         <i class="fas fa-shopping-bag"></i> My Orders
                                     </a>
                                 </li>
->>>>>>> 9c75139 (add new update)
                                 @if (isTeacher)
                                 {
                                     <li>
@@ -907,14 +657,11 @@
                                             <span class="badge-role admin">Admin</span>
                                         </a>
                                     </li>
-<<<<<<< HEAD
-=======
                                     <li>
                                         <a class="dropdown-item" asp-controller="Admin" asp-action="Payments">
                                             <i class="fas fa-money-check-alt"></i> Payment Management
                                         </a>
                                     </li>
->>>>>>> 9c75139 (add new update)
                                 }
                                 <li><hr class="dropdown-divider" /></li>
                                 <li>
@@ -957,10 +704,6 @@
                     <a asp-controller="Practice" asp-action="Index" class="text-sm" style="color:#4B5648;">Practice</a>
                     <a asp-controller="Progress" asp-action="Progress" class="text-sm" style="color:#4B5648;">Progress</a>
                     <a asp-controller="Leaderboard" asp-action="Leaderboard" class="text-sm" style="color:#4B5648;">Leaderboard</a>
-<<<<<<< HEAD
-                    <!-- ✅ Find Tutor (নতুন যোগ করা - মোবাইল) -->
-                    <a asp-controller="FindTutor" asp-action="Index" class="text-sm" style="color:#4B5648;">Find Tutor</a>
-=======
                     <a asp-controller="FindTutor" asp-action="Index" class="text-sm" style="color:#4B5648;">Find Tutor</a>
                     @if (Context.Session.GetString("UserName") != null)
                     {
@@ -968,7 +711,6 @@
                             <i class="fas fa-chalkboard me-1"></i> My Class
                         </a>
                     }
->>>>>>> 9c75139 (add new update)
 
                     <hr class="border-black/5" />
 
@@ -980,21 +722,11 @@
                         var userFullNameMobile = Context.Session.GetString("UserFullName") ?? Context.Session.GetString("UserName");
 
                         <div class="flex flex-col gap-2">
-<<<<<<< HEAD
-                            <!-- মোবাইলে ইউজারের নাম দেখানো -->
-=======
->>>>>>> 9c75139 (add new update)
                             <div class="text-sm font-semibold" style="color:#1F3B2C; padding: 4px 0;">
                                 <i class="fas fa-user-circle me-2"></i> @userFullNameMobile
                                 <span class="text-xs font-normal text-muted" style="color:#6B7568;">(@Context.Session.GetString("UserName"))</span>
                             </div>
 
-<<<<<<< HEAD
-                            <a asp-controller="Profile" asp-action="Index" class="text-sm font-medium" style="color:#1F3B2C;">
-                                <i class="fas fa-id-card me-2"></i> My Profile
-                            </a>
-
-=======
                             <a href="/Notification/All" class="text-sm font-medium" style="color:#1F3B2C;">
                                 <i class="fas fa-bell me-2"></i> Notifications
                             </a>
@@ -1011,7 +743,6 @@
                                 <i class="fas fa-shopping-bag me-2"></i> My Orders
                             </a>
 
->>>>>>> 9c75139 (add new update)
                             @if (isTeacherMobile)
                             {
                                 <a asp-controller="Teacher" asp-action="TeacherDashboard" class="text-sm font-medium" style="color:#1F3B2C;">
@@ -1026,12 +757,9 @@
                                     <i class="fas fa-shield-alt me-2"></i> Admin Panel
                                     <span class="text-xs text-muted" style="color:#b8860b;">Admin</span>
                                 </a>
-<<<<<<< HEAD
-=======
                                 <a asp-controller="Admin" asp-action="Payments" class="text-sm font-medium" style="color:#1F3B2C;">
                                     <i class="fas fa-money-check-alt me-2"></i> Payment Management
                                 </a>
->>>>>>> 9c75139 (add new update)
                             }
 
                             <hr class="border-black/5" />
@@ -1183,29 +911,6 @@
                 window.smoothNavigate(url.href);
             });
 
-<<<<<<< HEAD
-            // ড্রপডাউন ম্যানুয়ালি টগল করার জন্য (Bootstrap 5 এর সাথে)
-            document.addEventListener('DOMContentLoaded', function() {
-                const dropdownToggle = document.querySelector('.profile-dropdown .dropdown-toggle');
-                if (dropdownToggle) {
-                    dropdownToggle.addEventListener('click', function(e) {
-                        e.preventDefault();
-                        const parent = this.closest('.profile-dropdown');
-                        if (parent) {
-                            parent.classList.toggle('show');
-                        }
-                    });
-                }
-
-                // ড্রপডাউনের বাইরে ক্লিক করলে বন্ধ
-                document.addEventListener('click', function(e) {
-                    const dropdown = document.querySelector('.profile-dropdown');
-                    if (dropdown && !dropdown.contains(e.target)) {
-                        dropdown.classList.remove('show');
-                    }
-                });
-            });
-=======
             document.addEventListener('submit', function (e) {
                 if (e.defaultPrevented) return;
                 startProgress();
@@ -1414,7 +1119,6 @@
             loadUnreadCount();
             setInterval(loadUnreadCount, 30000);
         })();
->>>>>>> 9c75139 (add new update)
     </script>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>

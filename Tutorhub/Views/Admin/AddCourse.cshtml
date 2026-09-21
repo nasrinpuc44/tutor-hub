@@ -1,0 +1,307 @@
+﻿@model Tutorbub.Models.Course
+
+@{
+    ViewData["Title"] = "Add New Course";
+    Layout = "_Layout";
+}
+
+<style>
+    .admin-sidebar { position: fixed; top: 80px; left: 0; bottom: 0; width: 250px; background-color: #1F3B2C; color: white; padding: 20px 0; overflow-y: auto; z-index: 100; }
+    .admin-sidebar-brand { padding: 0 20px 20px 20px; border-bottom: 1px solid rgba(255,255,255,0.1); margin-bottom: 15px; }
+    .admin-sidebar-brand h4 { color: #F3F1E7; font-weight: 600; margin: 0; }
+    .admin-sidebar-brand small { color: #8A9188; font-size: 12px; }
+    .admin-sidebar-menu { list-style: none; padding: 0; margin: 0; }
+    .admin-sidebar-menu li a { display: flex; align-items: center; padding: 12px 20px; color: #C7D0C9; text-decoration: none; transition: all 0.3s ease; border-left: 3px solid transparent; font-size: 14px; cursor: pointer; }
+    .admin-sidebar-menu li a:hover, .admin-sidebar-menu li a.active { background-color: rgba(255,255,255,0.08); color: #ffffff; border-left-color: #F4C744; }
+    .admin-sidebar-menu li a i { width: 24px; margin-right: 10px; font-size: 16px; text-align: center; }
+    .admin-sidebar-menu li a .badge-sidebar { margin-left: auto; background-color: rgba(255,255,255,0.15); padding: 2px 10px; border-radius: 12px; font-size: 11px; color: #F3F1E7; }
+    .admin-main-content { margin-left: 250px; padding: 20px; min-height: calc(100vh - 80px); }
+    .sidebar-toggle { display: none; position: fixed; top: 90px; left: 15px; z-index: 101; background-color: #1F3B2C; color: white; border: none; border-radius: 8px; padding: 10px 12px; font-size: 18px; cursor: pointer; }
+    .sidebar-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(0,0,0,0.5); z-index: 99; }
+    .sidebar-overlay.active { display: block; }
+    @@media (max-width: 992px) {
+        .admin-sidebar { transform: translateX(-100%); }
+        .admin-sidebar.open { transform: translateX(0); }
+        .sidebar-toggle { display: block; }
+        .admin-main-content { margin-left: 0; padding: 20px 15px; }
+    }
+</style>
+
+<button class="sidebar-toggle" id="sidebarToggle"><i class="fas fa-bars"></i></button>
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+<!-- Sidebar -->
+<div class="admin-sidebar" id="sidebar">
+    <div class="admin-sidebar-brand">
+        <h4><i class="fas fa-shield-alt me-2"></i>Admin Panel</h4>
+        <small>Smart Tutor Hub</small>
+    </div>
+    <ul class="admin-sidebar-menu">
+        <li><a asp-controller="Admin" asp-action="Dashboard"><i class="fas fa-chart-pie"></i> Dashboard</a></li>
+        <li><a asp-controller="Admin" asp-action="TeacherRequests"><i class="fas fa-user-graduate"></i> Teacher Requests</a></li>
+        <li><a asp-controller="Admin" asp-action="Payments"><i class="fas fa-money-check-alt"></i> Payments</a></li>
+        <li><a asp-controller="Admin" asp-action="AddCourse" class="active"><i class="fas fa-plus-circle"></i> Add Course</a></li>
+        <li><a asp-controller="Admin" asp-action="ManageCourses"><i class="fas fa-tasks"></i> Manage Courses</a></li>
+        <li style="border-top: 1px solid rgba(255,255,255,0.05); margin-top: 10px; padding-top: 10px;">
+            <form method="post" asp-controller="Account" asp-action="Logout" id="logoutForm">
+                @Html.AntiForgeryToken()
+                <a href="#" onclick="document.getElementById('logoutForm').submit(); return false;" style="color: #e74c3c;"><i class="fas fa-sign-out-alt"></i> Logout</a>
+            </form>
+        </li>
+    </ul>
+</div>
+
+<!-- Main Content -->
+<div class="admin-main-content">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 style="color:#1F3B2C;"><i class="fas fa-plus-circle me-2"></i>Add New Course</h2>
+        <a asp-controller="Admin" asp-action="Dashboard" class="btn btn-outline-secondary"><i class="fas fa-arrow-left me-1"></i>Back to Dashboard</a>
+    </div>
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success">@TempData["Success"]</div>
+    }
+    @if (ViewBag.Error != null)
+    {
+        <div class="alert alert-danger">@ViewBag.Error</div>
+    }
+
+    <div class="card shadow" style="border-radius: 16px;">
+        <div class="card-body p-4">
+            <form method="post" asp-controller="Admin" asp-action="AddCourse">
+                @Html.AntiForgeryToken()
+
+                <div class="row">
+                    <div class="col-md-8 mb-3">
+                        <label asp-for="Title" class="form-label fw-bold">Course Title <span class="text-danger">*</span></label>
+                        <input asp-for="Title" class="form-control" placeholder="e.g. Complete Web Development" required />
+                        <span asp-validation-for="Title" class="text-danger"></span>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label asp-for="Category" class="form-label fw-bold">Category <span class="text-danger">*</span></label>
+                        <select asp-for="Category" class="form-select" required>
+                            <option value="">Select Category</option>
+                            <option value="Web Development">Web Development</option>
+                            <option value="Frontend">Frontend</option>
+                            <option value="Backend">Backend</option>
+                            <option value="Design">Design</option>
+                            <option value="Mobile Development">Mobile Development</option>
+                            <option value="Data Science">Data Science</option>
+                            <option value="Language">Language</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="Description" class="form-label fw-bold">Description <span class="text-danger">*</span></label>
+                    <textarea asp-for="Description" class="form-control" rows="3" placeholder="Write course description..." required></textarea>
+                </div>
+
+                <!-- ✅ What You'll Learn (Features) -->
+                <div class="mb-3">
+                    <label asp-for="Features" class="form-label fw-bold">
+                        <i class="fas fa-check-circle me-1" style="color:#1F3B2C;"></i> What You'll Learn (Features)
+                    </label>
+                    <textarea asp-for="Features" id="featuresInput" class="form-control" rows="3"
+                              placeholder="যেমন: Certificate Included, Lifetime Access, 24/7 Support, Interactive Quizzes"></textarea>
+                    <small class="text-muted d-block mt-1">
+                        <i class="fas fa-info-circle me-1"></i>
+                        কমা (,) দিয়ে আলাদা করে লিখুন। যেমন: <strong>Certificate Included, Lifetime Access, 24/7 Support</strong>
+                    </small>
+
+                    <!-- Features Preview -->
+                    <div id="featuresPreview" class="mt-2" style="display:none;">
+                        <small class="fw-bold" style="color:#1F3B2C;">Preview:</small>
+                        <ul id="featuresList" style="margin-top:5px; padding-left:20px;"></ul>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="Image" class="form-label fw-bold">Course Image <span class="text-danger">*</span></label>
+
+                    <div class="row g-2 align-items-center">
+                        <!-- URL Input -->
+                        <div class="col-md-8">
+                            <input asp-for="Image" id="courseImageUrl" class="form-control" placeholder="https://i.ibb.co/your-image.jpg" required />
+                        </div>
+
+                        <!-- Upload Button -->
+                        <div class="col-md-4">
+                            <label for="courseImageFile" class="btn w-100" style="background-color:#F3F1E7; color:#1F3B2C; border:1.5px dashed #1F3B2C; font-weight:600; padding:9px;">
+                                <i class="fas fa-upload me-1"></i> Upload from Device
+                            </label>
+                            <input type="file" id="courseImageFile" accept="image/*" style="display:none;" />
+                        </div>
+                    </div>
+
+                    <small class="text-muted d-block mt-2">
+                        <i class="fas fa-info-circle me-1"></i>
+                        Direct image link দিন অথবা ডিভাইস থেকে ছবি আপলোড করুন (Max 5MB)
+                    </small>
+
+                    <!-- Preview -->
+                    <div id="imagePreviewWrapper" class="mt-3" style="display:none;">
+                        <p class="mb-1 fw-bold" style="font-size:12px; color:#1F3B2C;">Preview:</p>
+                        <img id="imagePreview" src="" alt="Preview"
+                             style="max-width: 220px; max-height: 150px; border-radius: 10px; border: 2px solid #E7E4D9; object-fit: cover;" />
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-3 mb-3">
+                        <label asp-for="Price" class="form-label fw-bold">Price (৳) <span class="text-danger">*</span></label>
+                        <input asp-for="Price" type="number" step="0.01" class="form-control" placeholder="1499" required />
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <label asp-for="Instructor" class="form-label fw-bold">Instructor <span class="text-danger">*</span></label>
+                        <input asp-for="Instructor" class="form-control" placeholder="e.g. Dr. Sarah Ahmed" required />
+                    </div>
+                    <div class="col-md-2 mb-3">
+                        <label asp-for="Duration" class="form-label fw-bold">Duration</label>
+                        <input asp-for="Duration" class="form-control" placeholder="12 Weeks" />
+                    </div>
+                    <div class="col-md-2 mb-3">
+                        <label asp-for="Lessons" class="form-label fw-bold">Lessons</label>
+                        <input asp-for="Lessons" type="number" class="form-control" placeholder="48" />
+                    </div>
+                    <div class="col-md-2 mb-3">
+                        <label asp-for="Level" class="form-label fw-bold">Level</label>
+                        <select asp-for="Level" class="form-select">
+                            <option value="Beginner">Beginner</option>
+                            <option value="Intermediate">Intermediate</option>
+                            <option value="Advanced">Advanced</option>
+                            <option value="Beginner to Intermediate">Beginner to Intermediate</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="d-flex gap-3 mt-4">
+                    <a asp-controller="Admin" asp-action="Dashboard" class="btn btn-secondary px-4">Cancel</a>
+                    <button type="submit" class="btn btn-success px-5" style="background-color:#1F3B2C; border-color:#1F3B2C;">
+                        <i class="fas fa-save me-2"></i>Save Course
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        document.getElementById('sidebarToggle')?.addEventListener('click', function () {
+            document.getElementById('sidebar').classList.toggle('open');
+            document.getElementById('sidebarOverlay').classList.toggle('active');
+        });
+        document.getElementById('sidebarOverlay')?.addEventListener('click', function () {
+            document.getElementById('sidebar').classList.remove('open');
+            document.getElementById('sidebarOverlay').classList.remove('active');
+        });
+
+        // ===== Features Preview =====
+        const featuresInput = document.getElementById('featuresInput');
+        const featuresPreview = document.getElementById('featuresPreview');
+        const featuresList = document.getElementById('featuresList');
+
+        if (featuresInput) {
+            featuresInput.addEventListener('input', function () {
+                const value = this.value.trim();
+                if (!value) {
+                    featuresPreview.style.display = 'none';
+                    featuresList.innerHTML = '';
+                    return;
+                }
+
+                const items = value.split(',').map(s => s.trim()).filter(s => s);
+                featuresList.innerHTML = items.map(item =>
+                    `<li style="color:#4B5648; font-size:13px; margin-bottom:3px;"><i class="fas fa-check-circle me-1" style="color:#1F3B2C;"></i>${item}</li>`
+                ).join('');
+                featuresPreview.style.display = 'block';
+            });
+        }
+
+        // ===== ইমেজ আপলোড হ্যান্ডলিং =====
+        const fileInput = document.getElementById('courseImageFile');
+        const urlInput = document.getElementById('courseImageUrl');
+        const previewWrapper = document.getElementById('imagePreviewWrapper');
+        const previewImg = document.getElementById('imagePreview');
+
+        // URL ইনপুট পরিবর্তন হলে প্রিভিউ দেখাও
+        urlInput.addEventListener('input', function () {
+            const url = this.value.trim();
+            if (url) {
+                previewImg.src = url;
+                previewWrapper.style.display = 'block';
+            } else {
+                previewWrapper.style.display = 'none';
+            }
+        });
+
+        // ফাইল সিলেক্ট হলে আপলোড করো
+        fileInput.addEventListener('change', function () {
+            const file = this.files[0];
+            if (!file) return;
+
+            const allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+            if (!allowedTypes.includes(file.type)) {
+                alert('Only JPG, PNG, GIF, or WEBP images are allowed.');
+                this.value = '';
+                return;
+            }
+
+            if (file.size > 5 * 1024 * 1024) {
+                alert('Image size must be less than 5MB.');
+                this.value = '';
+                return;
+            }
+
+            // লোকাল প্রিভিউ
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                previewImg.src = e.target.result;
+                previewWrapper.style.display = 'block';
+            };
+            reader.readAsDataURL(file);
+
+            // সার্ভারে আপলোড
+            const formData = new FormData();
+            formData.append('courseImage', file);
+
+            const token = document.querySelector('input[name="__RequestVerificationToken"]');
+            const headers = {};
+            if (token) { headers['RequestVerificationToken'] = token.value; }
+
+            const uploadLabel = document.querySelector('label[for="courseImageFile"]');
+            const originalHtml = uploadLabel.innerHTML;
+            uploadLabel.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> Uploading...';
+            uploadLabel.style.pointerEvents = 'none';
+
+            fetch('/Admin/UploadCourseImage', {
+                method: 'POST',
+                body: formData,
+                headers: headers
+            })
+            .then(function (response) { return response.json(); })
+            .then(function (data) {
+                uploadLabel.innerHTML = originalHtml;
+                uploadLabel.style.pointerEvents = 'auto';
+
+                if (data.success) {
+                    urlInput.value = data.imageUrl;
+                    previewImg.src = data.imageUrl;
+                    previewWrapper.style.display = 'block';
+                } else {
+                    alert(data.message || 'Failed to upload image.');
+                    fileInput.value = '';
+                }
+            })
+            .catch(function (error) {
+                uploadLabel.innerHTML = originalHtml;
+                uploadLabel.style.pointerEvents = 'auto';
+                alert('Error uploading image: ' + error.message);
+                fileInput.value = '';
+            });
+        });
+    </script>
+    <partial name="_ValidationScriptsPartial" />
+}

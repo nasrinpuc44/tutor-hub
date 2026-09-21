@@ -1,4 +1,4 @@
-﻿@model Tutorbub.Models.CourseDetailViewModel
+﻿@model Tutorbub.Models.Course
 
 @{
     ViewData["Title"] = Model.Title + " - Smart Tutor Hub";
@@ -7,7 +7,6 @@
 }
 
 <style>
-    /* ===== ডিটেলস পেইজ স্টাইল ===== */
     .detail-wrapper {
         display: flex;
         gap: 40px;
@@ -100,7 +99,6 @@
         font-size: 14px;
     }
 
-    /* ===== সাইডবার ===== */
     .sidebar-card {
         background: #fff;
         border-radius: 16px;
@@ -170,30 +168,6 @@
         color: #fff;
     }
 
-    .btn-pending {
-        width: 100%;
-        padding: 14px;
-        background: #f39c12;
-        color: #fff;
-        border: none;
-        border-radius: 10px;
-        font-size: 16px;
-        font-weight: 700;
-        margin-top: 12px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 8px;
-        cursor: pointer;
-        text-decoration: none;
-        transition: all 0.3s;
-    }
-
-    .btn-pending:hover {
-        background: #e67e22;
-        color: #fff;
-    }
-
     .sidebar-info {
         margin-top: 20px;
         border-top: 1px solid #f0f0f0;
@@ -217,7 +191,6 @@
         color: #1F3B2C;
     }
 
-    /* ===== সুপারিশকৃত কোর্স ===== */
     .recommended-section {
         max-width: 1280px;
         margin: 0 auto;
@@ -358,17 +331,14 @@
             <p>@Model.Description</p>
         </div>
 
-        <!-- ফিচারসমূহ -->
-        @if (Model.Features != null && Model.Features.Any())
-        {
-            <div class="detail-section-title"><i class="fas fa-check-circle"></i> What You'll Learn</div>
-            <ul class="feature-list">
-                @foreach (var feature in Model.Features)
-                {
-                    <li><i class="fas fa-check-circle" style="color:#1F3B2C;"></i> @feature</li>
-                }
-            </ul>
-        }
+        <!-- ফিচারসমূহ (ডিফল্ট) -->
+        <div class="detail-section-title"><i class="fas fa-check-circle"></i> What You'll Learn</div>
+        <ul class="feature-list">
+            <li><i class="fas fa-check-circle"></i> Certificate of Completion</li>
+            <li><i class="fas fa-check-circle"></i> Lifetime Access</li>
+            <li><i class="fas fa-check-circle"></i> 24/7 Support</li>
+            <li><i class="fas fa-check-circle"></i> Interactive Quizzes</li>
+        </ul>
 
         <!-- আরও ইনফো -->
         <div style="margin-top: 24px; padding-top: 20px; border-top: 1px solid #eee;">
@@ -395,6 +365,15 @@
                 </a>
                 <p style="text-align:center; font-size:12px; color:#2ecc71; margin-top:8px;">
                     <i class="fas fa-check me-1"></i>You have full access to this course
+                </p>
+            }
+            else if (!Model.IsEnrollmentOpen)
+            {
+                <button class="btn-buy" style="background:#8A9188; cursor:not-allowed;" disabled>
+                    <i class="fas fa-lock"></i> Enrollment Closed
+                </button>
+                <p style="text-align:center; font-size:12px; color:#e74c3c; margin-top:8px;">
+                    <i class="fas fa-info-circle me-1"></i>This course is no longer accepting new students.
                 </p>
             }
             else
@@ -448,41 +427,44 @@
 
 @section Scripts {
     <script>
-        // ===== ডামি কোর্স ডেটা (ডিটেলসের জন্য) =====
-        const courseData = [
-            { id: 1, title: "English Grammar Course", image: "https://i.ibb.co.com/KjyJyXy8/English-grammar-courses-online-with-real-certificates.jpg", price: 1499, rating: 4.9 },
-            { id: 2, title: "Basic WordPress Theme Development", image: "https://i.ibb.co.com/ZpRSvpsk/Basic-Word-Press-theme-development-full-course.jpg", price: 1999, rating: 4.8 },
-            { id: 3, title: "Complete React Front-end Developer", image: "https://i.ibb.co.com/rf3RgYqG/Complete-React-Front-end-developer-course.jpg", price: 2499, rating: 4.9 },
-            { id: 4, title: "Complete Web Design", image: "https://i.ibb.co.com/XZSqdW0B/Complete-Web-Design-from-Figma-to-Webflow.jpg", price: 1799, rating: 4.7 },
-            { id: 5, title: "Flutter Development Bootcamp", image: "https://i.ibb.co.com/qZ60Vqg/Flutter-Development-Bootcamp-with-Dart.jpg", price: 2299, rating: 4.8 },
-            { id: 6, title: "The Ultimate Figma Course", image: "https://i.ibb.co.com/rGttSLJy/The-Ultimate-Figma-Course-From-Zero-to-Expert.jpg", price: 1599, rating: 4.9 }
-        ];
-
         // ===== বর্তমান কোর্সের আইডি =====
         const currentId = @Model.Id;
 
         // ===== সুপারিশকৃত কোর্স রেন্ডার =====
         function renderRecommended() {
-            const grid = document.getElementById('recommendedGrid');
-            const recommended = courseData.filter(c => c.id !== currentId).slice(0, 4);
+            fetch('/Learn/GetAllCourses')
+                .then(function (r) { return r.json(); })
+                .then(function (courses) {
+                    const grid = document.getElementById('recommendedGrid');
+                    const recommended = courses.filter(function (c) { return c.id !== currentId; }).slice(0, 4);
 
-            let html = '';
-            recommended.forEach(course => {
-                html += `
-                    <a href="/Learn/Details/${course.id}" class="recommended-card">
-                        <img src="${course.image}" alt="${course.title}" />
-                        <div class="body">
-                            <h6>${course.title}</h6>
-                            <div style="display:flex; justify-content:space-between; align-items:center; margin-top:4px;">
-                                <span class="price">৳${course.price.toLocaleString()}</span>
-                                <span class="rating">★ ${course.rating}</span>
-                            </div>
-                        </div>
-                    </a>
-                `;
-            });
+                    if (!recommended || recommended.length === 0) {
+                        grid.innerHTML = '<p style="color:#8A9188;">No recommendations available.</p>';
+                        return;
+                    }
 
-            grid.innerHTML = html;
+                    let html = '';
+                    recommended.forEach(function (course) {
+                        html += `
+                            <a href="/Learn/Details/${course.id}" class="recommended-card">
+                                <img src="${course.image}" alt="${course.title}" />
+                                <div class="body">
+                                    <h6>${course.title}</h6>
+                                    <div style="display:flex; justify-content:space-between; align-items:center; margin-top:4px;">
+                                        <span class="price">৳${course.price.toLocaleString()}</span>
+                                        <span class="rating">★ ${course.rating}</span>
+                                    </div>
+                                </div>
+                            </a>
+                        `;
+                    });
+
+                    grid.innerHTML = html;
+                })
+                .catch(function () {
+                    document.getElementById('recommendedGrid').innerHTML =
+                        '<p style="color:#8A9188;">Could not load recommendations.</p>';
+                });
         }
 
         // ===== এনরোল ফাংশন =====
@@ -499,11 +481,10 @@
                 return;
             }
 
-            // চেকআউট পেজে পাঠানো
             window.location.href = '/Payment/Checkout?courseId=' + id;
         }
 
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             renderRecommended();
         });
     </script>

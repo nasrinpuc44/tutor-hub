@@ -4,16 +4,21 @@
 using Microsoft.AspNetCore.Mvc;
 using Tutorbub.Models;
 using System;
+using System.IO;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace Tutorbub.Controllers
 {
     public class AdminController : Controller
     {
         private readonly DatabaseHelper _dbHelper;
+        private readonly IWebHostEnvironment _webHostEnvironment;
 
-        public AdminController(IConfiguration configuration)
+        public AdminController(IConfiguration configuration, IWebHostEnvironment webHostEnvironment)
         {
             _dbHelper = new DatabaseHelper(configuration);
+            _webHostEnvironment = webHostEnvironment;
         }
 
         // ===== ড্যাশবোর্ড =====
@@ -134,7 +139,6 @@ namespace Tutorbub.Controllers
 
             if (_dbHelper.ToggleUserStatus(id, isActive))
             {
-                // ✅ ইউজারকে নোটিফিকেশন পাঠান
                 if (isActive)
                 {
                     _dbHelper.CreateNotification(
@@ -181,7 +185,6 @@ namespace Tutorbub.Controllers
 
             if (_dbHelper.UpdatePassword(id, newPassword))
             {
-                // ✅ ইউজারকে নোটিফিকেশন
                 _dbHelper.CreateNotification(
                     id,
                     "🔑 Password Changed",
@@ -241,7 +244,6 @@ namespace Tutorbub.Controllers
                 {
                     _dbHelper.MakeUserTeacher(request.UserId);
 
-                    // ✅ ইউজারকে নোটিফিকেশন
                     _dbHelper.CreateNotification(
                         request.UserId,
                         "🎓 You're now a Teacher!",
@@ -253,7 +255,6 @@ namespace Tutorbub.Controllers
                 }
                 else if (action == "Reject" && request != null)
                 {
-                    // ✅ ইউজারকে নোটিফিকেশন
                     var msg = string.IsNullOrEmpty(adminNote)
                         ? "Your teacher request was not approved. You can try again later."
                         : $"Your teacher request was not approved. Reason: {adminNote}";
@@ -273,16 +274,7 @@ namespace Tutorbub.Controllers
             return Json(new { success = false, message = "Failed to process request" });
         }
 
-<<<<<<< HEAD
-        // ===== Teacher ডিলিট (ইউজার অ্যাকাউন্ট + Request দুটোই) =====
-        // এখানে ইউজার আইডি (id) এবং request আইডি (requestId) দুটোই পাঠানো হয়।
-        // ইউজার অ্যাকাউন্ট ডিলিটের চেষ্টা করা হয় (থাকলে তার সব request-ও
-        // ক্যাসকেড হয়ে যায়), এবং আলাদাভাবে এই নির্দিষ্ট request রো-টাও সরাসরি
-        // ডিলিট করার চেষ্টা করা হয় — যাতে ইউজার না থাকলেও (যেমন পুরনো/টেস্ট
-        // ডেটা) কার্ডটা ঠিকই লিস্ট থেকে মুছে যায়।
-=======
         // ===== Teacher ডিলিট =====
->>>>>>> 9c75139 (add new update)
         [HttpPost]
         [ValidateAntiForgeryToken]
         public IActionResult DeleteTeacherAccount(int id, int requestId)
@@ -412,7 +404,6 @@ namespace Tutorbub.Controllers
 
             if (_dbHelper.ApproveOrder(id, adminId, adminNote))
             {
-                // ✅ ইউজারকে নোটিফিকেশন
                 var order = _dbHelper.GetOrderById(id);
                 if (order != null)
                 {
@@ -446,7 +437,6 @@ namespace Tutorbub.Controllers
 
             if (_dbHelper.RejectOrder(id, adminId, adminNote))
             {
-                // ✅ ইউজারকে নোটিফিকেশন
                 var order = _dbHelper.GetOrderById(id);
                 if (order != null)
                 {
@@ -467,6 +457,297 @@ namespace Tutorbub.Controllers
                 return Json(new { success = true, message = "Payment rejected." });
             }
             return Json(new { success = false, message = "Failed to reject payment." });
+        }
+
+        // ============================================================
+        // ===== ADD COURSE =====
+        // ============================================================
+
+        [HttpGet]
+        public IActionResult AddCourse()
+        {
+            var role = HttpContext.Session.GetString("UserRole");
+            if (role != "Admin")
+            {
+                return RedirectToAction("Login", "Account");
+            }
+            return View();
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult AddCourse(Course model)
+        {
+            var role = HttpContext.Session.GetString("UserRole");
+            if (role != "Admin")
+            {
+                return RedirectToAction("Login", "Account");
+            }
+
+            if (ModelState.IsValid)
+            {
+                model.CreatedAt = DateTime.UtcNow;
+                model.IsEnrollmentOpen = true;
+
+                if (_dbHelper.CreateCourse(model, out string? error))
+                {
+                    TempData["Success"] = "Course added successfully!";
+                    return RedirectToAction("AddCourse");
+                }
+
+                ViewBag.Error = $"Failed to add course: {error}";
+            }
+
+            return View(model);
+        }
+
+        // ============================================================
+        // ===== UPLOAD COURSE IMAGE =====
+        // ============================================================
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> UploadCourseImage(IFormFile courseImage)
+        {
+            var role = HttpContext.Session.GetString("UserRole");
+            if (role != "Admin")
+            {
+                return Json(new { success = false, message = "Unauthorized" });
+            }
+
+            if (courseImage == null || courseImage.Length == 0)
+            {
+                return Json(new { success = false, message = "Please select an image." });
+            }
+
+            var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif", ".webp" };
+            var extension = Path.GetExtension(courseImage.FileName).ToLowerInvariant();
+
+            if (!allowedExtensions.Contains(extension))
+            {
+                return Json(new { success = false, message = "Only JPG, PNG, GIF, or WEBP images are allowed." });
+            }
+
+            if (courseImage.Length > 5 * 1024 * 1024)
+            {
+                return Json(new { success = false, message = "Image size must be less than 5MB." });
+            }
+
+            try
+            {
+                var uploadPath = Path.Combine(_webHostEnvironment.WebRootPath, "uploads", "courses");
+                if (!Directory.Exists(uploadPath))
+                {
+                    Directory.CreateDirectory(uploadPath);
+                }
+
+                var fileName = $"course_{DateTime.Now.Ticks}{extension}";
+                var filePath = Path.Combine(uploadPath, fileName);
+
+                using (var stream = new FileStream(filePath, FileMode.Create))
+                {
+                    await courseImage.CopyToAsync(stream);
+                }
+
+                var imageUrl = $"/uploads/courses/{fileName}";
+                return Json(new { success = true, message = "Image uploaded successfully!", imageUrl });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = $"Error: {ex.Message}" });
+            }
+        }
+
+        // ============================================================
+        // ===== UPLOAD COURSE LESSON VIDEO (নতুন) =====
+        // ============================================================
+
+        [HttpGet]
+        public IActionResult UploadLesson(int courseId)
+        {
+            var role = HttpContext.Session.GetString("UserRole");
+            if (role != "Admin")
+            {
+                return RedirectToAction("Login", "Account");
+            }
+
+            var course = _dbHelper.GetCourseById(courseId);
+            if (course == null)
+            {
+                TempData["Error"] = "Course not found.";
+                return RedirectToAction("ManageCourses");
+            }
+
+            ViewBag.Course = course;
+            var lessons = _dbHelper.GetLessonsByCourseId(courseId);
+            ViewBag.Lessons = lessons;
+            return View();
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult UploadLesson(int courseId, int moduleNumber, int lessonNumber,
+            string title, string duration, string? description, string? videoUrl)
+        {
+            var role = HttpContext.Session.GetString("UserRole");
+            if (role != "Admin")
+            {
+                return Json(new { success = false, message = "Unauthorized" });
+            }
+
+            if (string.IsNullOrWhiteSpace(title))
+            {
+                return Json(new { success = false, message = "Lesson title is required." });
+            }
+
+            if (string.IsNullOrWhiteSpace(videoUrl))
+            {
+                return Json(new { success = false, message = "Video URL is required." });
+            }
+
+            var lesson = new CourseLesson
+            {
+                CourseId = courseId,
+                ModuleNumber = moduleNumber,
+                LessonNumber = lessonNumber,
+                Title = title.Trim(),
+                VideoUrl = videoUrl.Trim(),
+                Duration = duration?.Trim() ?? "",
+                Description = description?.Trim(),
+                CreatedAt = DateTime.UtcNow
+            };
+
+            if (_dbHelper.CreateCourseLesson(lesson, out string? error))
+            {
+                return Json(new { success = true, message = "Lesson uploaded successfully!" });
+            }
+
+            return Json(new { success = false, message = $"Failed to save lesson: {error}" });
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult DeleteLesson(int id)
+        {
+            var role = HttpContext.Session.GetString("UserRole");
+            if (role != "Admin")
+            {
+                return Json(new { success = false, message = "Unauthorized" });
+            }
+
+            if (_dbHelper.DeleteCourseLesson(id))
+            {
+                return Json(new { success = true, message = "Lesson deleted successfully." });
+            }
+            return Json(new { success = false, message = "Failed to delete lesson." });
+        }
+
+        // ===== Upload Video File =====
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> UploadLessonVideo(IFormFile lessonVideo)
+        {
+            var role = HttpContext.Session.GetString("UserRole");
+            if (role != "Admin")
+            {
+                return Json(new { success = false, message = "Unauthorized" });
+            }
+
+            if (lessonVideo == null || lessonVideo.Length == 0)
+            {
+                return Json(new { success = false, message = "Please select a video file." });
+            }
+
+            var allowedExtensions = new[] { ".mp4", ".webm", ".ogg", ".mov", ".avi", ".mkv" };
+            var extension = Path.GetExtension(lessonVideo.FileName).ToLowerInvariant();
+
+            if (!allowedExtensions.Contains(extension))
+            {
+                return Json(new { success = false, message = "Only MP4, WEBM, OGG, MOV, AVI, or MKV videos are allowed." });
+            }
+
+            if (lessonVideo.Length > 500 * 1024 * 1024)
+            {
+                return Json(new { success = false, message = "Video size must be less than 500MB." });
+            }
+
+            try
+            {
+                var uploadPath = Path.Combine(_webHostEnvironment.WebRootPath, "uploads", "videos");
+                if (!Directory.Exists(uploadPath))
+                {
+                    Directory.CreateDirectory(uploadPath);
+                }
+
+                var fileName = $"lesson_{DateTime.Now.Ticks}{extension}";
+                var filePath = Path.Combine(uploadPath, fileName);
+
+                using (var stream = new FileStream(filePath, FileMode.Create))
+                {
+                    await lessonVideo.CopyToAsync(stream);
+                }
+
+                var videoUrl = $"/uploads/videos/{fileName}";
+                return Json(new { success = true, message = "Video uploaded successfully!", videoUrl });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = $"Error: {ex.Message}" });
+            }
+        }
+
+        // ============================================================
+        // ===== MANAGE COURSES =====
+        // ============================================================
+
+        [HttpGet]
+        public IActionResult ManageCourses()
+        {
+            var role = HttpContext.Session.GetString("UserRole");
+            if (role != "Admin")
+            {
+                return RedirectToAction("Login", "Account");
+            }
+
+            var courses = _dbHelper.GetAllCourses();
+            return View(courses);
+        }
+
+        // ===== কোর্স ডিলিট =====
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult DeleteCourse(int id)
+        {
+            var role = HttpContext.Session.GetString("UserRole");
+            if (role != "Admin")
+            {
+                return Json(new { success = false, message = "Unauthorized" });
+            }
+
+            if (_dbHelper.DeleteCourse(id))
+            {
+                return Json(new { success = true, message = "Course deleted successfully." });
+            }
+            return Json(new { success = false, message = "Failed to delete course." });
+        }
+
+        // ===== Enrollment Open/Close =====
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult ToggleEnrollment(int id, bool isOpen)
+        {
+            var role = HttpContext.Session.GetString("UserRole");
+            if (role != "Admin")
+            {
+                return Json(new { success = false, message = "Unauthorized" });
+            }
+
+            if (_dbHelper.ToggleEnrollment(id, isOpen))
+            {
+                var status = isOpen ? "opened" : "closed";
+                return Json(new { success = true, message = $"Enrollment {status} successfully." });
+            }
+            return Json(new { success = false, message = "Failed to update enrollment status." });
         }
     }
 }

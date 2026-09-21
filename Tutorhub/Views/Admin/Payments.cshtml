@@ -443,6 +443,18 @@
                 }
             </a>
         </li>
+        <!-- ✅ Add Course লিংক -->
+        <li>
+            <a asp-controller="Admin" asp-action="AddCourse">
+                <i class="fas fa-plus-circle"></i> Add Course
+            </a>
+        </li>
+        <!-- ✅ Manage Courses লিংক -->
+        <li>
+            <a asp-controller="Admin" asp-action="ManageCourses">
+                <i class="fas fa-tasks"></i> Manage Courses
+            </a>
+        </li>
         <li style="border-top: 1px solid rgba(255,255,255,0.05); margin-top: 10px; padding-top: 10px;">
             <form method="post" asp-controller="Account" asp-action="Logout" id="logoutForm">
                 @Html.AntiForgeryToken()

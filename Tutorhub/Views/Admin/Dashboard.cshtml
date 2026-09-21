@@ -1,13 +1,9 @@
-﻿<!-- 📁 Views/Admin/Dashboard.cshtml -->
-<!-- লোকেশন: Tutorbub/Views/Admin/Dashboard.cshtml -->
-
-@model List<Tutorbub.Models.User>
+﻿@model List<Tutorbub.Models.User>
 
 @{
     ViewData["Title"] = "Admin Dashboard";
     Layout = "_Layout";
-    
-    // পেন্ডিং টিচার রিকোয়েস্ট কাউন্ট
+
     var pendingCount = 0;
     try
     {
@@ -21,7 +17,6 @@
 }
 
 <style>
-    /* ===== সাইডবার স্টাইল ===== */
     .sidebar {
         position: fixed;
         top: 80px;
@@ -42,16 +37,16 @@
         margin-bottom: 15px;
     }
 
-        .sidebar-brand h4 {
-            color: #F3F1E7;
-            font-weight: 600;
-            margin: 0;
-        }
+    .sidebar-brand h4 {
+        color: #F3F1E7;
+        font-weight: 600;
+        margin: 0;
+    }
 
-        .sidebar-brand small {
-            color: #8A9188;
-            font-size: 12px;
-        }
+    .sidebar-brand small {
+        color: #8A9188;
+        font-size: 12px;
+    }
 
     .sidebar-menu {
         list-style: none;
@@ -59,58 +54,56 @@
         margin: 0;
     }
 
-        .sidebar-menu li {
-            padding: 0;
-        }
+    .sidebar-menu li {
+        padding: 0;
+    }
 
-            .sidebar-menu li a {
-                display: flex;
-                align-items: center;
-                padding: 12px 20px;
-                color: #C7D0C9;
-                text-decoration: none;
-                transition: all 0.3s ease;
-                border-left: 3px solid transparent;
-                font-size: 14px;
-                cursor: pointer;
-            }
+    .sidebar-menu li a {
+        display: flex;
+        align-items: center;
+        padding: 12px 20px;
+        color: #C7D0C9;
+        text-decoration: none;
+        transition: all 0.3s ease;
+        border-left: 3px solid transparent;
+        font-size: 14px;
+        cursor: pointer;
+    }
 
-                .sidebar-menu li a:hover {
-                    background-color: rgba(255, 255, 255, 0.05);
-                    color: #ffffff;
-                    border-left-color: #F4C744;
-                }
+    .sidebar-menu li a:hover {
+        background-color: rgba(255, 255, 255, 0.05);
+        color: #ffffff;
+        border-left-color: #F4C744;
+    }
 
-                .sidebar-menu li a.active {
-                    background-color: rgba(255, 255, 255, 0.08);
-                    color: #ffffff;
-                    border-left-color: #F4C744;
-                }
+    .sidebar-menu li a.active {
+        background-color: rgba(255, 255, 255, 0.08);
+        color: #ffffff;
+        border-left-color: #F4C744;
+    }
 
-                .sidebar-menu li a i {
-                    width: 24px;
-                    margin-right: 10px;
-                    font-size: 16px;
-                    text-align: center;
-                }
+    .sidebar-menu li a i {
+        width: 24px;
+        margin-right: 10px;
+        font-size: 16px;
+        text-align: center;
+    }
 
-                .sidebar-menu li a .badge-sidebar {
-                    margin-left: auto;
-                    background-color: rgba(255, 255, 255, 0.15);
-                    padding: 2px 10px;
-                    border-radius: 12px;
-                    font-size: 11px;
-                    color: #F3F1E7;
-                }
+    .sidebar-menu li a .badge-sidebar {
+        margin-left: auto;
+        background-color: rgba(255, 255, 255, 0.15);
+        padding: 2px 10px;
+        border-radius: 12px;
+        font-size: 11px;
+        color: #F3F1E7;
+    }
 
-    /* ===== মেইন কন্টেন্ট ===== */
     .main-content {
         margin-left: 250px;
         padding: 20px;
         min-height: calc(100vh - 80px);
     }
 
-    /* ===== মোবাইল সাইডবার ===== */
     .sidebar-overlay {
         display: none;
         position: fixed;
@@ -122,9 +115,9 @@
         z-index: 99;
     }
 
-        .sidebar-overlay.active {
-            display: block;
-        }
+    .sidebar-overlay.active {
+        display: block;
+    }
 
     .sidebar-toggle {
         display: none;
@@ -141,20 +134,18 @@
         cursor: pointer;
     }
 
-        .sidebar-toggle:hover {
-            background-color: #2d5a42;
-        }
+    .sidebar-toggle:hover {
+        background-color: #2d5a42;
+    }
 
-    /* ===== Stats Card ===== */
     .stats-card {
         transition: transform 0.2s;
     }
 
-        .stats-card:hover {
-            transform: translateY(-5px);
-        }
+    .stats-card:hover {
+        transform: translateY(-5px);
+    }
 
-    /* ===== টেবিল স্টাইল ===== */
     .table-striped tbody tr:nth-of-type(odd) {
         background-color: rgba(0, 0, 0, .02);
     }
@@ -183,7 +174,6 @@
         margin: 2px;
     }
 
-    /* ===== ইউজার ডিটেইলস মোডাল স্টাইল ===== */
     .user-detail-avatar {
         width: 80px;
         height: 80px;
@@ -198,11 +188,11 @@
         border-bottom: 1px solid #f0f0f0;
     }
 
-        .detail-section:last-child {
-            border-bottom: none;
-            margin-bottom: 0;
-            padding-bottom: 0;
-        }
+    .detail-section:last-child {
+        border-bottom: none;
+        margin-bottom: 0;
+        padding-bottom: 0;
+    }
 
     .detail-section-title {
         font-weight: 600;
@@ -214,10 +204,10 @@
         border-radius: 5px;
     }
 
-        .detail-section-title i {
-            margin-right: 8px;
-            color: #1F3B2C;
-        }
+    .detail-section-title i {
+        margin-right: 8px;
+        color: #1F3B2C;
+    }
 
     .detail-row {
         display: flex;
@@ -226,9 +216,9 @@
         border-bottom: 1px solid #f8f8f8;
     }
 
-        .detail-row:last-child {
-            border-bottom: none;
-        }
+    .detail-row:last-child {
+        border-bottom: none;
+    }
 
     .detail-label {
         width: 140px;
@@ -242,12 +232,11 @@
         word-break: break-all;
     }
 
-        .detail-value a {
-            color: #1F3B2C;
-            text-decoration: underline;
-        }
+    .detail-value a {
+        color: #1F3B2C;
+        text-decoration: underline;
+    }
 
-    /* ===== মোডাল ফিক্স ===== */
     .modal-content {
         background-color: #ffffff !important;
         border-radius: 16px !important;
@@ -261,9 +250,9 @@
         padding: 15px 20px !important;
     }
 
-        .modal-header .btn-close {
-            filter: brightness(0) invert(1) !important;
-        }
+    .modal-header .btn-close {
+        filter: brightness(0) invert(1) !important;
+    }
 
     .modal-body {
         padding: 20px !important;
@@ -272,23 +261,23 @@
         background-color: #ffffff !important;
     }
 
-        .modal-body::-webkit-scrollbar {
-            width: 6px;
-        }
+    .modal-body::-webkit-scrollbar {
+        width: 6px;
+    }
 
-        .modal-body::-webkit-scrollbar-track {
-            background: #f1f1f1;
-            border-radius: 10px;
-        }
+    .modal-body::-webkit-scrollbar-track {
+        background: #f1f1f1;
+        border-radius: 10px;
+    }
 
-        .modal-body::-webkit-scrollbar-thumb {
-            background: #1F3B2C;
-            border-radius: 10px;
-        }
+    .modal-body::-webkit-scrollbar-thumb {
+        background: #1F3B2C;
+        border-radius: 10px;
+    }
 
-            .modal-body::-webkit-scrollbar-thumb:hover {
-                background: #2d5a42;
-            }
+    .modal-body::-webkit-scrollbar-thumb:hover {
+        background: #2d5a42;
+    }
 
     .modal-footer {
         border-top: 1px solid #f0f0f0 !important;
@@ -301,9 +290,9 @@
         background-color: rgba(0, 0, 0, 0.4) !important;
     }
 
-        .modal-backdrop.show {
-            opacity: 1 !important;
-        }
+    .modal-backdrop.show {
+        opacity: 1 !important;
+    }
 
     .modal.fade .modal-dialog {
         transition: transform 0.3s ease-out;
@@ -314,15 +303,14 @@
         transform: scale(1);
     }
 
-    /* ===== রেস্পন্সিভ ===== */
     @@media (max-width: 992px) {
         .sidebar {
             transform: translateX(-100%);
         }
 
-            .sidebar.open {
-                transform: translateX(0);
-            }
+        .sidebar.open {
+            transform: translateX(0);
+        }
 
         .sidebar-toggle {
             display: block;
@@ -387,7 +375,7 @@
                 <span class="badge-sidebar">@Model.Count</span>
             </a>
         </li>
-        <!-- ===== Users বাটন রিমুভ করা হয়েছে ===== -->
+
         <!-- ===== Teacher Request বাটন ===== -->
         <li>
             <a asp-controller="Admin" asp-action="TeacherRequests">
@@ -395,7 +383,8 @@
                 <span class="badge-sidebar" style="background-color:#F4C744; color:#1F3B2C;">@ViewBag.PendingCount</span>
             </a>
         </li>
-        <!-- ✅ Payments বাটন (নতুন যোগ করা) -->
+
+        <!-- ===== Payments বাটন ===== -->
         <li>
             <a asp-controller="Admin" asp-action="Payments">
                 <i class="fas fa-money-check-alt"></i> Payments
@@ -405,6 +394,21 @@
                 }
             </a>
         </li>
+
+        <!-- ✅ Add Course বাটন -->
+        <li>
+            <a asp-controller="Admin" asp-action="AddCourse">
+                <i class="fas fa-plus-circle"></i> Add Course
+            </a>
+        </li>
+
+        <!-- ✅ Manage Courses বাটন (নতুন যোগ করা) -->
+        <li>
+            <a asp-controller="Admin" asp-action="ManageCourses">
+                <i class="fas fa-tasks"></i> Manage Courses
+            </a>
+        </li>
+
         <li>
             <a href="#" onclick="loadContent('add-user')">
                 <i class="fas fa-user-plus"></i> Add User
@@ -658,30 +662,30 @@
             </div>
             <div class="modal-body" style="padding: 25px;">
                 <input type="hidden" id="passwordUserId" />
-                
+
                 <div class="text-center mb-4">
                     <i class="fas fa-lock" style="font-size: 48px; color: #1F3B2C; opacity: 0.3;"></i>
                     <p class="text-muted mt-2">Enter new password for the user</p>
                 </div>
-                
+
                 <div class="mb-3">
                     <label for="newPassword" class="form-label fw-bold" style="color: #1F3B2C;">
                         <i class="fas fa-key me-1"></i> New Password
                     </label>
-                    <input type="password" id="newPassword" class="form-control" 
-                           placeholder="Min 6 characters" 
+                    <input type="password" id="newPassword" class="form-control"
+                           placeholder="Min 6 characters"
                            style="border-radius: 8px; padding: 12px 15px;" />
                     <small class="text-muted" style="display: block; margin-top: 5px;">
                         <i class="fas fa-info-circle me-1"></i> Password must be at least 6 characters
                     </small>
                 </div>
-                
+
                 <div class="mb-3">
                     <label for="confirmNewPassword" class="form-label fw-bold" style="color: #1F3B2C;">
                         <i class="fas fa-check-double me-1"></i> Confirm Password
                     </label>
-                    <input type="password" id="confirmNewPassword" class="form-control" 
-                           placeholder="Confirm new password" 
+                    <input type="password" id="confirmNewPassword" class="form-control"
+                           placeholder="Confirm new password"
                            style="border-radius: 8px; padding: 12px 15px;" />
                 </div>
             </div>
@@ -689,7 +693,7 @@
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" style="border-radius: 8px;">
                     <i class="fas fa-times me-1"></i> Cancel
                 </button>
-                <button type="button" class="btn btn-success" onclick="submitPassword()" 
+                <button type="button" class="btn btn-success" onclick="submitPassword()"
                         style="background-color: #1F3B2C; border-color: #1F3B2C; border-radius: 8px; padding: 10px 25px;">
                     <i class="fas fa-save me-1"></i> Update Password
                 </button>
@@ -700,13 +704,12 @@
 
 @section Scripts {
     <script>
-        // ===== সাইডবার টগল (মোবাইলের জন্য) =====
-        document.getElementById('sidebarToggle').addEventListener('click', function() {
+        document.getElementById('sidebarToggle').addEventListener('click', function () {
             document.getElementById('sidebar').classList.toggle('open');
             document.getElementById('sidebarOverlay').classList.toggle('active');
         });
 
-        document.getElementById('sidebarOverlay').addEventListener('click', function() {
+        document.getElementById('sidebarOverlay').addEventListener('click', function () {
             document.getElementById('sidebar').classList.remove('open');
             document.getElementById('sidebarOverlay').classList.remove('active');
         });
@@ -724,7 +727,6 @@
             alert('Loading ' + page + ' page... (Coming soon)');
         }
 
-        // ===== অ্যাডমিন নিজের পাসওয়ার্ড চেঞ্জ =====
         function changeAdminPassword() {
             var currentUserId = '@Context.Session.GetString("UserId")';
             if (currentUserId) {
@@ -736,69 +738,64 @@
 
         var userId = 0;
 
-        // ===== পাসওয়ার্ড চেঞ্জ ফাংশন =====
         function changePassword(id) {
             userId = id;
             document.getElementById('passwordUserId').value = id;
             document.getElementById('newPassword').value = '';
             document.getElementById('confirmNewPassword').value = '';
-            
-            // মোডাল সঠিকভাবে শো করা
+
             var modalElement = document.getElementById('passwordModal');
             var modal = new bootstrap.Modal(modalElement);
             modal.show();
         }
 
-        // ===== পাসওয়ার্ড সাবমিট ফাংশন =====
         function submitPassword() {
             var password = document.getElementById('newPassword').value;
             var confirmPassword = document.getElementById('confirmNewPassword').value;
-            
+
             if (password.length < 6) {
                 alert('Password must be at least 6 characters');
                 return;
             }
-            
+
             if (password !== confirmPassword) {
                 alert('Passwords do not match');
                 return;
             }
-            
+
             var id = document.getElementById('passwordUserId').value;
             if (!id) {
                 alert('User ID not found');
                 return;
             }
-            
+
             var formData = new FormData();
             formData.append('id', id);
             formData.append('newPassword', password);
-            
-            // Anti-forgery token নেওয়া
+
             var token = document.querySelector('input[name="__RequestVerificationToken"]');
             var headers = {};
             if (token) {
                 headers['RequestVerificationToken'] = token.value;
             }
-            
-            // লোডিং ইন্ডিকেটর
+
             var btn = document.querySelector('#passwordModal .btn-success');
             var originalText = btn.innerHTML;
             btn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> Updating...';
             btn.disabled = true;
-            
+
             fetch('/Admin/UpdatePassword', {
                 method: 'POST',
                 body: formData,
                 headers: headers
             })
-            .then(function(response) {
+            .then(function (response) {
                 return response.json();
             })
-            .then(function(data) {
+            .then(function (data) {
                 btn.innerHTML = originalText;
                 btn.disabled = false;
-                
+
                 alert(data.message);
                 if (data.success) {
                     var modal = bootstrap.Modal.getInstance(document.getElementById('passwordModal'));
@@ -808,7 +805,7 @@
                     location.reload();
                 }
             })
-            .catch(function(error) {
+            .catch(function (error) {
                 console.error('Error:', error);
                 btn.innerHTML = originalText;
                 btn.disabled = false;
@@ -816,16 +813,15 @@
             });
         }
 
-        // ===== ইউজার ভিউ (সম্পূর্ণ প্রোফাইল) =====
         function viewUser(id) {
             var detailsDiv = document.getElementById('userDetails');
             detailsDiv.innerHTML = '<div class="text-center py-5"><div class="spinner-border text-success" role="status"><span class="visually-hidden">Loading...</span></div><p class="mt-2 text-muted">Loading user profile...</p></div>';
 
             fetch('/Admin/UserDetails?id=' + id)
-                .then(function(response) {
+                .then(function (response) {
                     return response.json();
                 })
-                .then(function(data) {
+                .then(function (data) {
                     if (data.success) {
                         var u = data.user;
                         var profileImage = u.profileImageLink || 'https://i.ibb.co/fd9sY88Y/IMG-6916-1.png';
@@ -836,7 +832,6 @@
 
                         var html = '';
 
-                        // ===== প্রোফাইল হেডার =====
                         html += '<div class="text-center mb-3">';
                         html += '<img src="' + profileImage + '" alt="Profile" class="user-detail-avatar" />';
                         html += '<h5 class="mt-2" style="color:#1F3B2C;">' + u.fullName + '</h5>';
@@ -847,7 +842,6 @@
                         html += '<p class="text-muted small mt-1">' + u.userName + ' • ' + u.email + '</p>';
                         html += '</div>';
 
-                        // ===== বেসিক ইনফো =====
                         html += '<div class="detail-section">';
                         html += '<div class="detail-section-title"><i class="fas fa-id-card"></i>Basic Information</div>';
                         html += '<div class="detail-row"><span class="detail-label">ID</span><span class="detail-value">' + u.id + '</span></div>';
@@ -859,7 +853,6 @@
                         html += '<div class="detail-row"><span class="detail-label">Last Login</span><span class="detail-value">' + u.lastLoginAt + '</span></div>';
                         html += '</div>';
 
-                        // ===== অ্যাডিশনাল ইনফো =====
                         html += '<div class="detail-section">';
                         html += '<div class="detail-section-title"><i class="fas fa-info-circle"></i>Additional Information</div>';
                         html += '<div class="detail-row"><span class="detail-label">Gender</span><span class="detail-value">' + (u.gender || notProvided) + '</span></div>';
@@ -869,7 +862,6 @@
                         html += '<div class="detail-row"><span class="detail-label">Area Type</span><span class="detail-value">' + (u.areaType || notProvided) + '</span></div>';
                         html += '</div>';
 
-                        // ===== অ্যাড্রেস =====
                         html += '<div class="detail-section">';
                         html += '<div class="detail-section-title"><i class="fas fa-map-marker-alt"></i>Address</div>';
                         html += '<div class="detail-row"><span class="detail-label">Country</span><span class="detail-value">' + (u.country || notProvided) + '</span></div>';
@@ -877,7 +869,6 @@
                         html += '<div class="detail-row"><span class="detail-label">Permanent Address</span><span class="detail-value">' + (u.permanentAddress || notProvided) + '</span></div>';
                         html += '</div>';
 
-                        // ===== এডুকেশন =====
                         html += '<div class="detail-section">';
                         html += '<div class="detail-section-title"><i class="fas fa-graduation-cap"></i>Education</div>';
                         html += '<div class="detail-row"><span class="detail-label">Education Level</span><span class="detail-value">' + (u.educationLevel || notProvided) + '</span></div>';
@@ -888,7 +879,6 @@
                         html += '<div class="detail-row"><span class="detail-label">CSE/CS Student</span><span class="detail-value">' + (u.isCSEStudent ? 'Yes' : 'No') + '</span></div>';
                         html += '</div>';
 
-                        // ===== ইম্পোর্ট্যান্ট লিংক =====
                         html += '<div class="detail-section">';
                         html += '<div class="detail-section-title"><i class="fas fa-link"></i>Important Links</div>';
 
@@ -905,7 +895,6 @@
                         html += '<div class="detail-row"><span class="detail-label">Profile Image</span><span class="detail-value">' + profileImageLink + '</span></div>';
                         html += '</div>';
 
-                        // ===== প্রোফাইল সম্পূর্ণতার স্ট্যাটাস =====
                         var fields = [
                             { name: 'Full Name', value: u.fullName },
                             { name: 'Email', value: u.email },
@@ -952,14 +941,13 @@
                         detailsDiv.innerHTML = '<div class="alert alert-danger text-center">User not found</div>';
                     }
                 })
-                .catch(function(error) {
+                .catch(function (error) {
                     console.error('Error:', error);
                     detailsDiv.innerHTML = '<div class="alert alert-danger text-center">Error loading user details</div>';
                     alert('Error loading user details');
                 });
         }
 
-        // ===== স্ট্যাটাস টগল =====
         function toggleStatus(id, isActive) {
             var action = isActive ? 'activate' : 'deactivate';
             if (!confirm('Are you sure you want to ' + action + ' this user?')) {
@@ -981,22 +969,21 @@
                 body: formData,
                 headers: headers
             })
-                .then(function(response) {
+                .then(function (response) {
                     return response.json();
                 })
-                .then(function(data) {
+                .then(function (data) {
                     alert(data.message);
                     if (data.success) {
                         location.reload();
                     }
                 })
-                .catch(function(error) {
+                .catch(function (error) {
                     console.error('Error:', error);
                     alert('Error toggling user status');
                 });
         }
 
-        // ===== ইউজার ডিলিট =====
         function deleteUser(id) {
             if (!confirm('Delete this user permanently? This action cannot be undone!')) {
                 return;
@@ -1016,36 +1003,35 @@
                 body: formData,
                 headers: headers
             })
-                .then(function(response) {
+                .then(function (response) {
                     return response.json();
                 })
-                .then(function(data) {
+                .then(function (data) {
                     alert(data.message);
                     if (data.success) {
                         location.reload();
                     }
                 })
-                .catch(function(error) {
+                .catch(function (error) {
                     console.error('Error:', error);
                     alert('Error deleting user');
                 });
         }
 
-        // Enter key press support for password fields
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             var passwordField = document.getElementById('newPassword');
             var confirmField = document.getElementById('confirmNewPassword');
-            
+
             if (passwordField) {
-                passwordField.addEventListener('keypress', function(e) {
+                passwordField.addEventListener('keypress', function (e) {
                     if (e.key === 'Enter') {
                         confirmField.focus();
                     }
                 });
             }
-            
+
             if (confirmField) {
-                confirmField.addEventListener('keypress', function(e) {
+                confirmField.addEventListener('keypress', function (e) {
                     if (e.key === 'Enter') {
                         submitPassword();
                     }
