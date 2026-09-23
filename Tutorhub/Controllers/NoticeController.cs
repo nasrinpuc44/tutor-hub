@@ -1,6 +1,5 @@
 ﻿// 📁 Controllers/NoticeController.cs
 // লোকেশন: Tutorbub/Controllers/NoticeController.cs
-// ⚠️ এই ফাইলে কোনো ডামি ডেটা নেই — সব ডেটাবেস থেকে আসে।
 
 using Microsoft.AspNetCore.Mvc;
 using Tutorbub.Models;
@@ -31,24 +30,36 @@ namespace Tutorbub.Controllers
             {
                 var q = search.ToLower().Trim();
                 allNotices = allNotices.Where(n =>
-                    n.Title.ToLower().Contains(q) ||
-                    n.Content.ToLower().Contains(q) ||
-                    n.Category.ToLower().Contains(q)
+                    (n.Title ?? "").ToLower().Contains(q) ||
+                    (n.Content ?? "").ToLower().Contains(q) ||
+                    (n.Category ?? "").ToLower().Contains(q)
                 ).ToList();
             }
 
             // Category filter
             if (!string.IsNullOrWhiteSpace(category) && category != "all")
             {
-                allNotices = allNotices.Where(n => n.Category.Equals(category, StringComparison.OrdinalIgnoreCase)).ToList();
+                allNotices = allNotices
+                    .Where(n => (n.Category ?? "").Equals(category, StringComparison.OrdinalIgnoreCase))
+                    .ToList();
             }
 
+            // ✅ Announcements এবং News আলাদা করা
             var announcements = allNotices.Where(n => n.IsAnnouncement).ToList();
-            var news = allNotices.Where(n => !n.IsAnnouncement).OrderByDescending(n => n.PublishedDate).ToList();
+            var news = allNotices
+                .Where(n => !n.IsAnnouncement)
+                .OrderByDescending(n => n.PublishedDate)
+                .ToList();
 
             ViewBag.Announcements = announcements;
             ViewBag.SearchQuery = search;
             ViewBag.SelectedCategory = category ?? "all";
+
+            // 🔍 ডিবাগ লগ
+            Console.WriteLine($"=== Notice Index ===");
+            Console.WriteLine($"Total notices: {allNotices.Count}");
+            Console.WriteLine($"Announcements: {announcements.Count}");
+            Console.WriteLine($"News: {news.Count}");
 
             return View("Notice", news);
         }

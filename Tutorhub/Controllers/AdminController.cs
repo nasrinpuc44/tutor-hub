@@ -792,11 +792,28 @@ namespace Tutorbub.Controllers
                 return View(model);
             }
 
+            // 🔍 ডিবাগ লগ
+            Console.WriteLine("========== AddNotice POST ==========");
+            Console.WriteLine($"Title: {model.Title}");
+            Console.WriteLine($"IsAnnouncement: {model.IsAnnouncement}");
+            Console.WriteLine($"IsActive: {model.IsActive}");
+            Console.WriteLine($"Category: {model.Category}");
+            Console.WriteLine("====================================");
+
+            // ✅ Announcement হলে Force Active + Image clear
+            if (model.IsAnnouncement)
+            {
+                model.ImageUrl = string.Empty;
+                model.IsActive = true;   // ⚠️ মূল ফিক্স
+            }
+
             model.CreatedAt = DateTime.UtcNow;
 
             if (_dbHelper.CreateNotice(model, out string? error))
             {
-                TempData["Success"] = "Notice added successfully!";
+                TempData["Success"] = model.IsAnnouncement
+                    ? "Announcement added successfully!"
+                    : "News added successfully!";
                 return RedirectToAction("ManageNotices");
             }
 
@@ -838,9 +855,26 @@ namespace Tutorbub.Controllers
                 return View(model);
             }
 
+            // 🔍 ডিবাগ লগ
+            Console.WriteLine("========== EditNotice POST ==========");
+            Console.WriteLine($"Id: {model.Id}");
+            Console.WriteLine($"Title: {model.Title}");
+            Console.WriteLine($"IsAnnouncement: {model.IsAnnouncement}");
+            Console.WriteLine($"IsActive: {model.IsActive}");
+            Console.WriteLine("=====================================");
+
+            // ✅ Announcement হলে Force Active + Image clear
+            if (model.IsAnnouncement)
+            {
+                model.ImageUrl = string.Empty;
+                model.IsActive = true;   // ⚠️ মূল ফিক্স
+            }
+
             if (_dbHelper.UpdateNotice(model, out string? error))
             {
-                TempData["Success"] = "Notice updated successfully!";
+                TempData["Success"] = model.IsAnnouncement
+                    ? "Announcement updated successfully!"
+                    : "News updated successfully!";
                 return RedirectToAction("ManageNotices");
             }
 

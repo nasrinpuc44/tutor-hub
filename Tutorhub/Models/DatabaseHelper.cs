@@ -1490,6 +1490,13 @@ namespace Tutorbub.Models
                 {
                     notices.Add(MapNotice(reader));
                 }
+
+                Console.WriteLine($"GetAllNotices: {notices.Count} notices found");
+                foreach (var n in notices)
+                {
+                    Console.WriteLine($"  - Id={n.Id}, Title={n.Title}, IsAnnouncement={n.IsAnnouncement}");
+                }
+
                 return notices;
             }
             catch (Exception ex)
