@@ -640,6 +640,10 @@ namespace Tutorbub.Controllers
             return Json(new { success = false, message = "Failed to delete lesson." });
         }
 
+<<<<<<< HEAD
+=======
+        // ===== ভিডিও ফাইল আপলোড =====
+>>>>>>> ae092db (resolve merge conflict)
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> UploadLessonVideo(IFormFile lessonVideo)

@@ -6,6 +6,7 @@
 }
 
 <style>
+<<<<<<< HEAD
     .admin-sidebar { position: fixed; top: 80px; left: 0; bottom: 0; width: 250px; background-color: #1F3B2C; color: white; padding: 20px 0; overflow-y: auto; z-index: 100; }
     .admin-sidebar-brand { padding: 0 20px 20px 20px; border-bottom: 1px solid rgba(255,255,255,0.1); margin-bottom: 15px; }
     .admin-sidebar-brand h4 { color: #F3F1E7; font-weight: 600; margin: 0; }
@@ -30,6 +31,166 @@
         .admin-sidebar.open { transform: translateX(0); }
         .sidebar-toggle { display: block; }
         .admin-main-content { margin-left: 0; padding: 20px 15px; }
+=======
+    .admin-sidebar {
+        position: fixed;
+        top: 80px;
+        left: 0;
+        bottom: 0;
+        width: 250px;
+        background-color: #1F3B2C;
+        color: white;
+        padding: 20px 0;
+        overflow-y: auto;
+        z-index: 100;
+    }
+
+    .admin-sidebar-brand {
+        padding: 0 20px 20px 20px;
+        border-bottom: 1px solid rgba(255,255,255,0.1);
+        margin-bottom: 15px;
+    }
+
+        .admin-sidebar-brand h4 {
+            color: #F3F1E7;
+            font-weight: 600;
+            margin: 0;
+        }
+
+        .admin-sidebar-brand small {
+            color: #8A9188;
+            font-size: 12px;
+        }
+
+    .admin-sidebar-menu {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+        .admin-sidebar-menu li a {
+            display: flex;
+            align-items: center;
+            padding: 12px 20px;
+            color: #C7D0C9;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            border-left: 3px solid transparent;
+            font-size: 14px;
+            cursor: pointer;
+        }
+
+            .admin-sidebar-menu li a:hover, .admin-sidebar-menu li a.active {
+                background-color: rgba(255,255,255,0.08);
+                color: #ffffff;
+                border-left-color: #F4C744;
+            }
+
+            .admin-sidebar-menu li a i {
+                width: 24px;
+                margin-right: 10px;
+                font-size: 16px;
+                text-align: center;
+            }
+
+            .admin-sidebar-menu li a .badge-sidebar {
+                margin-left: auto;
+                background-color: rgba(255,255,255,0.15);
+                padding: 2px 10px;
+                border-radius: 12px;
+                font-size: 11px;
+                color: #F3F1E7;
+            }
+
+    .admin-main-content {
+        margin-left: 250px;
+        padding: 20px;
+        min-height: calc(100vh - 80px);
+    }
+
+    .sidebar-toggle {
+        display: none;
+        position: fixed;
+        top: 90px;
+        left: 15px;
+        z-index: 101;
+        background-color: #1F3B2C;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        padding: 10px 12px;
+        font-size: 18px;
+        cursor: pointer;
+    }
+
+    .sidebar-overlay {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: rgba(0,0,0,0.5);
+        z-index: 99;
+    }
+
+        .sidebar-overlay.active {
+            display: block;
+        }
+
+    .lesson-item {
+        background: white;
+        border-radius: 12px;
+        padding: 16px;
+        margin-bottom: 10px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border: 1px solid rgba(0,0,0,0.05);
+    }
+
+        .lesson-item .meta {
+            font-size: 13px;
+            color: #6B7568;
+        }
+
+            .lesson-item .meta strong {
+                color: #1F3B2C;
+            }
+
+    .btn-delete-lesson {
+        background: white;
+        color: #e74c3c;
+        border: 1.5px solid #e74c3c;
+        padding: 6px 14px;
+        border-radius: 8px;
+        font-size: 12px;
+        font-weight: 600;
+        cursor: pointer;
+    }
+
+        .btn-delete-lesson:hover {
+            background: #f8d7da;
+        }
+
+    @@media (max-width: 992px) {
+        .admin-sidebar {
+            transform: translateX(-100%);
+        }
+
+            .admin-sidebar.open {
+                transform: translateX(0);
+            }
+
+        .sidebar-toggle {
+            display: block;
+        }
+
+        .admin-main-content {
+            margin-left: 0;
+            padding: 20px 15px;
+        }
+>>>>>>> ae092db (resolve merge conflict)
     }
 </style>
 
@@ -238,9 +399,17 @@
             const formData = new FormData();
             formData.append('lessonVideo', file);
 
+<<<<<<< HEAD
             const token = document.querySelector('input[name="__RequestVerificationToken"]');
             const headers = {};
             if (token) headers['RequestVerificationToken'] = token.value;
+=======
+            // ✅ টোকেন FormData-তে পাঠানো হচ্ছে (হেডারে নয়)
+            const token = document.querySelector('input[name="__RequestVerificationToken"]');
+            if (token) {
+                formData.append('__RequestVerificationToken', token.value);
+            }
+>>>>>>> ae092db (resolve merge conflict)
 
             const uploadLabel = document.querySelector('label[for="videoFile"]');
             const originalHtml = uploadLabel.innerHTML;
@@ -249,6 +418,7 @@
 
             fetch('/Admin/UploadLessonVideo', {
                 method: 'POST',
+<<<<<<< HEAD
                 body: formData,
                 headers: headers
             })
@@ -271,6 +441,30 @@
                 alert('Error uploading video: ' + err.message);
                 videoFileInput.value = '';
             });
+=======
+                body: formData
+                // ❌ headers বাদ দেওয়া হয়েছে
+            })
+                .then(r => r.json())
+                .then(data => {
+                    uploadLabel.innerHTML = originalHtml;
+                    uploadLabel.style.pointerEvents = 'auto';
+
+                    if (data.success) {
+                        videoUrlInput.value = data.videoUrl;
+                        alert('✅ Video uploaded successfully!');
+                    } else {
+                        alert(data.message || 'Failed to upload video.');
+                        videoFileInput.value = '';
+                    }
+                })
+                .catch(err => {
+                    uploadLabel.innerHTML = originalHtml;
+                    uploadLabel.style.pointerEvents = 'auto';
+                    alert('Error uploading video: ' + err.message);
+                    videoFileInput.value = '';
+                });
+>>>>>>> ae092db (resolve merge conflict)
         });
 
         // ===== Submit form =====
@@ -297,9 +491,17 @@
             formData.append('description', description);
             formData.append('videoUrl', videoUrl);
 
+<<<<<<< HEAD
             const token = document.querySelector('input[name="__RequestVerificationToken"]');
             const headers = {};
             if (token) headers['RequestVerificationToken'] = token.value;
+=======
+            // ✅ টোকেন FormData-তে পাঠানো হচ্ছে
+            const token = document.querySelector('input[name="__RequestVerificationToken"]');
+            if (token) {
+                formData.append('__RequestVerificationToken', token.value);
+            }
+>>>>>>> ae092db (resolve merge conflict)
 
             const btn = this.querySelector('button[type="submit"]');
             const originalHtml = btn.innerHTML;
@@ -308,6 +510,7 @@
 
             fetch('/Admin/UploadLesson', {
                 method: 'POST',
+<<<<<<< HEAD
                 body: formData,
                 headers: headers
             })
@@ -326,6 +529,26 @@
                 btn.disabled = false;
                 alert('Error: ' + err.message);
             });
+=======
+                body: formData
+                // ❌ headers বাদ দেওয়া হয়েছে
+            })
+                .then(r => r.json())
+                .then(data => {
+                    btn.innerHTML = originalHtml;
+                    btn.disabled = false;
+
+                    alert(data.message);
+                    if (data.success) {
+                        location.reload();
+                    }
+                })
+                .catch(err => {
+                    btn.innerHTML = originalHtml;
+                    btn.disabled = false;
+                    alert('Error: ' + err.message);
+                });
+>>>>>>> ae092db (resolve merge conflict)
         });
 
         // ===== Delete lesson =====
@@ -336,6 +559,7 @@
             formData.append('id', id);
 
             const token = document.querySelector('input[name="__RequestVerificationToken"]');
+<<<<<<< HEAD
             const headers = {};
             if (token) headers['RequestVerificationToken'] = token.value;
 
@@ -350,6 +574,22 @@
                 if (data.success) location.reload();
             })
             .catch(() => alert('Error deleting lesson.'));
+=======
+            if (token) {
+                formData.append('__RequestVerificationToken', token.value);
+            }
+
+            fetch('/Admin/DeleteLesson', {
+                method: 'POST',
+                body: formData
+            })
+                .then(r => r.json())
+                .then(data => {
+                    alert(data.message);
+                    if (data.success) location.reload();
+                })
+                .catch(() => alert('Error deleting lesson.'));
+>>>>>>> ae092db (resolve merge conflict)
         }
     </script>
 }
