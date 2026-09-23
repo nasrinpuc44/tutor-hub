@@ -1,10 +1,12 @@
-﻿﻿﻿@{
+﻿@{
     ViewData["Title"] = "Learn - Smart Tutor Hub";
     Layout = "_Layout";
+    
+    // ✅ ডেটাবেস থেকে আসা কোর্সগুলো ViewBag থেকে নিন
+    var allCourses = ViewBag.AllCourses as List<Tutorbub.Models.Course> ?? new List<Tutorbub.Models.Course>();
 }
 
 <style>
-    /* ===== কোর্স কার্ড স্টাইল ===== */
     .course-card {
         border-radius: 16px;
         overflow: hidden;
@@ -120,7 +122,6 @@
         color: #fff;
     }
 
-    /* ===== ফিল্টার সেকশন ===== */
     .filter-section {
         background: #FAF9F4;
         border-radius: 12px;
@@ -144,7 +145,6 @@
         outline: none;
     }
 
-    /* ===== সেকশন হেডার ===== */
     .section-header {
         text-align: center;
         margin-bottom: 40px;
@@ -162,7 +162,6 @@
         font-size: 16px;
     }
 
-    /* ===== রিসেট বাটন হোভার ===== */
     .btn-reset {
         background: #FFFFFF;
         color: #1F3B2C;
@@ -220,9 +219,9 @@
                         <option value="Language">Language</option>
                         <option value="Web Development">Web Development</option>
                         <option value="Frontend">Frontend</option>
+                        <option value="Backend">Backend</option>
                         <option value="Design">Design</option>
                         <option value="Mobile Development">Mobile Development</option>
-                        <option value="Backend">Backend</option>
                         <option value="Data Science">Data Science</option>
                     </select>
                 </div>
@@ -254,7 +253,7 @@
 
         <!-- লোড মোর বাটন -->
         <div class="text-center mt-5">
-            <button class="btn-outline-dark-custom" onclick="loadMoreCourses()">
+            <button class="btn-outline-dark-custom" id="loadMoreBtn" onclick="loadMoreCourses()">
                 <i class="fas fa-plus-circle me-1"></i> Load More Courses
             </button>
         </div>
@@ -263,159 +262,31 @@
 
 @section Scripts {
     <script>
-        // ===== ডামি কোর্স ডেটা =====
-        const allCourses = [
-            {
-                id: 1,
-                title: "English Grammar Course",
-                desc: "Master English grammar with real certificates and interactive exercises.",
-                image: "https://i.ibb.co.com/KjyJyXy8/English-grammar-courses-online-with-real-certificates.jpg",
-                category: "Language",
-                price: 1499,
-                students: 12500,
-                rating: 4.9,
-                isNew: false,
-                popular: true,
-                instructor: "Ms. Farhana Akter",
-                duration: "12 Weeks",
-                lessons: 48,
-                level: "Beginner to Intermediate",
-                features: ["Interactive Quizzes", "Certificate Included", "Lifetime Access"]
-            },
-            {
-                id: 2,
-                title: "Basic WordPress Theme Development",
-                desc: "Full course from beginner to expert — build custom WordPress themes.",
-                image: "https://i.ibb.co.com/ZpRSvpsk/Basic-Word-Press-theme-development-full-course.jpg",
-                category: "Web Development",
-                price: 1999,
-                students: 8300,
-                rating: 4.8,
-                isNew: false,
-                popular: true,
-                instructor: "Mr. Rajib Hasan",
-                duration: "8 Weeks",
-                lessons: 36,
-                level: "Beginner",
-                features: ["Live Projects", "Source Code", "Certificate"]
-            },
-            {
-                id: 3,
-                title: "Complete React Front-end Developer",
-                desc: "Master React.js with real-world projects and build modern web apps.",
-                image: "https://i.ibb.co.com/rf3RgYqG/Complete-React-Front-end-developer-course.jpg",
-                category: "Frontend",
-                price: 2499,
-                students: 15700,
-                rating: 4.9,
-                isNew: true,
-                popular: true,
-                instructor: "Dr. Sarah Ahmed",
-                duration: "14 Weeks",
-                lessons: 62,
-                level: "Intermediate",
-                features: ["React Hooks", "Redux", "Tailwind CSS", "Firebase"]
-            },
-            {
-                id: 4,
-                title: "Complete Web Design",
-                desc: "From beginner to professional web designer — UI/UX design mastery.",
-                image: "https://i.ibb.co.com/XZSqdW0B/Complete-Web-Design-from-Figma-to-Webflow.jpg",
-                category: "Design",
-                price: 1799,
-                students: 10200,
-                rating: 4.7,
-                isNew: false,
-                popular: false,
-                instructor: "Ms. Nusrat Jahan",
-                duration: "10 Weeks",
-                lessons: 40,
-                level: "Beginner",
-                features: ["Figma", "Webflow", "Portfolio Project"]
-            },
-            {
-                id: 5,
-                title: "Flutter Development Bootcamp",
-                desc: "Learn Flutter & Dart from scratch — build cross-platform mobile apps.",
-                image: "https://i.ibb.co.com/qZ60Vqg/Flutter-Development-Bootcamp-with-Dart.jpg",
-                category: "Mobile Development",
-                price: 2299,
-                students: 6900,
-                rating: 4.8,
-                isNew: true,
-                popular: false,
-                instructor: "Mr. Kamal Hossain",
-                duration: "12 Weeks",
-                lessons: 55,
-                level: "Beginner to Intermediate",
-                features: ["Dart", "Flutter Widgets", "Firebase", "App Deployment"]
-            },
-            {
-                id: 6,
-                title: "The Ultimate Figma Course",
-                desc: "From zero to expert in UI/UX design — master Figma like a pro.",
-                image: "https://i.ibb.co.com/rGttSLJy/The-Ultimate-Figma-Course-From-Zero-to-Expert.jpg",
-                category: "Design",
-                price: 1599,
-                students: 9400,
-                rating: 4.9,
-                isNew: false,
-                popular: true,
-                instructor: "Ms. Farhana Akter",
-                duration: "6 Weeks",
-                lessons: 28,
-                level: "Beginner",
-                features: ["UI/UX Principles", "Prototyping", "Design Systems"]
-            },
-            {
-                id: 7,
-                title: "Node.js & Express Backend Masterclass",
-                desc: "Build robust backend APIs with Node.js, Express, and MongoDB.",
-                image: "https://i.ibb.co.com/7vZ6R3k/Node-js-Express-Backend.jpg",
-                category: "Backend",
-                price: 2699,
-                students: 5100,
-                rating: 4.7,
-                isNew: true,
-                popular: false,
-                instructor: "Mr. Rajib Hasan",
-                duration: "10 Weeks",
-                lessons: 45,
-                level: "Intermediate",
-                features: ["REST APIs", "JWT Auth", "MongoDB", "Deployment"]
-            },
-            {
-                id: 8,
-                title: "Python for Data Science & Machine Learning",
-                desc: "Master Python, Pandas, NumPy, and ML algorithms from scratch.",
-                image: "https://i.ibb.co.com/0j8wQ9K/Python-Data-Science.jpg",
-                category: "Data Science",
-                price: 2999,
-                students: 3800,
-                rating: 4.9,
-                isNew: true,
-                popular: false,
-                instructor: "Dr. Sarah Ahmed",
-                duration: "16 Weeks",
-                lessons: 70,
-                level: "Intermediate to Advanced",
-                features: ["Python", "Pandas", "Scikit-learn", "TensorFlow"]
-            }
-        ];
+        // ✅ ডেটাবেস থেকে Razor-এর মাধ্যমে আসা কোর্সগুলো JS অবজেক্টে রূপান্তর
+        const allCourses = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(
+            allCourses,
+            new System.Text.Json.JsonSerializerOptions { PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase }
+        ));
+
+        console.log('📚 Total courses loaded from DB:', allCourses.length);
+        if (allCourses.length > 0) {
+            console.log('First course:', allCourses[0]);
+        }
 
         let displayedCourses = [];
         let currentPage = 0;
         const pageSize = 6;
 
-        // ===== কোর্স রেন্ডার ফাংশন =====
+        // ===== কোর্স রেন্ডার =====
         function renderCourses(courses) {
             const grid = document.getElementById('courseGrid');
-            if (courses.length === 0) {
+
+            if (!courses || courses.length === 0) {
                 grid.innerHTML = `
                     <div class="col-12 text-center py-5">
                         <i class="fas fa-search" style="font-size:48px; color:#ccc;"></i>
                         <h5 class="mt-3" style="color:#6B7568;">No courses found</h5>
-                        <p style="color:#8A9188;">Try adjusting your filters</p>
+                        <p style="color:#8A9188;">Try adjusting your filters, or check back later!</p>
                     </div>
                 `;
                 return;
@@ -423,26 +294,35 @@
 
             let html = '';
             courses.forEach(course => {
-                const ratingStars = '★'.repeat(Math.floor(course.rating)) + '☆'.repeat(5 - Math.floor(course.rating));
+                const rating = course.rating || 0;
+                const ratingStars = '★'.repeat(Math.floor(rating)) + '☆'.repeat(5 - Math.floor(rating));
+                const students = course.students || 0;
+                const price = course.price || 0;
+
                 html += `
                     <div class="col-md-6 col-lg-4">
                         <div class="course-card" data-id="${course.id}">
                             <div>
-                                <img src="${course.image}" alt="${course.title}" class="course-image" />
+                                <img src="${course.image || 'https://i.ibb.co/fd9sY88Y/IMG-6916-1.png'}" 
+                                     alt="${course.title}" 
+                                     class="course-image"
+                                     onerror="this.src='https://i.ibb.co/fd9s88Y/IMG-6916-1.png'" />
                             </div>
                             <div class="course-body">
                                 <h5 class="course-title">${course.title}</h5>
-                                <p class="course-desc">${course.desc.substring(0, 70)}${course.desc.length > 70 ? '...' : ''}</p>
+                                <p class="course-desc">
+                                    ${(course.description || '').substring(0, 70)}${(course.description || '').length > 70 ? '...' : ''}
+                                </p>
                                 <div class="course-meta">
                                     <div>
-                                        <span class="course-price">৳${course.price.toLocaleString()}</span>
+                                        <span class="course-price">৳${price.toLocaleString()}</span>
                                     </div>
                                     <div class="course-students">
-                                        <i class="fas fa-users"></i> ${(course.students / 1000).toFixed(1)}k
+                                        <i class="fas fa-users"></i> ${(students / 1000).toFixed(1)}k
                                     </div>
                                 </div>
                                 <div class="d-flex justify-content-between align-items-center mt-2">
-                                    <span style="font-size:13px; color:#D98E1F;">${ratingStars} ${course.rating}</span>
+                                    <span style="font-size:13px; color:#D98E1F;">${ratingStars} ${rating}</span>
                                     <a href="/Learn/Details/${course.id}" class="btn-enroll">
                                         View Details <i class="fas fa-arrow-right"></i>
                                     </a>
@@ -456,7 +336,7 @@
             grid.innerHTML = html;
         }
 
-        // ===== ফিল্টার ও সর্ট ফাংশন =====
+        // ===== ফিল্টার ও সর্ট =====
         function filterAndSortCourses() {
             const search = document.getElementById('searchInput').value.toLowerCase().trim();
             const category = document.getElementById('categoryFilter').value;
@@ -467,9 +347,9 @@
             // সার্চ
             if (search) {
                 filtered = filtered.filter(c =>
-                    c.title.toLowerCase().includes(search) ||
-                    c.desc.toLowerCase().includes(search) ||
-                    c.category.toLowerCase().includes(search)
+                    (c.title || '').toLowerCase().includes(search) ||
+                    (c.description || '').toLowerCase().includes(search) ||
+                    (c.category || '').toLowerCase().includes(search)
                 );
             }
 
@@ -481,28 +361,27 @@
             // সর্ট
             switch (sort) {
                 case 'popular':
-                    filtered.sort((a, b) => b.students - a.students);
+                    filtered.sort((a, b) => (b.students || 0) - (a.students || 0));
                     break;
                 case 'newest':
-                    filtered.sort((a, b) => (b.isNew ? 1 : 0) - (a.isNew ? 1 : 0));
+                    filtered.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
                     break;
                 case 'price-low':
-                    filtered.sort((a, b) => a.price - b.price);
+                    filtered.sort((a, b) => (a.price || 0) - (b.price || 0));
                     break;
                 case 'price-high':
-                    filtered.sort((a, b) => b.price - a.price);
-                    break;
-                default:
+                    filtered.sort((a, b) => (b.price || 0) - (a.price || 0));
                     break;
             }
 
             displayedCourses = filtered;
             currentPage = 0;
+
             const paginated = displayedCourses.slice(0, pageSize);
             renderCourses(paginated);
 
-            // লোড মোর বাটন দেখানো
-            const loadMoreBtn = document.querySelector('.btn-outline-dark-custom');
+            // Load More বাটন দেখানো/লুকানো
+            const loadMoreBtn = document.getElementById('loadMoreBtn');
             if (loadMoreBtn) {
                 loadMoreBtn.style.display = displayedCourses.length > pageSize ? 'inline-flex' : 'none';
             }
@@ -511,18 +390,17 @@
         // ===== লোড মোর =====
         function loadMoreCourses() {
             currentPage++;
-            const start = currentPage * pageSize;
-            const end = start + pageSize;
+            const end = (currentPage + 1) * pageSize;
             const paginated = displayedCourses.slice(0, end);
             renderCourses(paginated);
 
-            const loadMoreBtn = document.querySelector('.btn-outline-dark-custom');
+            const loadMoreBtn = document.getElementById('loadMoreBtn');
             if (loadMoreBtn && end >= displayedCourses.length) {
                 loadMoreBtn.style.display = 'none';
             }
         }
 
-        // ===== রিসেট ফিল্টার =====
+        // ===== রিসেট =====
         function resetFilters() {
             document.getElementById('searchInput').value = '';
             document.getElementById('categoryFilter').value = 'all';
@@ -530,8 +408,8 @@
             filterAndSortCourses();
         }
 
-        // ===== ইভেন্ট লিসেনার =====
-        document.addEventListener('DOMContentLoaded', function() {
+        // ===== শুরু =====
+        document.addEventListener('DOMContentLoaded', function () {
             filterAndSortCourses();
 
             document.getElementById('searchInput').addEventListener('input', filterAndSortCourses);

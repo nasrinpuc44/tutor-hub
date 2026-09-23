@@ -1,0 +1,343 @@
+﻿@model Tutorbub.Models.Notice
+
+@{
+    ViewData["Title"] = "Add Notice";
+    Layout = "_Layout";
+}
+
+<style>
+    .admin-sidebar { position: fixed; top: 80px; left: 0; bottom: 0; width: 250px; background-color: #1F3B2C; color: white; padding: 20px 0; overflow-y: auto; z-index: 100; }
+    .admin-sidebar-brand { padding: 0 20px 20px 20px; border-bottom: 1px solid rgba(255,255,255,0.1); margin-bottom: 15px; }
+    .admin-sidebar-brand h4 { color: #F3F1E7; font-weight: 600; margin: 0; }
+    .admin-sidebar-brand small { color: #8A9188; font-size: 12px; }
+    .admin-sidebar-menu { list-style: none; padding: 0; margin: 0; }
+    .admin-sidebar-menu li a { display: flex; align-items: center; padding: 12px 20px; color: #C7D0C9; text-decoration: none; transition: all 0.3s ease; border-left: 3px solid transparent; font-size: 14px; cursor: pointer; }
+    .admin-sidebar-menu li a:hover, .admin-sidebar-menu li a.active { background-color: rgba(255,255,255,0.08); color: #ffffff; border-left-color: #F4C744; }
+    .admin-sidebar-menu li a i { width: 24px; margin-right: 10px; font-size: 16px; text-align: center; }
+    .admin-main-content { margin-left: 250px; padding: 20px; min-height: calc(100vh - 80px); }
+    .sidebar-toggle { display: none; position: fixed; top: 90px; left: 15px; z-index: 101; background-color: #1F3B2C; color: white; border: none; border-radius: 8px; padding: 10px 12px; font-size: 18px; cursor: pointer; }
+    .sidebar-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(0,0,0,0.5); z-index: 99; }
+    .sidebar-overlay.active { display: block; }
+
+    .form-card { background: white; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.06); }
+    .form-label { font-weight: 700; color: #1F3B2C; font-size: 13px; margin-bottom: 6px; }
+    .form-control, .form-select { border-radius: 10px; border: 1.5px solid #E5E1D3; padding: 11px 14px; font-size: 14px; background: #FAF9F4; }
+    .form-control:focus, .form-select:focus { border-color: #1F3B2C; box-shadow: 0 0 0 3px rgba(31,59,44,0.1); background: white; }
+    .btn-save { background: #1F3B2C; color: white; padding: 12px 40px; border-radius: 10px; border: none; font-weight: 600; transition: opacity 0.2s; }
+    .btn-save:hover { opacity: 0.9; color: white; }
+    .req { color: #e74c3c; }
+
+    .upload-btn {
+        display: block;
+        width: 100%;
+        padding: 11px;
+        background-color: #F3F1E7;
+        color: #1F3B2C;
+        border: 1.5px dashed #1F3B2C;
+        border-radius: 10px;
+        font-weight: 600;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+    .upload-btn:hover { background-color: #E7E4D9; }
+
+    /* Type selector cards */
+    .type-card {
+        border: 2px solid #E5E1D3;
+        border-radius: 12px;
+        padding: 16px 18px;
+        cursor: pointer;
+        transition: all 0.25s;
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        background: #FAF9F4;
+        user-select: none;
+    }
+    .type-card:hover { border-color: #1F3B2C; transform: translateY(-2px); }
+    .type-card.selected { border-color: #1F3B2C; background: #E8F0E9; box-shadow: 0 4px 16px rgba(31,59,44,0.15); }
+    .type-card .tc-icon {
+        width: 44px; height: 44px; border-radius: 10px;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 18px; flex-shrink: 0;
+    }
+    .type-card.news .tc-icon { background: #D9EDDF; color: #1F3B2C; }
+    .type-card.announcement .tc-icon { background: #FCEACB; color: #8a5a00; }
+    .type-card .tc-text h6 { font-size: 14px; font-weight: 700; color: #1F3B2C; margin: 0 0 2px; }
+    .type-card .tc-text p { font-size: 12px; color: #6B7568; margin: 0; }
+    .type-card .tc-check {
+        margin-left: auto;
+        width: 22px; height: 22px; border-radius: 50%;
+        border: 2px solid #D5CFB8;
+        display: flex; align-items: center; justify-content: center;
+        color: white; font-size: 11px;
+        flex-shrink: 0;
+    }
+    .type-card.selected .tc-check { background: #1F3B2C; border-color: #1F3B2C; }
+
+    @@media (max-width: 992px) {
+        .admin-sidebar { transform: translateX(-100%); }
+        .admin-sidebar.open { transform: translateX(0); }
+        .sidebar-toggle { display: block; }
+        .admin-main-content { margin-left: 0; padding: 20px 15px; }
+    }
+</style>
+
+<button class="sidebar-toggle" id="sidebarToggle"><i class="fas fa-bars"></i></button>
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+<div class="admin-sidebar" id="sidebar">
+    <div class="admin-sidebar-brand">
+        <h4><i class="fas fa-shield-alt me-2"></i>Admin Panel</h4>
+        <small>Smart Tutor Hub</small>
+    </div>
+    <ul class="admin-sidebar-menu">
+        <li><a asp-controller="Admin" asp-action="Dashboard"><i class="fas fa-chart-pie"></i> Dashboard</a></li>
+        <li><a asp-controller="Admin" asp-action="TeacherRequests"><i class="fas fa-user-graduate"></i> Teacher Requests</a></li>
+        <li><a asp-controller="Admin" asp-action="Payments"><i class="fas fa-money-check-alt"></i> Payments</a></li>
+        <li><a asp-controller="Admin" asp-action="AddCourse"><i class="fas fa-plus-circle"></i> Add Course</a></li>
+        <li><a asp-controller="Admin" asp-action="ManageCourses"><i class="fas fa-tasks"></i> Manage Courses</a></li>
+        <li><a asp-controller="Admin" asp-action="ManageNotices" class="active"><i class="fas fa-newspaper"></i> News & Announcements</a></li>
+        <li style="border-top: 1px solid rgba(255,255,255,0.05); margin-top: 10px; padding-top: 10px;">
+            <form method="post" asp-controller="Account" asp-action="Logout" id="logoutForm">
+                @Html.AntiForgeryToken()
+                <a href="#" onclick="document.getElementById('logoutForm').submit(); return false;" style="color: #e74c3c;"><i class="fas fa-sign-out-alt"></i> Logout</a>
+            </form>
+        </li>
+    </ul>
+</div>
+
+<div class="admin-main-content">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 style="color:#1F3B2C;"><i class="fas fa-plus-circle me-2"></i>Add New Notice</h2>
+        <a asp-controller="Admin" asp-action="ManageNotices" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left me-1"></i>Back
+        </a>
+    </div>
+
+    @if (ViewBag.Error != null)
+    {
+        <div class="alert alert-danger">@ViewBag.Error</div>
+    }
+
+    <div class="form-card p-4">
+        <form method="post" asp-controller="Admin" asp-action="AddNotice" id="addNoticeForm">
+            @Html.AntiForgeryToken()
+
+            <!-- ✅ Type Selector: News vs Announcement -->
+            <div class="mb-4">
+                <label class="form-label">What are you posting? <span class="req">*</span></label>
+
+                <!-- ✅ This hidden input is what MVC actually binds to -->
+                <input type="hidden" name="IsAnnouncement" id="isAnnouncementHidden" value="false" />
+
+                <div class="row g-3">
+                    <!-- News Card -->
+                    <div class="col-md-6">
+                        <div class="type-card news selected" id="cardNews" onclick="selectType('news')">
+                            <div class="tc-icon"><i class="fas fa-newspaper"></i></div>
+                            <div class="tc-text">
+                                <h6>News</h6>
+                                <p>Show in "Latest News" grid (left)</p>
+                            </div>
+                            <div class="tc-check"><i class="fas fa-check"></i></div>
+                        </div>
+                    </div>
+
+                    <!-- Announcement Card -->
+                    <div class="col-md-6">
+                        <div class="type-card announcement" id="cardAnnouncement" onclick="selectType('announcement')">
+                            <div class="tc-icon"><i class="fas fa-bullhorn"></i></div>
+                            <div class="tc-text">
+                                <h6>Announcement</h6>
+                                <p>Show in "Announcements" sidebar (right)</p>
+                            </div>
+                            <div class="tc-check"><i class="fas fa-check"></i></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-8 mb-3">
+                    <label class="form-label">Title <span class="req">*</span></label>
+                    <input name="Title" value="@Model.Title" class="form-control" placeholder="Enter notice title..." required />
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label class="form-label">Category <span class="req">*</span></label>
+                    <select name="Category" class="form-select" required>
+                        <option value="News" selected="@(Model.Category == "News")">News</option>
+                        <option value="Workshop" selected="@(Model.Category == "Workshop")">Workshop</option>
+                        <option value="Course" selected="@(Model.Category == "Course")">Course</option>
+                        <option value="Event" selected="@(Model.Category == "Event")">Event</option>
+                        <option value="Result" selected="@(Model.Category == "Result")">Result</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Content <span class="req">*</span></label>
+                <textarea name="Content" class="form-control" rows="10" placeholder="Write full content here... (use blank lines for paragraphs)" required>@Model.Content</textarea>
+                <small class="text-muted"><i class="fas fa-info-circle me-1"></i> এখানে যা লিখবেন সেটাই Details পেজে দেখাবে।</small>
+            </div>
+
+            <!-- Image Section -->
+            <div class="mb-3">
+                <label class="form-label">Image <span class="text-muted" style="font-weight:400;">(Optional)</span></label>
+
+                <div class="row g-2 align-items-center">
+                    <div class="col-md-8">
+                        <input name="ImageUrl" id="imageUrlInput" value="@Model.ImageUrl" class="form-control" placeholder="https://example.com/image.jpg" />
+                    </div>
+                    <div class="col-md-4">
+                        <label for="imageFileInput" class="upload-btn">
+                            <i class="fas fa-upload me-1"></i> Upload from Device
+                        </label>
+                        <input type="file" id="imageFileInput" accept="image/*" style="display:none;" />
+                    </div>
+                </div>
+
+                <small class="text-muted d-block mt-2">
+                    <i class="fas fa-info-circle me-1"></i>
+                    Direct image link দিন অথবা ডিভাইস থেকে ছবি আপলোড করুন (Max 5MB)
+                </small>
+
+                <div id="imagePreviewWrapper" class="mt-3" style="@(string.IsNullOrEmpty(Model.ImageUrl) ? "display:none;" : "")">
+                    <p class="mb-1 fw-bold" style="font-size:12px; color:#1F3B2C;">Preview:</p>
+                    <img id="imagePreview" src="@Model.ImageUrl" alt="Preview"
+                         style="max-width: 240px; max-height: 160px; border-radius: 10px; border: 2px solid #E7E4D9; object-fit: cover;" />
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Published Date <span class="req">*</span></label>
+                    <input name="PublishedDate" type="date" value="@Model.PublishedDate.ToString("yyyy-MM-dd")" class="form-control" required />
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label class="form-label d-block">Active</label>
+                    <div class="form-check form-switch mt-2">
+                        <input type="hidden" name="IsActive" value="false" />
+                        <input class="form-check-input" type="checkbox" name="IsActive" value="true" id="isActive" checked />
+                        <label class="form-check-label" for="isActive" style="font-size:13px; color:#6B7568;">Visible to users</label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="d-flex gap-3 mt-4">
+                <a asp-controller="Admin" asp-action="ManageNotices" class="btn btn-secondary px-4">Cancel</a>
+                <button type="submit" class="btn-save"><i class="fas fa-save me-1"></i> Save Notice</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        document.getElementById('sidebarToggle')?.addEventListener('click', function () {
+            document.getElementById('sidebar').classList.toggle('open');
+            document.getElementById('sidebarOverlay').classList.toggle('active');
+        });
+        document.getElementById('sidebarOverlay')?.addEventListener('click', function () {
+            document.getElementById('sidebar').classList.remove('open');
+            document.getElementById('sidebarOverlay').classList.remove('active');
+        });
+
+        // ===== Type Selector (News vs Announcement) =====
+        function selectType(type) {
+            const hidden = document.getElementById('isAnnouncementHidden');
+            const cardNews = document.getElementById('cardNews');
+            const cardAnnouncement = document.getElementById('cardAnnouncement');
+
+            if (type === 'announcement') {
+                hidden.value = 'true';
+                cardAnnouncement.classList.add('selected');
+                cardNews.classList.remove('selected');
+            } else {
+                hidden.value = 'false';
+                cardNews.classList.add('selected');
+                cardAnnouncement.classList.remove('selected');
+            }
+        }
+
+        // ===== Image URL + Upload handling =====
+        const imageUrlInput = document.getElementById('imageUrlInput');
+        const imageFileInput = document.getElementById('imageFileInput');
+        const imagePreview = document.getElementById('imagePreview');
+        const imagePreviewWrapper = document.getElementById('imagePreviewWrapper');
+
+        imageUrlInput.addEventListener('input', function () {
+            const url = this.value.trim();
+            if (url) {
+                imagePreview.src = url;
+                imagePreviewWrapper.style.display = 'block';
+            } else {
+                imagePreviewWrapper.style.display = 'none';
+            }
+        });
+
+        imageFileInput.addEventListener('change', function () {
+            const file = this.files[0];
+            if (!file) return;
+
+            const allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+            if (!allowedTypes.includes(file.type)) {
+                alert('Only JPG, PNG, GIF, or WEBP images are allowed.');
+                this.value = '';
+                return;
+            }
+
+            if (file.size > 5 * 1024 * 1024) {
+                alert('Image size must be less than 5MB.');
+                this.value = '';
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                imagePreview.src = e.target.result;
+                imagePreviewWrapper.style.display = 'block';
+            };
+            reader.readAsDataURL(file);
+
+            const formData = new FormData();
+            formData.append('noticeImage', file);
+
+            const token = document.querySelector('input[name="__RequestVerificationToken"]');
+            const headers = {};
+            if (token) headers['RequestVerificationToken'] = token.value;
+
+            const uploadLabel = document.querySelector('label[for="imageFileInput"]');
+            const originalHtml = uploadLabel.innerHTML;
+            uploadLabel.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> Uploading...';
+            uploadLabel.style.pointerEvents = 'none';
+
+            fetch('/Admin/UploadNoticeImage', {
+                method: 'POST',
+                body: formData,
+                headers: headers
+            })
+            .then(r => r.json())
+            .then(data => {
+                uploadLabel.innerHTML = originalHtml;
+                uploadLabel.style.pointerEvents = 'auto';
+
+                if (data.success) {
+                    imageUrlInput.value = data.imageUrl;
+                    imagePreview.src = data.imageUrl;
+                    imagePreviewWrapper.style.display = 'block';
+                } else {
+                    alert(data.message || 'Failed to upload image.');
+                    imageFileInput.value = '';
+                }
+            })
+            .catch(err => {
+                uploadLabel.innerHTML = originalHtml;
+                uploadLabel.style.pointerEvents = 'auto';
+                alert('Error uploading image: ' + err.message);
+                imageFileInput.value = '';
+            });
+        });
+    </script>
+}

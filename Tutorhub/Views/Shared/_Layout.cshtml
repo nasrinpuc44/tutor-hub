@@ -1,21 +1,14 @@
-﻿﻿
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] - Smart Tutor Hub</title>
 
-    <!-- Bootstrap 5 CSS -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" />
-
-    <!-- Font Awesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
-
-    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
 
-    <!-- Tailwind Configuration -->
     <script>
             tailwind.config = {
                 theme: {
@@ -29,6 +22,26 @@
                         }
                     }
                 }
+            }
+    </script>
+
+    <script>
+            if (!('PageSwapEvent' in window)) document.documentElement.classList.add('no-vt');
+    </script>
+
+    <script type="speculationrules">
+            {
+                "prefetch": [
+                    {
+                        "where": {
+                            "and": [
+                                { "href_matches": "/*" },
+                                { "not": { "selector_matches": "[data-no-prefetch], [download], [target=_blank]" } }
+                            ]
+                        },
+                        "eagerness": "moderate"
+                    }
+                ]
             }
     </script>
 
@@ -69,7 +82,6 @@
                 border-top: 1px solid rgba(0,0,0,0.05);
             }
 
-            /* সাইডবার ওভারলে ফিক্স */
             .sidebar-overlay {
                 display: none;
                 position: fixed;
@@ -85,12 +97,10 @@
                     display: block;
                 }
 
-            /* পেজ কন্টেন্টের জন্য প্যাডিং */
             .page-content {
                 padding-top: 80px;
             }
 
-            /* অ্যাডমিন পেজের জন্য সাইডবার স্পেস */
             .admin-page .main-content {
                 margin-left: 250px;
                 padding: 20px;
@@ -101,146 +111,6 @@
                 .admin-page .main-content {
                     margin-left: 0;
                     padding: 20px 15px;
-                }
-            }
-
-            /* ড্যাশবোর্ড সাইডবার স্টাইল - শুধু অ্যাডমিন পেজে */
-            .admin-sidebar {
-                position: fixed;
-                top: 80px;
-                left: 0;
-                bottom: 0;
-                width: 250px;
-                background-color: #1F3B2C;
-                color: white;
-                padding: 20px 0;
-                overflow-y: auto;
-                z-index: 100;
-                transition: transform 0.3s ease;
-            }
-
-            .admin-sidebar-brand {
-                padding: 0 20px 20px 20px;
-                border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-                margin-bottom: 15px;
-            }
-
-                .admin-sidebar-brand h4 {
-                    color: #F3F1E7;
-                    font-weight: 600;
-                    margin: 0;
-                }
-
-                .admin-sidebar-brand small {
-                    color: #8A9188;
-                    font-size: 12px;
-                }
-
-            .admin-sidebar-menu {
-                list-style: none;
-                padding: 0;
-                margin: 0;
-            }
-
-                .admin-sidebar-menu li {
-                    padding: 0;
-                }
-
-                    .admin-sidebar-menu li a {
-                        display: flex;
-                        align-items: center;
-                        padding: 12px 20px;
-                        color: #C7D0C9;
-                        text-decoration: none;
-                        transition: all 0.3s ease;
-                        border-left: 3px solid transparent;
-                        font-size: 14px;
-                        cursor: pointer;
-                    }
-
-                        .admin-sidebar-menu li a:hover {
-                            background-color: rgba(255, 255, 255, 0.05);
-                            color: #ffffff;
-                            border-left-color: #F4C744;
-                        }
-
-                        .admin-sidebar-menu li a.active {
-                            background-color: rgba(255, 255, 255, 0.08);
-                            color: #ffffff;
-                            border-left-color: #F4C744;
-                        }
-
-                        .admin-sidebar-menu li a i {
-                            width: 24px;
-                            margin-right: 10px;
-                            font-size: 16px;
-                            text-align: center;
-                        }
-
-                        .admin-sidebar-menu li a .badge-sidebar {
-                            margin-left: auto;
-                            background-color: rgba(255, 255, 255, 0.15);
-                            padding: 2px 10px;
-                            border-radius: 12px;
-                            font-size: 11px;
-                            color: #F3F1E7;
-                        }
-
-            .admin-sidebar-footer {
-                position: absolute;
-                bottom: 20px;
-                left: 0;
-                right: 0;
-                padding: 0 20px;
-                text-align: center;
-                border-top: 1px solid rgba(255,255,255,0.05);
-                padding-top: 15px;
-            }
-
-                .admin-sidebar-footer small {
-                    color: #6B7568;
-                    font-size: 11px;
-                }
-
-                .admin-sidebar-footer strong {
-                    color: #F3F1E7;
-                }
-
-            /* সাইডবার টগল বাটন */
-            .sidebar-toggle-btn {
-                display: none;
-                position: fixed;
-                top: 90px;
-                left: 15px;
-                z-index: 101;
-                background-color: #1F3B2C;
-                color: white;
-                border: none;
-                border-radius: 8px;
-                padding: 10px 12px;
-                font-size: 18px;
-                cursor: pointer;
-            }
-
-                .sidebar-toggle-btn:hover {
-                    background-color: #2d5a42;
-                }
-
-            @@media (max-width: 992px) {
-                .admin-sidebar {
-                    transform: translateX(-100%);
-                }
-
-                    .admin-sidebar.open {
-                        transform: translateX(0);
-                    }
-
-                .sidebar-toggle-btn {
-                    display: block;
-                }
-
-                .admin-page .main-content {
-                    margin-left: 0;
                 }
             }
 
@@ -277,7 +147,7 @@
                 border-radius: 12px;
                 box-shadow: 0 8px 30px rgba(0,0,0,0.12);
                 padding: 8px 0;
-                min-width: 220px;
+                min-width: 240px;
                 background: white;
                 margin-top: 8px;
             }
@@ -361,7 +231,6 @@
                         color: #b8860b;
                     }
 
-            /* ড্রপডাউন অ্যানিমেশন */
             .profile-dropdown .dropdown-menu {
                 display: block;
                 opacity: 0;
@@ -378,24 +247,367 @@
                 pointer-events: auto;
             }
 
-            /* প্রোফাইল লিংক স্টাইল (পুরনো) */
-            .profile-link {
-                color: #1F3B2C !important;
-                text-decoration: none !important;
-                font-weight: 500;
-                transition: opacity 0.3s;
+            /* ===== Notification Bell ===== */
+            .notification-wrapper {
+                position: relative;
+                margin-right: 14px;
             }
 
-                .profile-link:hover {
-                    opacity: 0.7;
+            .notification-bell {
+                background: none;
+                border: none;
+                color: #1F3B2C;
+                font-size: 20px;
+                cursor: pointer;
+                position: relative;
+                padding: 8px;
+                transition: transform 0.2s;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+
+                .notification-bell:hover {
+                    transform: scale(1.1);
                 }
 
-                .profile-link i {
-                    margin-right: 5px;
+                .notification-bell .notif-badge {
+                    position: absolute;
+                    top: 2px;
+                    right: 0px;
+                    background: #e74c3c;
+                    color: white;
+                    font-size: 10px;
+                    font-weight: 700;
+                    padding: 2px 6px;
+                    border-radius: 10px;
+                    min-width: 18px;
+                    text-align: center;
+                    border: 2px solid #F3F1E7;
+                    display: none;
                 }
+
+                    .notification-bell .notif-badge.show {
+                        display: block;
+                    }
+
+            .notif-dropdown {
+                position: absolute;
+                top: calc(100% + 8px);
+                right: 0;
+                width: 380px;
+                max-width: 92vw;
+                background: white;
+                border-radius: 14px;
+                box-shadow: 0 12px 40px rgba(0,0,0,0.15);
+                border: 1px solid rgba(0,0,0,0.06);
+                opacity: 0;
+                visibility: hidden;
+                transform: translateY(-8px);
+                transition: all 0.2s ease;
+                pointer-events: none;
+                z-index: 1000;
+                overflow: hidden;
+            }
+
+            .notification-wrapper.show .notif-dropdown {
+                opacity: 1;
+                visibility: visible;
+                transform: translateY(0);
+                pointer-events: auto;
+            }
+
+            .notif-header {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                padding: 14px 18px;
+                border-bottom: 1px solid #f0f0f0;
+                background: #FAF9F4;
+            }
+
+                .notif-header h6 {
+                    margin: 0;
+                    font-size: 14px;
+                    font-weight: 700;
+                    color: #1F3B2C;
+                }
+
+            .notif-header-actions {
+                display: flex;
+                gap: 8px;
+            }
+
+                .notif-header-actions button {
+                    background: none;
+                    border: none;
+                    color: #1F3B2C;
+                    font-size: 11px;
+                    font-weight: 600;
+                    cursor: pointer;
+                    padding: 4px 8px;
+                    border-radius: 6px;
+                    transition: background 0.2s;
+                }
+
+                    .notif-header-actions button:hover {
+                        background: #E7E4D9;
+                    }
+
+            .notif-list {
+                max-height: 400px;
+                overflow-y: auto;
+            }
+
+                .notif-list::-webkit-scrollbar {
+                    width: 5px;
+                }
+
+                .notif-list::-webkit-scrollbar-thumb {
+                    background: #D5CFB8;
+                    border-radius: 10px;
+                }
+
+            .notif-item {
+                display: flex;
+                gap: 12px;
+                padding: 14px 18px;
+                border-bottom: 1px solid #f5f5f5;
+                transition: background 0.2s;
+                cursor: pointer;
+                text-decoration: none;
+                color: inherit;
+            }
+
+                .notif-item:hover {
+                    background: #FAF9F4;
+                }
+
+                .notif-item.unread {
+                    background: #FFFDF5;
+                    border-left: 3px solid #F4C744;
+                }
+
+            .notif-icon {
+                width: 40px;
+                height: 40px;
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                flex-shrink: 0;
+                font-size: 16px;
+            }
+
+                .notif-icon.info {
+                    background: #d1ecf1;
+                    color: #0c6b7c;
+                }
+
+                .notif-icon.success {
+                    background: #d4edda;
+                    color: #155724;
+                }
+
+                .notif-icon.warning {
+                    background: #fff3cd;
+                    color: #856404;
+                }
+
+                .notif-icon.danger {
+                    background: #f8d7da;
+                    color: #721c24;
+                }
+
+            .notif-content {
+                flex: 1;
+                min-width: 0;
+            }
+
+                .notif-content .notif-title {
+                    font-size: 13.5px;
+                    font-weight: 700;
+                    color: #1F3B2C;
+                    margin: 0 0 2px;
+                    line-height: 1.3;
+                }
+
+                .notif-content .notif-message {
+                    font-size: 12.5px;
+                    color: #6B7568;
+                    margin: 0 0 4px;
+                    line-height: 1.4;
+                    display: -webkit-box;
+                    -webkit-line-clamp: 2;
+                    -webkit-box-orient: vertical;
+                    overflow: hidden;
+                }
+
+                .notif-content .notif-time {
+                    font-size: 11px;
+                    color: #8A9188;
+                }
+
+            .notif-empty {
+                text-align: center;
+                padding: 40px 20px;
+                color: #8A9188;
+            }
+
+                .notif-empty i {
+                    font-size: 36px;
+                    color: #E7E4D9;
+                    margin-bottom: 10px;
+                    display: block;
+                }
+
+                .notif-empty p {
+                    margin: 0;
+                    font-size: 13px;
+                }
+
+            .notif-footer {
+                padding: 10px 18px;
+                border-top: 1px solid #f0f0f0;
+                background: #FAF9F4;
+                text-align: center;
+            }
+
+                .notif-footer a {
+                    font-size: 12px;
+                    font-weight: 600;
+                    color: #1F3B2C;
+                    text-decoration: none;
+                }
+
+                    .notif-footer a:hover {
+                        text-decoration: underline;
+                    }
+
+            @@media (max-width: 576px) {
+                .notif-dropdown {
+                    width: 320px;
+                    right: -60px;
+                }
+            }
+
+            /* ===== Smooth Page Transition ===== */
+            @@media (prefers-reduced-motion: no-preference) {
+                @@view-transition {
+                    navigation: auto;
+                }
+            }
+
+            ::view-transition-old(root),
+            ::view-transition-new(root) {
+                animation-duration: 0.3s;
+                animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+            }
+
+            @@keyframes pageEnter {
+                from {
+                    opacity: 0;
+                    transform: translateY(12px);
+                }
+
+                to {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+            }
+
+            html.no-vt main {
+                animation: pageEnter 0.4s cubic-bezier(0.22, 1, 0.36, 1) backwards;
+                transition: opacity 0.2s ease, transform 0.2s ease;
+            }
+
+                html.no-vt main.page-leaving {
+                    opacity: 0;
+                    transform: translateY(-6px);
+                    pointer-events: none;
+                }
+
+            #pageProgress {
+                position: fixed;
+                top: 0;
+                left: 0;
+                height: 3px;
+                width: 0;
+                background: linear-gradient(90deg, #1F3B2C, #F4C744);
+                z-index: 9999;
+                opacity: 0;
+                pointer-events: none;
+                transition: opacity 0.2s ease;
+            }
+
+                #pageProgress.active {
+                    opacity: 1;
+                    width: 75%;
+                    transition: width 6s cubic-bezier(0.1, 0.6, 0.2, 1), opacity 0.2s ease;
+                }
+
+            /* ===== Smooth Buttons ===== */
+            button,
+            .btn,
+            a.rounded-full {
+                transition-property: color, background-color, border-color, opacity, box-shadow, transform;
+                transition-duration: 0.2s;
+                transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+            }
+
+                .btn-primary-custom:hover,
+                a.rounded-full[style*="background-color"]:hover {
+                    transform: translateY(-1px);
+                    box-shadow: 0 6px 16px rgba(31, 59, 44, 0.22);
+                }
+
+                button:not(:disabled):active,
+                .btn:not(:disabled):active,
+                a.rounded-full:active,
+                .btn-primary-custom:active,
+                a.rounded-full[style*="background-color"]:active {
+                    transform: scale(0.96);
+                    box-shadow: none;
+                }
+
+                button:focus-visible,
+                .btn:focus-visible,
+                a.rounded-full:focus-visible {
+                    outline: 2px solid #1F3B2C;
+                    outline-offset: 2px;
+                }
+
+            @@media (prefers-reduced-motion: reduce) {
+                html.no-vt main {
+                    animation: none;
+                    transition: none;
+                }
+
+                    html.no-vt main.page-leaving {
+                        transform: none;
+                    }
+
+                #pageProgress.active {
+                    transition: none;
+                }
+
+                button, .btn, a.rounded-full {
+                    transition: none;
+                }
+
+                    button:active, .btn:active, a.rounded-full:active,
+                    .btn-primary-custom:hover, .btn-primary-custom:active,
+                    a.rounded-full[style*="background-color"]:hover,
+                    a.rounded-full[style*="background-color"]:active {
+                        transform: none;
+                    }
+            }
     </style>
 </head>
 <body>
+
+    <!-- Page transition loading bar -->
+    <div id="pageProgress"></div>
 
     <!-- ========================================= -->
     <!-- NAVBAR -->
@@ -419,13 +631,18 @@
                     <a asp-controller="Home" asp-action="Index" class="text-sm font-medium transition hover:opacity-70" style="color:#4B5648;">Home</a>
                     <a asp-controller="Learn" asp-action="Index" class="text-sm font-medium transition hover:opacity-70" style="color:#4B5648;">Learn</a>
                     <a asp-controller="Practice" asp-action="Index" class="text-sm font-medium transition hover:opacity-70" style="color:#4B5648;">Practice</a>
-                    <a asp-controller="Progress" asp-action="Progress" class="text-sm font-medium transition hover:opacity-70" style="color:#4B5648;">Progress</a>
                     <a asp-controller="Leaderboard" asp-action="Leaderboard" class="text-sm font-medium transition hover:opacity-70" style="color:#4B5648;">Leaderboard</a>
-                    <!-- ✅ Find Tutor (নতুন যোগ করা) -->
                     <a asp-controller="FindTutor" asp-action="Index" class="text-sm font-medium transition hover:opacity-70" style="color:#4B5648;">Find Tutor</a>
+                    <a asp-controller="Notice" asp-action="Index" class="text-sm font-medium transition hover:opacity-70" style="color:#4B5648;">Notice</a>
+                    @if (Context.Session.GetString("UserName") != null)
+                    {
+                        <a asp-controller="MyClass" asp-action="MyClass" class="text-sm font-medium transition hover:opacity-70" style="color:#4B5648;">
+                            <i class="fas fa-chalkboard me-1" style="font-size:12px;"></i>My Class
+                        </a>
+                    }
                 </div>
 
-                <!-- Desktop Right Side - User Dropdown -->
+                <!-- Desktop Right Side -->
                 <div class="hidden lg:flex items-center">
                     @if (Context.Session.GetString("UserName") != null)
                     {
@@ -433,27 +650,36 @@
                         var isTeacher = userRole == "Teacher";
                         var isAdmin = userRole == "Admin";
                         var userFullName = Context.Session.GetString("UserFullName") ?? Context.Session.GetString("UserName");
-                        var userInitials = "";
-                        if (!string.IsNullOrEmpty(userFullName))
-                        {
-                            var names = userFullName.Split(' ', StringSplitOptions.RemoveEmptyEntries);
-                            if (names.Length >= 2)
-                            {
-                                userInitials = names[0][0].ToString().ToUpper() + names[1][0].ToString().ToUpper();
-                            }
-                            else if (names.Length == 1 && names[0].Length > 0)
-                            {
-                                userInitials = names[0][0].ToString().ToUpper();
-                            }
-                            else
-                            {
-                                userInitials = "U";
-                            }
-                        }
-                        else
-                        {
-                            userInitials = "U";
-                        }
+
+                        <!-- ✅ Notification Bell -->
+                        <div class="notification-wrapper" id="notifWrapper">
+                            <button class="notification-bell" id="notifBell" type="button" title="Notifications">
+                                <i class="fas fa-bell"></i>
+                                <span class="notif-badge" id="notifBadge">0</span>
+                            </button>
+                            <div class="notif-dropdown" id="notifDropdown">
+                                <div class="notif-header">
+                                    <h6><i class="fas fa-bell me-1"></i>Notifications</h6>
+                                    <div class="notif-header-actions">
+                                        <button onclick="markAllRead()" title="Mark all as read">
+                                            <i class="fas fa-check-double"></i> Mark all read
+                                        </button>
+                                        <button onclick="clearAllNotifications()" title="Clear all">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="notif-list" id="notifList">
+                                    <div class="notif-empty">
+                                        <i class="fas fa-spinner fa-spin"></i>
+                                        <p>Loading...</p>
+                                    </div>
+                                </div>
+                                <div class="notif-footer">
+                                    <a href="/Notification/All">View All Notifications</a>
+                                </div>
+                            </div>
+                        </div>
 
                         <div class="profile-dropdown dropdown" id="profileDropdown">
                             <button class="dropdown-toggle" type="button" id="userMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
@@ -472,6 +698,21 @@
                                         <i class="fas fa-id-card"></i> My Profile
                                     </a>
                                 </li>
+                                <li>
+                                    <a class="dropdown-item" asp-controller="Profile" asp-action="Index" asp-route-section="progress">
+                                        <i class="fas fa-chart-line"></i> My Progress
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item" asp-controller="MyClass" asp-action="MyClass">
+                                        <i class="fas fa-chalkboard"></i> My Class
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item" asp-controller="Payment" asp-action="MyOrders">
+                                        <i class="fas fa-shopping-bag"></i> My Orders
+                                    </a>
+                                </li>
                                 @if (isTeacher)
                                 {
                                     <li>
@@ -487,6 +728,11 @@
                                         <a class="dropdown-item" asp-controller="Admin" asp-action="Dashboard">
                                             <i class="fas fa-shield-alt"></i> Admin Panel
                                             <span class="badge-role admin">Admin</span>
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item" asp-controller="Admin" asp-action="Payments">
+                                            <i class="fas fa-money-check-alt"></i> Payment Management
                                         </a>
                                     </li>
                                 }
@@ -529,10 +775,15 @@
                     <a asp-controller="Home" asp-action="Index" class="text-sm" style="color:#4B5648;">Home</a>
                     <a asp-controller="Learn" asp-action="Index" class="text-sm" style="color:#4B5648;">Learn</a>
                     <a asp-controller="Practice" asp-action="Index" class="text-sm" style="color:#4B5648;">Practice</a>
-                    <a asp-controller="Progress" asp-action="Progress" class="text-sm" style="color:#4B5648;">Progress</a>
                     <a asp-controller="Leaderboard" asp-action="Leaderboard" class="text-sm" style="color:#4B5648;">Leaderboard</a>
-                    <!-- ✅ Find Tutor (নতুন যোগ করা - মোবাইল) -->
                     <a asp-controller="FindTutor" asp-action="Index" class="text-sm" style="color:#4B5648;">Find Tutor</a>
+                    <a asp-controller="Notice" asp-action="Index" class="text-sm" style="color:#4B5648;">Notice</a>
+                    @if (Context.Session.GetString("UserName") != null)
+                    {
+                        <a asp-controller="MyClass" asp-action="MyClass" class="text-sm" style="color:#4B5648;">
+                            <i class="fas fa-chalkboard me-1"></i> My Class
+                        </a>
+                    }
 
                     <hr class="border-black/5" />
 
@@ -544,14 +795,29 @@
                         var userFullNameMobile = Context.Session.GetString("UserFullName") ?? Context.Session.GetString("UserName");
 
                         <div class="flex flex-col gap-2">
-                            <!-- মোবাইলে ইউজারের নাম দেখানো -->
                             <div class="text-sm font-semibold" style="color:#1F3B2C; padding: 4px 0;">
                                 <i class="fas fa-user-circle me-2"></i> @userFullNameMobile
                                 <span class="text-xs font-normal text-muted" style="color:#6B7568;">(@Context.Session.GetString("UserName"))</span>
                             </div>
 
+                            <a href="/Notification/All" class="text-sm font-medium" style="color:#1F3B2C;">
+                                <i class="fas fa-bell me-2"></i> Notifications
+                            </a>
+
                             <a asp-controller="Profile" asp-action="Index" class="text-sm font-medium" style="color:#1F3B2C;">
                                 <i class="fas fa-id-card me-2"></i> My Profile
+                            </a>
+
+                            <a asp-controller="Profile" asp-action="Index" asp-route-section="progress" class="text-sm font-medium" style="color:#1F3B2C;">
+                                <i class="fas fa-chart-line me-2"></i> My Progress
+                            </a>
+
+                            <a asp-controller="MyClass" asp-action="MyClass" class="text-sm font-medium" style="color:#1F3B2C;">
+                                <i class="fas fa-chalkboard me-2"></i> My Class
+                            </a>
+
+                            <a asp-controller="Payment" asp-action="MyOrders" class="text-sm font-medium" style="color:#1F3B2C;">
+                                <i class="fas fa-shopping-bag me-2"></i> My Orders
                             </a>
 
                             @if (isTeacherMobile)
@@ -567,6 +833,9 @@
                                 <a asp-controller="Admin" asp-action="Dashboard" class="text-sm font-medium" style="color:#1F3B2C;">
                                     <i class="fas fa-shield-alt me-2"></i> Admin Panel
                                     <span class="text-xs text-muted" style="color:#b8860b;">Admin</span>
+                                </a>
+                                <a asp-controller="Admin" asp-action="Payments" class="text-sm font-medium" style="color:#1F3B2C;">
+                                    <i class="fas fa-money-check-alt me-2"></i> Payment Management
                                 </a>
                             }
 
@@ -593,9 +862,6 @@
         </nav>
     </header>
 
-    <!-- ========================================= -->
-    <!-- PAGE CONTENT -->
-    <!-- ========================================= -->
     <main>
         @RenderBody()
     </main>
@@ -607,7 +873,6 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10">
             <div class="flex flex-col sm:flex-row items-center sm:items-start justify-between gap-6">
 
-                <!-- Logo + tagline -->
                 <div class="flex items-start gap-2.5 text-center sm:text-left">
                     <img src="https://i.ibb.co/fd9sY88Y/IMG-6916-1.png" alt="Smart Tutor Hub logo" class="w-12 h-12 rounded-full object-cover flex-shrink-0" />
                     <div>
@@ -620,7 +885,6 @@
                     </div>
                 </div>
 
-                <!-- Follow us -->
                 <div class="flex items-center gap-4">
                     <span class="text-sm" style="color:#8A9188;">Follow us</span>
                     <a href="#" aria-label="Twitter" class="transition hover:opacity-70" style="color:#8A9188;">
@@ -648,7 +912,6 @@
                 </div>
             </div>
 
-            <!-- Bottom line -->
             <div class="border-t border-black/10 mt-8 pt-6 text-center">
                 <p class="text-xs sm:text-sm" style="color:#8A9188;">
                     &copy; @DateTime.Now.Year Smart Tutor Hub. All Rights Reserved.
@@ -658,40 +921,283 @@
     </footer>
 
     <!-- ========================================= -->
-    <!-- MOBILE MENU JAVASCRIPT -->
+    <!-- JAVASCRIPT -->
     <!-- ========================================= -->
     <script>
+            // ===== SMOOTH PAGE TRANSITION =====
+            (function () {
+                const progress = document.getElementById('pageProgress');
+                const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+                const LEAVE_DELAY = prefersReducedMotion ? 0 : 200;
+                const nativeTransition = document.documentElement.classList.contains('no-vt') === false;
+                let navigating = false;
+
+                function startProgress() {
+                    if (!progress) return;
+                    progress.classList.add('active');
+                }
+
+                function resetState() {
+                    navigating = false;
+                    document.querySelector('main')?.classList.remove('page-leaving');
+                    if (progress) {
+                        progress.classList.remove('active');
+                        progress.style.width = '0';
+                        void progress.offsetWidth;
+                        progress.style.width = '';
+                    }
+                }
+
+                window.smoothNavigate = function (url) {
+                    if (navigating) return;
+                    navigating = true;
+                    startProgress();
+                    if (nativeTransition) {
+                        window.location.href = url;
+                    } else {
+                        document.querySelector('main')?.classList.add('page-leaving');
+                        setTimeout(function () { window.location.href = url; }, LEAVE_DELAY);
+                    }
+                    setTimeout(resetState, 10000);
+                };
+
+                document.addEventListener('click', function (e) {
+                    if (e.defaultPrevented) return;
+                    if (e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+
+                    const link = e.target.closest('a');
+                    if (!link) return;
+
+                    const href = link.getAttribute('href');
+                    if (!href || href.startsWith('#') || /^(javascript|mailto|tel):/i.test(href)) return;
+                    if (link.target && link.target !== '_self') return;
+                    if (link.hasAttribute('download') || link.hasAttribute('data-bs-toggle') || link.hasAttribute('data-no-transition')) return;
+
+                    let url;
+                    try { url = new URL(link.href, window.location.href); } catch { return; }
+                    if (url.origin !== window.location.origin) return;
+                    if (url.pathname === window.location.pathname && url.search === window.location.search && url.hash) return;
+
+                    if (nativeTransition) {
+                        startProgress();
+                        setTimeout(resetState, 10000);
+                        return;
+                    }
+
+                    e.preventDefault();
+                    window.smoothNavigate(url.href);
+                });
+
+                document.addEventListener('submit', function (e) {
+                    if (e.defaultPrevented) return;
+                    startProgress();
+                    setTimeout(resetState, 10000);
+                });
+
+                window.addEventListener('pageshow', function (e) {
+                    if (e.persisted) resetState();
+                });
+            })();
+    </script>
+
+    <script>
+            // ===== Mobile Menu Toggle =====
             const mobileMenuButton = document.getElementById("mobileMenuButton");
             const mobileMenu = document.getElementById("mobileMenu");
 
-            mobileMenuButton.addEventListener("click", function() {
+            mobileMenuButton.addEventListener("click", function () {
                 mobileMenu.classList.toggle("hidden");
             });
 
-            // ড্রপডাউন ম্যানুয়ালি টগল করার জন্য (Bootstrap 5 এর সাথে)
-            document.addEventListener('DOMContentLoaded', function() {
+            // ===== Profile Dropdown =====
+            document.addEventListener('DOMContentLoaded', function () {
                 const dropdownToggle = document.querySelector('.profile-dropdown .dropdown-toggle');
                 if (dropdownToggle) {
-                    dropdownToggle.addEventListener('click', function(e) {
+                    dropdownToggle.addEventListener('click', function (e) {
                         e.preventDefault();
                         const parent = this.closest('.profile-dropdown');
                         if (parent) {
                             parent.classList.toggle('show');
                         }
+                        document.getElementById('notifWrapper')?.classList.remove('show');
                     });
                 }
 
-                // ড্রপডাউনের বাইরে ক্লিক করলে বন্ধ
-                document.addEventListener('click', function(e) {
+                document.addEventListener('click', function (e) {
                     const dropdown = document.querySelector('.profile-dropdown');
                     if (dropdown && !dropdown.contains(e.target)) {
                         dropdown.classList.remove('show');
                     }
                 });
             });
+
+            // ===== NOTIFICATION SYSTEM =====
+            (function () {
+                const wrapper = document.getElementById('notifWrapper');
+                const bell = document.getElementById('notifBell');
+                const badge = document.getElementById('notifBadge');
+                const list = document.getElementById('notifList');
+
+                if (!wrapper || !bell) return;
+
+                function getToken() {
+                    const token = document.querySelector('input[name="__RequestVerificationToken"]');
+                    return token ? token.value : '';
+                }
+
+                function loadUnreadCount() {
+                    fetch('/Notification/GetUnreadCount')
+                        .then(r => r.json())
+                        .then(data => {
+                            if (data.success && data.count > 0) {
+                                badge.textContent = data.count > 99 ? '99+' : data.count;
+                                badge.classList.add('show');
+                            } else {
+                                badge.classList.remove('show');
+                            }
+                        })
+                        .catch(() => {});
+                }
+
+                function loadNotifications() {
+                    list.innerHTML = '<div class="notif-empty"><i class="fas fa-spinner fa-spin"></i><p>Loading...</p></div>';
+
+                    fetch('/Notification/GetNotifications')
+                        .then(r => r.json())
+                        .then(data => {
+                            if (!data.success || !data.notifications || data.notifications.length === 0) {
+                                list.innerHTML = `
+                                    <div class="notif-empty">
+                                        <i class="fas fa-bell-slash"></i>
+                                        <p>No notifications yet</p>
+                                    </div>`;
+                                return;
+                            }
+
+                            let html = '';
+                            data.notifications.forEach(n => {
+                                const unreadClass = n.isRead ? '' : 'unread';
+                                const typeClass = n.type || 'info';
+                                const icon = n.icon || 'fa-bell';
+                                const linkAttr = n.link ? `data-link="${n.link}"` : '';
+
+                                html += `
+                                    <div class="notif-item ${unreadClass}" ${linkAttr} data-id="${n.id}">
+                                        <div class="notif-icon ${typeClass}">
+                                            <i class="fas ${icon}"></i>
+                                        </div>
+                                        <div class="notif-content">
+                                            <p class="notif-title">${escapeHtml(n.title)}</p>
+                                            <p class="notif-message">${escapeHtml(n.message)}</p>
+                                            <span class="notif-time"><i class="far fa-clock me-1"></i>${n.timeAgo}</span>
+                                        </div>
+                                    </div>`;
+                            });
+
+                            list.innerHTML = html;
+
+                            list.querySelectorAll('.notif-item').forEach(item => {
+                                item.addEventListener('click', function () {
+                                    const id = this.getAttribute('data-id');
+                                    const link = this.getAttribute('data-link');
+                                    markOneRead(id);
+                                    if (link) {
+                                        window.smoothNavigate ? window.smoothNavigate(link) : (window.location.href = link);
+                                    }
+                                });
+                            });
+                        })
+                        .catch(() => {
+                            list.innerHTML = '<div class="notif-empty"><i class="fas fa-exclamation-circle"></i><p>Failed to load</p></div>';
+                        });
+                }
+
+                function escapeHtml(text) {
+                    if (!text) return '';
+                    return String(text)
+                        .replace(/&/g, '&amp;')
+                        .replace(/</g, '&lt;')
+                        .replace(/>/g, '&gt;')
+                        .replace(/"/g, '&quot;')
+                        .replace(/'/g, '&#39;');
+                }
+
+                function markOneRead(id) {
+                    const formData = new FormData();
+                    formData.append('id', id);
+                    const headers = { 'RequestVerificationToken': getToken() };
+
+                    fetch('/Notification/MarkAsRead', {
+                        method: 'POST',
+                        body: formData,
+                        headers: headers
+                    }).then(() => {
+                        loadUnreadCount();
+                    }).catch(() => {});
+                }
+
+                window.markAllRead = function () {
+                    const formData = new FormData();
+                    const headers = { 'RequestVerificationToken': getToken() };
+
+                    fetch('/Notification/MarkAllAsRead', {
+                        method: 'POST',
+                        body: formData,
+                        headers: headers
+                    })
+                    .then(r => r.json())
+                    .then(data => {
+                        if (data.success) {
+                            loadUnreadCount();
+                            loadNotifications();
+                        }
+                    });
+                };
+
+                window.clearAllNotifications = function () {
+                    if (!confirm('সব নোটিফিকেশন মুছে ফেলতে চান?')) return;
+
+                    const formData = new FormData();
+                    const headers = { 'RequestVerificationToken': getToken() };
+
+                    fetch('/Notification/ClearAll', {
+                        method: 'POST',
+                        body: formData,
+                        headers: headers
+                    })
+                    .then(r => r.json())
+                    .then(data => {
+                        if (data.success) {
+                            loadUnreadCount();
+                            loadNotifications();
+                        }
+                    });
+                };
+
+                bell.addEventListener('click', function (e) {
+                    e.stopPropagation();
+                    const isOpen = wrapper.classList.contains('show');
+
+                    if (isOpen) {
+                        wrapper.classList.remove('show');
+                    } else {
+                        wrapper.classList.add('show');
+                        loadNotifications();
+                        document.querySelector('.profile-dropdown')?.classList.remove('show');
+                    }
+                });
+
+                document.addEventListener('click', function (e) {
+                    if (!wrapper.contains(e.target)) {
+                        wrapper.classList.remove('show');
+                    }
+                });
+
+                loadUnreadCount();
+                setInterval(loadUnreadCount, 30000);
+            })();
     </script>
 
-    <!-- Bootstrap 5 JS Bundle -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
     @await RenderSectionAsync("Scripts", required: false)

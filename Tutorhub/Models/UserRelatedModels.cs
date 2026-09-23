@@ -12,18 +12,8 @@ namespace Tutorbub.Models
         public User? User { get; set; }
     }
 
-    public class CourseOrder
-    {
-        public int Id { get; set; }
-        public int UserId { get; set; }
-        public string CourseName { get; set; } = string.Empty;
-        public decimal Price { get; set; }
-        public string PaymentStatus { get; set; } = string.Empty;
-        public string PaymentMethod { get; set; } = string.Empty;
-        public DateTime OrderDate { get; set; }
-        public string? Action { get; set; }
-        public User? User { get; set; }
-    }
+    // ❌ পুরনো CourseOrder ক্লাস মুছে ফেলা হয়েছে
+    // ✅ নতুন CourseOrder ক্লাস এখন PaymentModel.cs এ আছে
 
     public class Certificate
     {
