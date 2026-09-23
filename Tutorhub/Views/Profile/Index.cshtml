@@ -1,5 +1,4 @@
-﻿<!-- 📁 Views/Profile/Index.cshtml -->
-@model Tutorbub.Models.UserProfileViewModel
+﻿@model Tutorbub.Models.UserProfileViewModel
 
 @{
     ViewData["Title"] = "My Profile";
@@ -63,11 +62,97 @@
     .alert-danger { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
     .alert-info { background-color: #d1ecf1; color: #0c5460; border: 1px solid #bee5eb; }
 
+    /* ===== My Progress Section ===== */
+    .progress-stat-card {
+        background: #FAF9F4;
+        border-radius: 12px;
+        padding: 16px;
+        text-align: center;
+        border: 1px solid rgba(0,0,0,0.04);
+        height: 100%;
+    }
+    .progress-stat-icon {
+        width: 40px; height: 40px;
+        border-radius: 10px;
+        display: inline-flex;
+        align-items: center; justify-content: center;
+        font-size: 18px; margin-bottom: 8px;
+    }
+    .progress-stat-icon.green { background: #d4edda; color: #1f7b4d; }
+    .progress-stat-icon.blue { background: #d1ecf1; color: #0c6b7c; }
+    .progress-stat-icon.gold { background: #fff3cd; color: #b8860b; }
+    .progress-stat-icon.purple { background: #e7dcf5; color: #6f42c1; }
+    .progress-stat-number { font-size: 22px; font-weight: 800; color: #1F3B2C; }
+    .progress-stat-label { font-size: 12px; color: #6B7568; margin-top: 2px; }
+
+    .progress-sub-title {
+        font-size: 16px; font-weight: 700;
+        color: #1F3B2C; margin-bottom: 14px;
+        padding-bottom: 8px;
+        border-bottom: 2px solid #F3F1E7;
+    }
+
+    .p-course-card {
+        display: flex; align-items: center; gap: 14px;
+        padding: 14px; background: #FAF9F4;
+        border-radius: 12px; margin-bottom: 10px;
+        border: 1px solid rgba(0,0,0,0.04);
+    }
+    .p-course-card img {
+        width: 60px; height: 60px; border-radius: 10px;
+        object-fit: cover; flex-shrink: 0;
+    }
+    .p-course-info { flex: 1; min-width: 0; }
+    .p-course-info h6 {
+        font-size: 14px; font-weight: 700;
+        color: #1F3B2C; margin: 0 0 4px;
+        white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .p-course-info .meta { font-size: 12px; color: #6B7568; }
+    .p-course-progress { width: 120px; flex-shrink: 0; }
+    .p-course-progress .bar-bg {
+        height: 6px; background: #E7E4D9;
+        border-radius: 10px; overflow: hidden;
+    }
+    .p-course-progress .bar-fill {
+        height: 100%; background: #1F3B2C;
+        border-radius: 10px; transition: width 0.6s ease;
+    }
+    .p-course-progress .label {
+        display: flex; justify-content: space-between;
+        font-size: 11px; color: #6B7568; margin-top: 4px;
+    }
+
+    .p-quiz-item {
+        display: flex; justify-content: space-between;
+        align-items: center; padding: 12px 16px;
+        background: #FAF9F4; border-radius: 10px;
+        margin-bottom: 8px; border-left: 4px solid #1F3B2C;
+    }
+    .p-quiz-item .left .title {
+        font-weight: 600; color: #1F3B2C; font-size: 14px;
+    }
+    .p-quiz-item .left .sub { font-size: 12px; color: #8A9188; }
+    .p-quiz-item .right { text-align: right; }
+    .p-quiz-item .right .score {
+        font-weight: 700; font-size: 16px; color: #1F3B2C;
+    }
+    .p-quiz-item .right .date { font-size: 11px; color: #8A9188; }
+
     @@media (max-width: 992px) {
         .profile-wrapper { flex-direction: column; padding: 15px; }
         .profile-sidebar { width: 100%; position: static; }
         .profile-content { padding: 20px; }
         .image-upload-container { justify-content: center; }
+    }
+
+    @@media (max-width: 768px) {
+        .p-course-card { flex-direction: column; text-align: center; }
+        .p-course-card img { width: 100%; height: 120px; }
+        .p-course-progress { width: 100%; }
+        .p-course-info h6 { white-space: normal; }
+        .p-quiz-item { flex-direction: column; gap: 6px; text-align: center; }
+        .p-quiz-item .right { text-align: center; }
     }
 </style>
 
@@ -90,6 +175,7 @@
             <li><a href="#" class="@(activeSection == "education" ? "active" : "")" onclick="showSection('education')"><i class="fas fa-graduation-cap"></i> Education <span class="badge-status">@(string.IsNullOrEmpty(Model.EducationLevel) ? "Incomplete" : "Complete")</span></a></li>
             <li><a href="#" class="@(activeSection == "links" ? "active" : "")" onclick="showSection('links')"><i class="fas fa-link"></i> Important Links <span class="badge-status">@(string.IsNullOrEmpty(Model.CvLink) ? "Incomplete" : "Complete")</span></a></li>
             <li><a href="#" class="@(activeSection == "orders" ? "active" : "")" onclick="showSection('orders')"><i class="fas fa-shopping-bag"></i> Order History <span class="badge-status">@(Model.CourseOrders != null && Model.CourseOrders.Count > 0 ? Model.CourseOrders.Count + " Orders" : "No Orders")</span></a></li>
+            <li><a href="#" class="@(activeSection == "progress" ? "active" : "")" onclick="showSection('progress')"><i class="fas fa-chart-line"></i> My Progress <span class="badge-status">View</span></a></li>
             <li><a href="#" class="@(activeSection == "become-tutor" ? "active" : "")" onclick="showSection('become-tutor')"><i class="fas fa-chalkboard-teacher"></i> Become a Tutor <span class="badge-status" id="tutorStatusBadge">Check</span></a></li>
             <li style="border-top: 2px solid #F3F1E7; margin-top: 10px; padding-top: 10px;">
                 <a href="#" onclick="changePassword()" style="color: #b8860b;"><i class="fas fa-key"></i> Change Password</a>
@@ -227,6 +313,64 @@
             }
         </div>
 
+        <!-- My Progress -->
+        <div id="section-progress" class="profile-section @(activeSection == "progress" ? "active" : "")">
+            <h2 class="section-title"><i class="fas fa-chart-line me-2" style="color:#1F3B2C;"></i>My Progress</h2>
+            <p class="section-subtitle">Track your learning journey across courses and quizzes</p>
+
+            <!-- Stats Cards -->
+            <div class="row g-3 mb-4">
+                <div class="col-md-3 col-6">
+                    <div class="progress-stat-card">
+                        <div class="progress-stat-icon green"><i class="fas fa-star"></i></div>
+                        <div class="progress-stat-number" id="pTotalPoints">0</div>
+                        <div class="progress-stat-label">Total Points</div>
+                    </div>
+                </div>
+                <div class="col-md-3 col-6">
+                    <div class="progress-stat-card">
+                        <div class="progress-stat-icon blue"><i class="fas fa-check-circle"></i></div>
+                        <div class="progress-stat-number" id="pCorrectAnswers">0</div>
+                        <div class="progress-stat-label">Correct Answers</div>
+                    </div>
+                </div>
+                <div class="col-md-3 col-6">
+                    <div class="progress-stat-card">
+                        <div class="progress-stat-icon gold"><i class="fas fa-fire"></i></div>
+                        <div class="progress-stat-number" id="pStreakDays">0</div>
+                        <div class="progress-stat-label">Day Streak</div>
+                    </div>
+                </div>
+                <div class="col-md-3 col-6">
+                    <div class="progress-stat-card">
+                        <div class="progress-stat-icon purple"><i class="fas fa-trophy"></i></div>
+                        <div class="progress-stat-number" id="pQuizzesCompleted">0</div>
+                        <div class="progress-stat-label">Quizzes Done</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Course Progress -->
+            <div class="mb-4">
+                <h4 class="progress-sub-title"><i class="fas fa-book-open me-2"></i>Course Progress</h4>
+                <div id="pCourseProgressList">
+                    <div class="text-center py-4" style="color:#8A9188;">
+                        <i class="fas fa-spinner fa-spin"></i> Loading...
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quiz History -->
+            <div class="mb-4">
+                <h4 class="progress-sub-title"><i class="fas fa-brain me-2"></i>Quiz History</h4>
+                <div id="pQuizHistoryList">
+                    <div class="text-center py-4" style="color:#8A9188;">
+                        <i class="fas fa-spinner fa-spin"></i> Loading...
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- Become a Tutor -->
         <div id="section-become-tutor" class="profile-section @(activeSection == "become-tutor" ? "active" : "")">
             <h2 class="section-title"><i class="fas fa-chalkboard-teacher me-2" style="color:#1F3B2C;"></i>Become a Tutor</h2>
@@ -254,6 +398,13 @@
         var url = new URL(window.location.href);
         url.searchParams.set('section', section);
         window.history.pushState({}, '', url);
+
+        if (section === 'progress') {
+            loadMyProgress();
+        }
+        if (section === 'become-tutor') {
+            checkTutorStatus();
+        }
     }
 
     // Profile Image Upload
@@ -393,6 +544,79 @@
         });
     }
 
+    // ===== My Progress Load =====
+    function loadMyProgress() {
+        fetch('/Progress/GetProgressData')
+            .then(function(response) { return response.json(); })
+            .then(function(data) {
+                if (!data.success) {
+                    console.warn('Progress data could not be loaded');
+                    return;
+                }
+
+                // Stats
+                document.getElementById('pTotalPoints').textContent = data.totalPoints || 0;
+                document.getElementById('pCorrectAnswers').textContent = data.correctAnswers || 0;
+                document.getElementById('pStreakDays').textContent = data.streakDays || 0;
+                document.getElementById('pQuizzesCompleted').textContent = data.quizzesCompleted || 0;
+
+                // Course Progress
+                var courseList = document.getElementById('pCourseProgressList');
+                if (!data.courses || data.courses.length === 0) {
+                    courseList.innerHTML = '<div class="text-center py-4" style="color:#8A9188;"><i class="fas fa-book" style="font-size:32px; opacity:0.3;"></i><p class="mt-2">No courses enrolled yet</p><a href="/Learn/Index" style="color:#1F3B2C; font-weight:600; text-decoration:none;">Browse Courses →</a></div>';
+                } else {
+                    var html = '';
+                    data.courses.forEach(function(c) {
+                        html += `
+                            <div class="p-course-card">
+                                <img src="${c.image || 'https://i.ibb.co/fd9sY88Y/IMG-6916-1.png'}" alt="${c.title}" />
+                                <div class="p-course-info">
+                                    <h6>${c.title}</h6>
+                                    <div class="meta"><i class="fas fa-check-circle me-1"></i>${c.completedLessons}/${c.totalLessons} lessons</div>
+                                </div>
+                                <div class="p-course-progress">
+                                    <div class="bar-bg"><div class="bar-fill" style="width:${c.progress}%;"></div></div>
+                                    <div class="label"><span>${c.progress}%</span><span><a href="/Learn/Details/${c.id}" style="color:#1F3B2C; font-weight:600; text-decoration:none;">Continue</a></span></div>
+                                </div>
+                            </div>
+                        `;
+                    });
+                    courseList.innerHTML = html;
+                }
+
+                // Quiz History
+                var quizList = document.getElementById('pQuizHistoryList');
+                if (!data.quizzes || data.quizzes.length === 0) {
+                    quizList.innerHTML = '<div class="text-center py-4" style="color:#8A9188;"><i class="fas fa-question-circle" style="font-size:32px; opacity:0.3;"></i><p class="mt-2">No quizzes attempted yet</p><a href="/Practice/Index" style="color:#1F3B2C; font-weight:600; text-decoration:none;">Start Practice →</a></div>';
+                } else {
+                    var html = '';
+                    data.quizzes.forEach(function(q) {
+                        var pct = Math.round((q.score / q.total) * 100);
+                        var color = pct >= 60 ? '#2ecc71' : '#e74c3c';
+                        var date = new Date(q.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+                        html += `
+                            <div class="p-quiz-item" style="border-left-color:${color};">
+                                <div class="left">
+                                    <div class="title">${q.title}</div>
+                                    <div class="sub"><i class="fas fa-tag me-1"></i>${q.subject}</div>
+                                </div>
+                                <div class="right">
+                                    <div class="score">${q.score}/${q.total}</div>
+                                    <div class="date">${date}</div>
+                                </div>
+                            </div>
+                        `;
+                    });
+                    quizList.innerHTML = html;
+                }
+            })
+            .catch(function(error) {
+                console.error('Error loading progress:', error);
+                document.getElementById('pCourseProgressList').innerHTML = '<div class="text-center py-4" style="color:#e74c3c;"><i class="fas fa-exclamation-circle"></i> Failed to load course progress</div>';
+                document.getElementById('pQuizHistoryList').innerHTML = '<div class="text-center py-4" style="color:#e74c3c;"><i class="fas fa-exclamation-circle"></i> Failed to load quiz history</div>';
+            });
+    }
+
     document.addEventListener('DOMContentLoaded', function() {
         var urlParams = new URLSearchParams(window.location.search);
         var section = urlParams.get('section') || 'basic';
@@ -400,6 +624,9 @@
 
         if (section === 'become-tutor') {
             checkTutorStatus();
+        }
+        if (section === 'progress') {
+            loadMyProgress();
         }
     });
 

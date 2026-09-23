@@ -643,7 +643,6 @@ namespace Tutorbub.Models
         }
 
         // ============================================================
-<<<<<<< HEAD
         // ===== COURSE RELATED METHODS =====
         // ============================================================
 
@@ -747,7 +746,6 @@ namespace Tutorbub.Models
             }
         }
 
-        // ===== কোর্স ডিলিট =====
         public bool DeleteCourse(int courseId)
         {
             try
@@ -781,7 +779,6 @@ namespace Tutorbub.Models
             }
         }
 
-        // ===== Enrollment Open/Close Toggle =====
         public bool ToggleEnrollment(int courseId, bool isOpen)
         {
             string query = @"UPDATE ""Courses"" 
@@ -805,7 +802,7 @@ namespace Tutorbub.Models
         }
 
         // ============================================================
-        // ===== COURSE LESSON / VIDEO METHODS (নতুন) =====
+        // ===== COURSE LESSON / VIDEO METHODS =====
         // ============================================================
 
         public bool CreateCourseLesson(CourseLesson lesson, out string? errorMessage)
@@ -911,14 +908,6 @@ namespace Tutorbub.Models
         // ===== PAYMENT / COURSE ORDER RELATED METHODS =====
         // ============================================================
 
-=======
-        // ===== PAYMENT / COURSE ORDER RELATED METHODS =====
-        // ============================================================
-
-        /// <summary>
-        /// নতুন কোর্স অর্ডার তৈরি করা (পেমেন্ট পেন্ডিং)
-        /// </summary>
->>>>>>> df3504e (update site  and add  courselessons systems)
         public bool CreateCourseOrder(CourseOrder order, out string? errorMessage)
         {
             errorMessage = null;
@@ -964,12 +953,6 @@ namespace Tutorbub.Models
             }
         }
 
-<<<<<<< HEAD
-=======
-        /// <summary>
-        /// ইউজারের সব অর্ডার পাওয়া
-        /// </summary>
->>>>>>> df3504e (update site  and add  courselessons systems)
         public List<CourseOrder> GetUserOrders(int userId)
         {
             var orders = new List<CourseOrder>();
@@ -1002,12 +985,6 @@ namespace Tutorbub.Models
             }
         }
 
-<<<<<<< HEAD
-=======
-        /// <summary>
-        /// সব অর্ডার পাওয়া (অ্যাডমিনের জন্য)
-        /// </summary>
->>>>>>> df3504e (update site  and add  courselessons systems)
         public List<AdminPaymentViewModel> GetAllOrders(string? statusFilter = null)
         {
             var orders = new List<AdminPaymentViewModel>();
@@ -1071,12 +1048,6 @@ namespace Tutorbub.Models
             }
         }
 
-<<<<<<< HEAD
-=======
-        /// <summary>
-        /// একটি নির্দিষ্ট অর্ডার পাওয়া
-        /// </summary>
->>>>>>> df3504e (update site  and add  courselessons systems)
         public CourseOrder? GetOrderById(int orderId)
         {
             string query = @"
@@ -1107,12 +1078,6 @@ namespace Tutorbub.Models
             }
         }
 
-<<<<<<< HEAD
-=======
-        /// <summary>
-        /// অর্ডার অ্যাপ্রুভ করা (অ্যাডমিন)
-        /// </summary>
->>>>>>> df3504e (update site  and add  courselessons systems)
         public bool ApproveOrder(int orderId, int adminId, string? adminNote = null)
         {
             string query = @"
@@ -1141,12 +1106,6 @@ namespace Tutorbub.Models
             }
         }
 
-<<<<<<< HEAD
-=======
-        /// <summary>
-        /// অর্ডার রিজেক্ট করা (অ্যাডমিন)
-        /// </summary>
->>>>>>> df3504e (update site  and add  courselessons systems)
         public bool RejectOrder(int orderId, int adminId, string? adminNote = null)
         {
             string query = @"
@@ -1175,12 +1134,6 @@ namespace Tutorbub.Models
             }
         }
 
-<<<<<<< HEAD
-=======
-        /// <summary>
-        /// ইউজার একটি কোর্সে এনরোল করেছে কিনা চেক
-        /// </summary>
->>>>>>> df3504e (update site  and add  courselessons systems)
         public bool IsUserEnrolled(int userId, int courseId)
         {
             string query = @"
@@ -1205,12 +1158,6 @@ namespace Tutorbub.Models
             }
         }
 
-<<<<<<< HEAD
-=======
-        /// <summary>
-        /// ইউজারের এনরোল করা সব কোর্সের আইডি
-        /// </summary>
->>>>>>> df3504e (update site  and add  courselessons systems)
         public List<int> GetUserEnrolledCourseIds(int userId)
         {
             var courseIds = new List<int>();
@@ -1240,7 +1187,6 @@ namespace Tutorbub.Models
             }
         }
 
-<<<<<<< HEAD
         // ============================================================
         // ===== ENROLLED COURSES (MY CLASS) =====
         // ============================================================
@@ -1285,11 +1231,6 @@ namespace Tutorbub.Models
             }
         }
 
-=======
-        /// <summary>
-        /// অ্যাডমিন ড্যাশবোর্ডের জন্য পেমেন্ট স্ট্যাটস
-        /// </summary>
->>>>>>> df3504e (update site  and add  courselessons systems)
         public (int Pending, int Approved, int Rejected, decimal TotalRevenue) GetPaymentStats()
         {
             string query = @"
@@ -1326,7 +1267,6 @@ namespace Tutorbub.Models
         }
 
         // ============================================================
-<<<<<<< HEAD
         // ===== NOTIFICATION RELATED METHODS =====
         // ============================================================
 
@@ -1489,8 +1429,161 @@ namespace Tutorbub.Models
         }
 
         // ============================================================
-=======
->>>>>>> df3504e (update site  and add  courselessons systems)
+        // ===== NOTICE / NEWS / ANNOUNCEMENT METHODS =====
+        // ============================================================
+
+        public bool CreateNotice(Notice notice, out string? errorMessage)
+        {
+            errorMessage = null;
+            string query = @"
+                INSERT INTO ""Notices"" 
+                (""Title"", ""Content"", ""Category"", ""ImageUrl"", 
+                 ""PublishedDate"", ""IsAnnouncement"", ""IsActive"", ""CreatedAt"")
+                VALUES 
+                (@title, @content, @category, @imageUrl,
+                 @publishedDate, @isAnnouncement, @isActive, @createdAt)
+                RETURNING ""Id""";
+
+            try
+            {
+                using var connection = new NpgsqlConnection(_connectionString);
+                using var command = new NpgsqlCommand(query, connection);
+
+                command.Parameters.AddWithValue("@title", notice.Title ?? (object)DBNull.Value);
+                command.Parameters.AddWithValue("@content", notice.Content ?? (object)DBNull.Value);
+                command.Parameters.AddWithValue("@category", notice.Category ?? "News");
+                command.Parameters.AddWithValue("@imageUrl", string.IsNullOrEmpty(notice.ImageUrl) ? (object)DBNull.Value : notice.ImageUrl);
+                command.Parameters.AddWithValue("@publishedDate", notice.PublishedDate);
+                command.Parameters.AddWithValue("@isAnnouncement", notice.IsAnnouncement);
+                command.Parameters.AddWithValue("@isActive", notice.IsActive);
+                command.Parameters.AddWithValue("@createdAt", DateTime.UtcNow);
+
+                connection.Open();
+                var result = command.ExecuteScalar();
+                if (result != null && int.TryParse(result.ToString(), out int newId))
+                {
+                    notice.Id = newId;
+                    return true;
+                }
+                return false;
+            }
+            catch (Exception ex)
+            {
+                errorMessage = ex.Message;
+                return false;
+            }
+        }
+
+        public List<Notice> GetAllNotices()
+        {
+            var notices = new List<Notice>();
+            string query = @"SELECT * FROM ""Notices"" WHERE ""IsActive"" = TRUE ORDER BY ""PublishedDate"" DESC";
+
+            try
+            {
+                using var connection = new NpgsqlConnection(_connectionString);
+                using var command = new NpgsqlCommand(query, connection);
+                connection.Open();
+                using var reader = command.ExecuteReader();
+
+                while (reader.Read())
+                {
+                    notices.Add(MapNotice(reader));
+                }
+                return notices;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Error getting all notices: " + ex.Message);
+                return new List<Notice>();
+            }
+        }
+
+        public Notice? GetNoticeById(int id)
+        {
+            string query = @"SELECT * FROM ""Notices"" WHERE ""Id"" = @id";
+
+            try
+            {
+                using var connection = new NpgsqlConnection(_connectionString);
+                using var command = new NpgsqlCommand(query, connection);
+                command.Parameters.AddWithValue("@id", id);
+                connection.Open();
+
+                using var reader = command.ExecuteReader();
+                if (reader.Read())
+                {
+                    return MapNotice(reader);
+                }
+                return null;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Error getting notice by id: " + ex.Message);
+                return null;
+            }
+        }
+
+        public bool UpdateNotice(Notice notice, out string? errorMessage)
+        {
+            errorMessage = null;
+            string query = @"
+                UPDATE ""Notices"" SET 
+                    ""Title"" = @title,
+                    ""Content"" = @content,
+                    ""Category"" = @category,
+                    ""ImageUrl"" = @imageUrl,
+                    ""PublishedDate"" = @publishedDate,
+                    ""IsAnnouncement"" = @isAnnouncement,
+                    ""IsActive"" = @isActive,
+                    ""UpdatedAt"" = @updatedAt
+                WHERE ""Id"" = @id";
+
+            try
+            {
+                using var connection = new NpgsqlConnection(_connectionString);
+                using var command = new NpgsqlCommand(query, connection);
+
+                command.Parameters.AddWithValue("@id", notice.Id);
+                command.Parameters.AddWithValue("@title", notice.Title ?? (object)DBNull.Value);
+                command.Parameters.AddWithValue("@content", notice.Content ?? (object)DBNull.Value);
+                command.Parameters.AddWithValue("@category", notice.Category ?? "News");
+                command.Parameters.AddWithValue("@imageUrl", string.IsNullOrEmpty(notice.ImageUrl) ? (object)DBNull.Value : notice.ImageUrl);
+                command.Parameters.AddWithValue("@publishedDate", notice.PublishedDate);
+                command.Parameters.AddWithValue("@isAnnouncement", notice.IsAnnouncement);
+                command.Parameters.AddWithValue("@isActive", notice.IsActive);
+                command.Parameters.AddWithValue("@updatedAt", DateTime.UtcNow);
+
+                connection.Open();
+                return command.ExecuteNonQuery() > 0;
+            }
+            catch (Exception ex)
+            {
+                errorMessage = ex.Message;
+                return false;
+            }
+        }
+
+        public bool DeleteNotice(int id)
+        {
+            string query = @"DELETE FROM ""Notices"" WHERE ""Id"" = @id";
+
+            try
+            {
+                using var connection = new NpgsqlConnection(_connectionString);
+                using var command = new NpgsqlCommand(query, connection);
+                command.Parameters.AddWithValue("@id", id);
+                connection.Open();
+                return command.ExecuteNonQuery() > 0;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Error deleting notice: " + ex.Message);
+                return false;
+            }
+        }
+
+        // ============================================================
         // ===== PRIVATE MAPPERS =====
         // ============================================================
 
@@ -1577,7 +1670,6 @@ namespace Tutorbub.Models
                 VerifiedBy = reader["VerifiedBy"] as int?
             };
         }
-<<<<<<< HEAD
 
         private Course MapCourse(NpgsqlDataReader reader)
         {
@@ -1602,7 +1694,22 @@ namespace Tutorbub.Models
                 CreatedAt = reader["CreatedAt"] as DateTime? ?? DateTime.UtcNow
             };
         }
-=======
->>>>>>> df3504e (update site  and add  courselessons systems)
+
+        private Notice MapNotice(NpgsqlDataReader reader)
+        {
+            return new Notice
+            {
+                Id = reader.GetInt32(reader.GetOrdinal("Id")),
+                Title = reader["Title"]?.ToString() ?? "",
+                Content = reader["Content"]?.ToString() ?? "",
+                Category = reader["Category"]?.ToString() ?? "News",
+                ImageUrl = reader["ImageUrl"]?.ToString() ?? "",
+                PublishedDate = reader["PublishedDate"] as DateTime? ?? DateTime.UtcNow,
+                IsAnnouncement = reader["IsAnnouncement"] as bool? ?? false,
+                IsActive = reader["IsActive"] as bool? ?? true,
+                CreatedAt = reader["CreatedAt"] as DateTime? ?? DateTime.UtcNow,
+                UpdatedAt = reader["UpdatedAt"] as DateTime?
+            };
+        }
     }
 }

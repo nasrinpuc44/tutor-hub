@@ -19,6 +19,7 @@
     .sidebar-toggle { display: none; position: fixed; top: 90px; left: 15px; z-index: 101; background-color: #1F3B2C; color: white; border: none; border-radius: 8px; padding: 10px 12px; font-size: 18px; cursor: pointer; }
     .sidebar-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(0,0,0,0.5); z-index: 99; }
     .sidebar-overlay.active { display: block; }
+
     @@media (max-width: 992px) {
         .admin-sidebar { transform: translateX(-100%); }
         .admin-sidebar.open { transform: translateX(0); }
@@ -42,6 +43,7 @@
         <li><a asp-controller="Admin" asp-action="Payments"><i class="fas fa-money-check-alt"></i> Payments</a></li>
         <li><a asp-controller="Admin" asp-action="AddCourse" class="active"><i class="fas fa-plus-circle"></i> Add Course</a></li>
         <li><a asp-controller="Admin" asp-action="ManageCourses"><i class="fas fa-tasks"></i> Manage Courses</a></li>
+        <li><a asp-controller="Admin" asp-action="ManageNotices"><i class="fas fa-newspaper"></i> News & Announcements</a></li>
         <li style="border-top: 1px solid rgba(255,255,255,0.05); margin-top: 10px; padding-top: 10px;">
             <form method="post" asp-controller="Account" asp-action="Logout" id="logoutForm">
                 @Html.AntiForgeryToken()
@@ -110,7 +112,6 @@
                         কমা (,) দিয়ে আলাদা করে লিখুন। যেমন: <strong>Certificate Included, Lifetime Access, 24/7 Support</strong>
                     </small>
 
-                    <!-- Features Preview -->
                     <div id="featuresPreview" class="mt-2" style="display:none;">
                         <small class="fw-bold" style="color:#1F3B2C;">Preview:</small>
                         <ul id="featuresList" style="margin-top:5px; padding-left:20px;"></ul>
@@ -121,12 +122,9 @@
                     <label asp-for="Image" class="form-label fw-bold">Course Image <span class="text-danger">*</span></label>
 
                     <div class="row g-2 align-items-center">
-                        <!-- URL Input -->
                         <div class="col-md-8">
                             <input asp-for="Image" id="courseImageUrl" class="form-control" placeholder="https://i.ibb.co/your-image.jpg" required />
                         </div>
-
-                        <!-- Upload Button -->
                         <div class="col-md-4">
                             <label for="courseImageFile" class="btn w-100" style="background-color:#F3F1E7; color:#1F3B2C; border:1.5px dashed #1F3B2C; font-weight:600; padding:9px;">
                                 <i class="fas fa-upload me-1"></i> Upload from Device
@@ -140,7 +138,6 @@
                         Direct image link দিন অথবা ডিভাইস থেকে ছবি আপলোড করুন (Max 5MB)
                     </small>
 
-                    <!-- Preview -->
                     <div id="imagePreviewWrapper" class="mt-3" style="display:none;">
                         <p class="mb-1 fw-bold" style="font-size:12px; color:#1F3B2C;">Preview:</p>
                         <img id="imagePreview" src="" alt="Preview"
@@ -211,7 +208,6 @@
                     featuresList.innerHTML = '';
                     return;
                 }
-
                 const items = value.split(',').map(s => s.trim()).filter(s => s);
                 featuresList.innerHTML = items.map(item =>
                     `<li style="color:#4B5648; font-size:13px; margin-bottom:3px;"><i class="fas fa-check-circle me-1" style="color:#1F3B2C;"></i>${item}</li>`
@@ -220,13 +216,12 @@
             });
         }
 
-        // ===== ইমেজ আপলোড হ্যান্ডলিং =====
+        // ===== Image Upload =====
         const fileInput = document.getElementById('courseImageFile');
         const urlInput = document.getElementById('courseImageUrl');
         const previewWrapper = document.getElementById('imagePreviewWrapper');
         const previewImg = document.getElementById('imagePreview');
 
-        // URL ইনপুট পরিবর্তন হলে প্রিভিউ দেখাও
         urlInput.addEventListener('input', function () {
             const url = this.value.trim();
             if (url) {
@@ -237,7 +232,6 @@
             }
         });
 
-        // ফাইল সিলেক্ট হলে আপলোড করো
         fileInput.addEventListener('change', function () {
             const file = this.files[0];
             if (!file) return;
@@ -255,7 +249,6 @@
                 return;
             }
 
-            // লোকাল প্রিভিউ
             const reader = new FileReader();
             reader.onload = function (e) {
                 previewImg.src = e.target.result;
@@ -263,7 +256,6 @@
             };
             reader.readAsDataURL(file);
 
-            // সার্ভারে আপলোড
             const formData = new FormData();
             formData.append('courseImage', file);
 

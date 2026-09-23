@@ -34,10 +34,6 @@ namespace Tutorbub.Controllers
             var requests = _dbHelper.GetAllTeacherRequests();
             var pendingCount = requests.Count(r => r.Status == "Pending");
 
-<<<<<<< HEAD
-=======
-            // ✅ পেমেন্ট স্ট্যাটস যোগ করা
->>>>>>> df3504e (update site  and add  courselessons systems)
             var payStats = _dbHelper.GetPaymentStats();
 
             ViewBag.UserCount = users.Count;
@@ -171,7 +167,7 @@ namespace Tutorbub.Controllers
             return Json(new { success = false, message = "Failed to update user status" });
         }
 
-        // ===== পাসওয়ার্ড আপডেট =====
+        // ===== পাসওয়ার্ড আপডেট =====
         [HttpPost]
         [ValidateAntiForgeryToken]
         public IActionResult UpdatePassword(int id, string newPassword)
@@ -214,25 +210,11 @@ namespace Tutorbub.Controllers
 
             var requests = _dbHelper.GetAllTeacherRequests();
             var users = _dbHelper.GetAllUsers();
-<<<<<<< HEAD
             var payStats = _dbHelper.GetPaymentStats();
 
             ViewBag.UserCount = users.Count;
             ViewBag.PendingCount = requests.Count(r => r.Status == "Pending");
             ViewBag.PendingPayments = payStats.Pending;
-=======
-            var payStats = _dbHelper.GetPaymentStats();   // ✅ পেমেন্ট স্ট্যাটস
-
-            ViewBag.UserCount = users.Count;
-            ViewBag.PendingCount = requests.Count(r => r.Status == "Pending");
-            ViewBag.PendingPayments = payStats.Pending;   // ✅ পেন্ডিং পেমেন্ট কাউন্ট
-
-            Console.WriteLine($"Total Teacher Requests: {requests.Count}");
-            foreach (var req in requests)
-            {
-                Console.WriteLine($"Request: {req.FullName} - {req.Status} - {req.RequestDate}");
-            }
->>>>>>> df3504e (update site  and add  courselessons systems)
 
             return View(requests);
         }
@@ -386,10 +368,6 @@ namespace Tutorbub.Controllers
         // ===== PAYMENT MANAGEMENT =====
         // ============================================================
 
-<<<<<<< HEAD
-=======
-        // ===== পেমেন্ট লিস্ট পেজ =====
->>>>>>> df3504e (update site  and add  courselessons systems)
         public IActionResult Payments(string status = "all")
         {
             var role = HttpContext.Session.GetString("UserRole");
@@ -406,16 +384,11 @@ namespace Tutorbub.Controllers
             ViewBag.RejectedCount = stats.Rejected;
             ViewBag.TotalRevenue = stats.TotalRevenue;
             ViewBag.CurrentFilter = status;
-<<<<<<< HEAD
             ViewBag.PendingPayments = stats.Pending;
-=======
-            ViewBag.PendingPayments = stats.Pending;  // সাইডবার badge এর জন্য
->>>>>>> df3504e (update site  and add  courselessons systems)
 
             return View(payments);
         }
 
-        // ===== পেমেন্ট অ্যাপ্রুভ =====
         [HttpPost]
         [ValidateAntiForgeryToken]
         public IActionResult ApprovePayment(int id, string? adminNote)
@@ -430,7 +403,6 @@ namespace Tutorbub.Controllers
 
             if (_dbHelper.ApproveOrder(id, adminId, adminNote))
             {
-<<<<<<< HEAD
                 var order = _dbHelper.GetOrderById(id);
                 if (order != null)
                 {
@@ -444,14 +416,11 @@ namespace Tutorbub.Controllers
                     );
                 }
 
-=======
->>>>>>> df3504e (update site  and add  courselessons systems)
                 return Json(new { success = true, message = "Payment approved successfully! User now has access to the course." });
             }
             return Json(new { success = false, message = "Failed to approve payment." });
         }
 
-        // ===== পেমেন্ট রিজেক্ট =====
         [HttpPost]
         [ValidateAntiForgeryToken]
         public IActionResult RejectPayment(int id, string? adminNote)
@@ -466,7 +435,6 @@ namespace Tutorbub.Controllers
 
             if (_dbHelper.RejectOrder(id, adminId, adminNote))
             {
-<<<<<<< HEAD
                 var order = _dbHelper.GetOrderById(id);
                 if (order != null)
                 {
@@ -484,13 +452,10 @@ namespace Tutorbub.Controllers
                     );
                 }
 
-=======
->>>>>>> df3504e (update site  and add  courselessons systems)
                 return Json(new { success = true, message = "Payment rejected." });
             }
             return Json(new { success = false, message = "Failed to reject payment." });
         }
-<<<<<<< HEAD
 
         // ============================================================
         // ===== ADD COURSE =====
@@ -592,7 +557,7 @@ namespace Tutorbub.Controllers
         }
 
         // ============================================================
-        // ===== UPLOAD COURSE LESSON VIDEO (নতুন) =====
+        // ===== UPLOAD COURSE LESSON VIDEO =====
         // ============================================================
 
         [HttpGet]
@@ -675,7 +640,6 @@ namespace Tutorbub.Controllers
             return Json(new { success = false, message = "Failed to delete lesson." });
         }
 
-        // ===== Upload Video File =====
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> UploadLessonVideo(IFormFile lessonVideo)
@@ -746,7 +710,6 @@ namespace Tutorbub.Controllers
             return View(courses);
         }
 
-        // ===== কোর্স ডিলিট =====
         [HttpPost]
         [ValidateAntiForgeryToken]
         public IActionResult DeleteCourse(int id)
@@ -764,7 +727,6 @@ namespace Tutorbub.Controllers
             return Json(new { success = false, message = "Failed to delete course." });
         }
 
-        // ===== Enrollment Open/Close =====
         [HttpPost]
         [ValidateAntiForgeryToken]
         public IActionResult ToggleEnrollment(int id, bool isOpen)
@@ -782,7 +744,177 @@ namespace Tutorbub.Controllers
             }
             return Json(new { success = false, message = "Failed to update enrollment status." });
         }
-=======
->>>>>>> df3504e (update site  and add  courselessons systems)
+
+        // ============================================================
+        // ===== NOTICE MANAGEMENT (NEWS & ANNOUNCEMENTS) =====
+        // ============================================================
+
+        [HttpGet]
+        public IActionResult ManageNotices()
+        {
+            var role = HttpContext.Session.GetString("UserRole");
+            if (role != "Admin") return RedirectToAction("Login", "Account");
+
+            var notices = _dbHelper.GetAllNotices();
+            return View(notices);
+        }
+
+        [HttpGet]
+        public IActionResult AddNotice()
+        {
+            var role = HttpContext.Session.GetString("UserRole");
+            if (role != "Admin") return RedirectToAction("Login", "Account");
+
+            return View(new Notice
+            {
+                PublishedDate = DateTime.Now,
+                IsActive = true,
+                IsAnnouncement = false
+            });
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult AddNotice(Notice model)
+        {
+            var role = HttpContext.Session.GetString("UserRole");
+            if (role != "Admin") return RedirectToAction("Login", "Account");
+
+            if (string.IsNullOrWhiteSpace(model.Title))
+            {
+                ViewBag.Error = "Title is required.";
+                return View(model);
+            }
+            if (string.IsNullOrWhiteSpace(model.Content))
+            {
+                ViewBag.Error = "Content is required.";
+                return View(model);
+            }
+
+            model.CreatedAt = DateTime.UtcNow;
+
+            if (_dbHelper.CreateNotice(model, out string? error))
+            {
+                TempData["Success"] = "Notice added successfully!";
+                return RedirectToAction("ManageNotices");
+            }
+
+            ViewBag.Error = $"Failed to add notice: {error}";
+            return View(model);
+        }
+
+        [HttpGet]
+        public IActionResult EditNotice(int id)
+        {
+            var role = HttpContext.Session.GetString("UserRole");
+            if (role != "Admin") return RedirectToAction("Login", "Account");
+
+            var notice = _dbHelper.GetNoticeById(id);
+            if (notice == null)
+            {
+                TempData["Error"] = "Notice not found.";
+                return RedirectToAction("ManageNotices");
+            }
+
+            return View(notice);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult EditNotice(Notice model)
+        {
+            var role = HttpContext.Session.GetString("UserRole");
+            if (role != "Admin") return RedirectToAction("Login", "Account");
+
+            if (string.IsNullOrWhiteSpace(model.Title))
+            {
+                ViewBag.Error = "Title is required.";
+                return View(model);
+            }
+            if (string.IsNullOrWhiteSpace(model.Content))
+            {
+                ViewBag.Error = "Content is required.";
+                return View(model);
+            }
+
+            if (_dbHelper.UpdateNotice(model, out string? error))
+            {
+                TempData["Success"] = "Notice updated successfully!";
+                return RedirectToAction("ManageNotices");
+            }
+
+            ViewBag.Error = $"Failed to update notice: {error}";
+            return View(model);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult DeleteNotice(int id)
+        {
+            var role = HttpContext.Session.GetString("UserRole");
+            if (role != "Admin") return Json(new { success = false, message = "Unauthorized" });
+
+            if (_dbHelper.DeleteNotice(id))
+                return Json(new { success = true, message = "Notice deleted successfully." });
+
+            return Json(new { success = false, message = "Failed to delete notice." });
+        }
+
+        // ============================================================
+        // ===== UPLOAD NOTICE IMAGE =====
+        // ============================================================
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> UploadNoticeImage(IFormFile noticeImage)
+        {
+            var role = HttpContext.Session.GetString("UserRole");
+            if (role != "Admin")
+            {
+                return Json(new { success = false, message = "Unauthorized" });
+            }
+
+            if (noticeImage == null || noticeImage.Length == 0)
+            {
+                return Json(new { success = false, message = "Please select an image." });
+            }
+
+            var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif", ".webp" };
+            var extension = Path.GetExtension(noticeImage.FileName).ToLowerInvariant();
+
+            if (!allowedExtensions.Contains(extension))
+            {
+                return Json(new { success = false, message = "Only JPG, PNG, GIF, or WEBP images are allowed." });
+            }
+
+            if (noticeImage.Length > 5 * 1024 * 1024)
+            {
+                return Json(new { success = false, message = "Image size must be less than 5MB." });
+            }
+
+            try
+            {
+                var uploadPath = Path.Combine(_webHostEnvironment.WebRootPath, "uploads", "notices");
+                if (!Directory.Exists(uploadPath))
+                {
+                    Directory.CreateDirectory(uploadPath);
+                }
+
+                var fileName = $"notice_{DateTime.Now.Ticks}{extension}";
+                var filePath = Path.Combine(uploadPath, fileName);
+
+                using (var stream = new FileStream(filePath, FileMode.Create))
+                {
+                    await noticeImage.CopyToAsync(stream);
+                }
+
+                var imageUrl = $"/uploads/notices/{fileName}";
+                return Json(new { success = true, message = "Image uploaded successfully!", imageUrl });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = $"Error: {ex.Message}" });
+            }
+        }
     }
 }

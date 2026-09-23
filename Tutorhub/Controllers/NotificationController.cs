@@ -1,5 +1,6 @@
 ﻿// 📁 Controllers/NotificationController.cs
 // লোকেশন: Tutorbub/Controllers/NotificationController.cs
+// ⚠️ এই ফাইলে শুধু NotificationController ক্লাস থাকবে — NoticeController থাকবে না।
 
 using Microsoft.AspNetCore.Mvc;
 using Tutorbub.Models;
