@@ -168,6 +168,33 @@
         color: #fff;
     }
 
+<<<<<<< HEAD
+=======
+    .btn-pending {
+        width: 100%;
+        padding: 14px;
+        background: #f39c12;
+        color: #fff;
+        border: none;
+        border-radius: 10px;
+        font-size: 16px;
+        font-weight: 700;
+        margin-top: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        cursor: pointer;
+        text-decoration: none;
+        transition: all 0.3s;
+    }
+
+    .btn-pending:hover {
+        background: #e67e22;
+        color: #fff;
+    }
+
+>>>>>>> df3504e (update site  and add  courselessons systems)
     .sidebar-info {
         margin-top: 20px;
         border-top: 1px solid #f0f0f0;
@@ -367,6 +394,7 @@
                     <i class="fas fa-check me-1"></i>You have full access to this course
                 </p>
             }
+<<<<<<< HEAD
             else if (!Model.IsEnrollmentOpen)
             {
                 <button class="btn-buy" style="background:#8A9188; cursor:not-allowed;" disabled>
@@ -376,6 +404,8 @@
                     <i class="fas fa-info-circle me-1"></i>This course is no longer accepting new students.
                 </p>
             }
+=======
+>>>>>>> df3504e (update site  and add  courselessons systems)
             else
             {
                 <button class="btn-buy" onclick="buyCourse(@Model.Id)">
@@ -427,6 +457,19 @@
 
 @section Scripts {
     <script>
+<<<<<<< HEAD
+=======
+        // ===== ডামি কোর্স ডেটা (ডিটেলসের জন্য) =====
+        const courseData = [
+            { id: 1, title: "English Grammar Course", image: "https://i.ibb.co.com/KjyJyXy8/English-grammar-courses-online-with-real-certificates.jpg", price: 1499, rating: 4.9 },
+            { id: 2, title: "Basic WordPress Theme Development", image: "https://i.ibb.co.com/ZpRSvpsk/Basic-Word-Press-theme-development-full-course.jpg", price: 1999, rating: 4.8 },
+            { id: 3, title: "Complete React Front-end Developer", image: "https://i.ibb.co.com/rf3RgYqG/Complete-React-Front-end-developer-course.jpg", price: 2499, rating: 4.9 },
+            { id: 4, title: "Complete Web Design", image: "https://i.ibb.co.com/XZSqdW0B/Complete-Web-Design-from-Figma-to-Webflow.jpg", price: 1799, rating: 4.7 },
+            { id: 5, title: "Flutter Development Bootcamp", image: "https://i.ibb.co.com/qZ60Vqg/Flutter-Development-Bootcamp-with-Dart.jpg", price: 2299, rating: 4.8 },
+            { id: 6, title: "The Ultimate Figma Course", image: "https://i.ibb.co.com/rGttSLJy/The-Ultimate-Figma-Course-From-Zero-to-Expert.jpg", price: 1599, rating: 4.9 }
+        ];
+
+>>>>>>> df3504e (update site  and add  courselessons systems)
         // ===== বর্তমান কোর্সের আইডি =====
         const currentId = @Model.Id;
 
@@ -481,6 +524,10 @@
                 return;
             }
 
+<<<<<<< HEAD
+=======
+            // চেকআউট পেজে পাঠানো
+>>>>>>> df3504e (update site  and add  courselessons systems)
             window.location.href = '/Payment/Checkout?courseId=' + id;
         }
 

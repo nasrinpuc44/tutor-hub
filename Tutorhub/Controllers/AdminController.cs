@@ -34,6 +34,10 @@ namespace Tutorbub.Controllers
             var requests = _dbHelper.GetAllTeacherRequests();
             var pendingCount = requests.Count(r => r.Status == "Pending");
 
+<<<<<<< HEAD
+=======
+            // ✅ পেমেন্ট স্ট্যাটস যোগ করা
+>>>>>>> df3504e (update site  and add  courselessons systems)
             var payStats = _dbHelper.GetPaymentStats();
 
             ViewBag.UserCount = users.Count;
@@ -210,11 +214,25 @@ namespace Tutorbub.Controllers
 
             var requests = _dbHelper.GetAllTeacherRequests();
             var users = _dbHelper.GetAllUsers();
+<<<<<<< HEAD
             var payStats = _dbHelper.GetPaymentStats();
 
             ViewBag.UserCount = users.Count;
             ViewBag.PendingCount = requests.Count(r => r.Status == "Pending");
             ViewBag.PendingPayments = payStats.Pending;
+=======
+            var payStats = _dbHelper.GetPaymentStats();   // ✅ পেমেন্ট স্ট্যাটস
+
+            ViewBag.UserCount = users.Count;
+            ViewBag.PendingCount = requests.Count(r => r.Status == "Pending");
+            ViewBag.PendingPayments = payStats.Pending;   // ✅ পেন্ডিং পেমেন্ট কাউন্ট
+
+            Console.WriteLine($"Total Teacher Requests: {requests.Count}");
+            foreach (var req in requests)
+            {
+                Console.WriteLine($"Request: {req.FullName} - {req.Status} - {req.RequestDate}");
+            }
+>>>>>>> df3504e (update site  and add  courselessons systems)
 
             return View(requests);
         }
@@ -368,6 +386,10 @@ namespace Tutorbub.Controllers
         // ===== PAYMENT MANAGEMENT =====
         // ============================================================
 
+<<<<<<< HEAD
+=======
+        // ===== পেমেন্ট লিস্ট পেজ =====
+>>>>>>> df3504e (update site  and add  courselessons systems)
         public IActionResult Payments(string status = "all")
         {
             var role = HttpContext.Session.GetString("UserRole");
@@ -384,7 +406,11 @@ namespace Tutorbub.Controllers
             ViewBag.RejectedCount = stats.Rejected;
             ViewBag.TotalRevenue = stats.TotalRevenue;
             ViewBag.CurrentFilter = status;
+<<<<<<< HEAD
             ViewBag.PendingPayments = stats.Pending;
+=======
+            ViewBag.PendingPayments = stats.Pending;  // সাইডবার badge এর জন্য
+>>>>>>> df3504e (update site  and add  courselessons systems)
 
             return View(payments);
         }
@@ -404,6 +430,7 @@ namespace Tutorbub.Controllers
 
             if (_dbHelper.ApproveOrder(id, adminId, adminNote))
             {
+<<<<<<< HEAD
                 var order = _dbHelper.GetOrderById(id);
                 if (order != null)
                 {
@@ -417,6 +444,8 @@ namespace Tutorbub.Controllers
                     );
                 }
 
+=======
+>>>>>>> df3504e (update site  and add  courselessons systems)
                 return Json(new { success = true, message = "Payment approved successfully! User now has access to the course." });
             }
             return Json(new { success = false, message = "Failed to approve payment." });
@@ -437,6 +466,7 @@ namespace Tutorbub.Controllers
 
             if (_dbHelper.RejectOrder(id, adminId, adminNote))
             {
+<<<<<<< HEAD
                 var order = _dbHelper.GetOrderById(id);
                 if (order != null)
                 {
@@ -454,10 +484,13 @@ namespace Tutorbub.Controllers
                     );
                 }
 
+=======
+>>>>>>> df3504e (update site  and add  courselessons systems)
                 return Json(new { success = true, message = "Payment rejected." });
             }
             return Json(new { success = false, message = "Failed to reject payment." });
         }
+<<<<<<< HEAD
 
         // ============================================================
         // ===== ADD COURSE =====
@@ -749,5 +782,7 @@ namespace Tutorbub.Controllers
             }
             return Json(new { success = false, message = "Failed to update enrollment status." });
         }
+=======
+>>>>>>> df3504e (update site  and add  courselessons systems)
     }
 }

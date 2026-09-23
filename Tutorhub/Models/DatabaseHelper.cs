@@ -643,6 +643,7 @@ namespace Tutorbub.Models
         }
 
         // ============================================================
+<<<<<<< HEAD
         // ===== COURSE RELATED METHODS =====
         // ============================================================
 
@@ -910,6 +911,14 @@ namespace Tutorbub.Models
         // ===== PAYMENT / COURSE ORDER RELATED METHODS =====
         // ============================================================
 
+=======
+        // ===== PAYMENT / COURSE ORDER RELATED METHODS =====
+        // ============================================================
+
+        /// <summary>
+        /// নতুন কোর্স অর্ডার তৈরি করা (পেমেন্ট পেন্ডিং)
+        /// </summary>
+>>>>>>> df3504e (update site  and add  courselessons systems)
         public bool CreateCourseOrder(CourseOrder order, out string? errorMessage)
         {
             errorMessage = null;
@@ -955,6 +964,12 @@ namespace Tutorbub.Models
             }
         }
 
+<<<<<<< HEAD
+=======
+        /// <summary>
+        /// ইউজারের সব অর্ডার পাওয়া
+        /// </summary>
+>>>>>>> df3504e (update site  and add  courselessons systems)
         public List<CourseOrder> GetUserOrders(int userId)
         {
             var orders = new List<CourseOrder>();
@@ -987,6 +1002,12 @@ namespace Tutorbub.Models
             }
         }
 
+<<<<<<< HEAD
+=======
+        /// <summary>
+        /// সব অর্ডার পাওয়া (অ্যাডমিনের জন্য)
+        /// </summary>
+>>>>>>> df3504e (update site  and add  courselessons systems)
         public List<AdminPaymentViewModel> GetAllOrders(string? statusFilter = null)
         {
             var orders = new List<AdminPaymentViewModel>();
@@ -1050,6 +1071,12 @@ namespace Tutorbub.Models
             }
         }
 
+<<<<<<< HEAD
+=======
+        /// <summary>
+        /// একটি নির্দিষ্ট অর্ডার পাওয়া
+        /// </summary>
+>>>>>>> df3504e (update site  and add  courselessons systems)
         public CourseOrder? GetOrderById(int orderId)
         {
             string query = @"
@@ -1080,6 +1107,12 @@ namespace Tutorbub.Models
             }
         }
 
+<<<<<<< HEAD
+=======
+        /// <summary>
+        /// অর্ডার অ্যাপ্রুভ করা (অ্যাডমিন)
+        /// </summary>
+>>>>>>> df3504e (update site  and add  courselessons systems)
         public bool ApproveOrder(int orderId, int adminId, string? adminNote = null)
         {
             string query = @"
@@ -1108,6 +1141,12 @@ namespace Tutorbub.Models
             }
         }
 
+<<<<<<< HEAD
+=======
+        /// <summary>
+        /// অর্ডার রিজেক্ট করা (অ্যাডমিন)
+        /// </summary>
+>>>>>>> df3504e (update site  and add  courselessons systems)
         public bool RejectOrder(int orderId, int adminId, string? adminNote = null)
         {
             string query = @"
@@ -1136,6 +1175,12 @@ namespace Tutorbub.Models
             }
         }
 
+<<<<<<< HEAD
+=======
+        /// <summary>
+        /// ইউজার একটি কোর্সে এনরোল করেছে কিনা চেক
+        /// </summary>
+>>>>>>> df3504e (update site  and add  courselessons systems)
         public bool IsUserEnrolled(int userId, int courseId)
         {
             string query = @"
@@ -1160,6 +1205,12 @@ namespace Tutorbub.Models
             }
         }
 
+<<<<<<< HEAD
+=======
+        /// <summary>
+        /// ইউজারের এনরোল করা সব কোর্সের আইডি
+        /// </summary>
+>>>>>>> df3504e (update site  and add  courselessons systems)
         public List<int> GetUserEnrolledCourseIds(int userId)
         {
             var courseIds = new List<int>();
@@ -1189,6 +1240,7 @@ namespace Tutorbub.Models
             }
         }
 
+<<<<<<< HEAD
         // ============================================================
         // ===== ENROLLED COURSES (MY CLASS) =====
         // ============================================================
@@ -1233,6 +1285,11 @@ namespace Tutorbub.Models
             }
         }
 
+=======
+        /// <summary>
+        /// অ্যাডমিন ড্যাশবোর্ডের জন্য পেমেন্ট স্ট্যাটস
+        /// </summary>
+>>>>>>> df3504e (update site  and add  courselessons systems)
         public (int Pending, int Approved, int Rejected, decimal TotalRevenue) GetPaymentStats()
         {
             string query = @"
@@ -1269,6 +1326,7 @@ namespace Tutorbub.Models
         }
 
         // ============================================================
+<<<<<<< HEAD
         // ===== NOTIFICATION RELATED METHODS =====
         // ============================================================
 
@@ -1431,6 +1489,8 @@ namespace Tutorbub.Models
         }
 
         // ============================================================
+=======
+>>>>>>> df3504e (update site  and add  courselessons systems)
         // ===== PRIVATE MAPPERS =====
         // ============================================================
 
@@ -1517,6 +1577,7 @@ namespace Tutorbub.Models
                 VerifiedBy = reader["VerifiedBy"] as int?
             };
         }
+<<<<<<< HEAD
 
         private Course MapCourse(NpgsqlDataReader reader)
         {
@@ -1541,5 +1602,7 @@ namespace Tutorbub.Models
                 CreatedAt = reader["CreatedAt"] as DateTime? ?? DateTime.UtcNow
             };
         }
+=======
+>>>>>>> df3504e (update site  and add  courselessons systems)
     }
 }

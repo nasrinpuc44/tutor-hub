@@ -1,4 +1,9 @@
 ﻿// 📁 Controllers/PaymentController.cs
+<<<<<<< HEAD
+=======
+// লোকেশন: Tutorbub/Controllers/PaymentController.cs
+
+>>>>>>> df3504e (update site  and add  courselessons systems)
 using Microsoft.AspNetCore.Mvc;
 using Tutorbub.Models;
 using System;
@@ -38,13 +43,18 @@ namespace Tutorbub.Controllers
                 return RedirectToAction("Details", "Learn", new { id = courseId });
             }
 
+<<<<<<< HEAD
             var course = _dbHelper.GetCourseById(courseId);
+=======
+            var course = GetCourseById(courseId);
+>>>>>>> df3504e (update site  and add  courselessons systems)
             if (course == null)
             {
                 TempData["Error"] = "Course not found.";
                 return RedirectToAction("Index", "Learn");
             }
 
+<<<<<<< HEAD
             // ✅ Enrollment চেক
             if (!course.IsEnrollmentOpen)
             {
@@ -52,6 +62,8 @@ namespace Tutorbub.Controllers
                 return RedirectToAction("Details", "Learn", new { id = courseId });
             }
 
+=======
+>>>>>>> df3504e (update site  and add  courselessons systems)
             var model = new PaymentViewModel
             {
                 CourseId = course.Id,
@@ -113,13 +125,18 @@ namespace Tutorbub.Controllers
                 return RedirectToAction("Details", "Learn", new { id = model.CourseId });
             }
 
+<<<<<<< HEAD
             var course = _dbHelper.GetCourseById(model.CourseId);
+=======
+            var course = GetCourseById(model.CourseId);
+>>>>>>> df3504e (update site  and add  courselessons systems)
             if (course == null)
             {
                 TempData["Error"] = "Course not found.";
                 return RedirectToAction("Index", "Learn");
             }
 
+<<<<<<< HEAD
             // ✅ Enrollment চেক
             if (!course.IsEnrollmentOpen)
             {
@@ -127,6 +144,8 @@ namespace Tutorbub.Controllers
                 return RedirectToAction("Details", "Learn", new { id = model.CourseId });
             }
 
+=======
+>>>>>>> df3504e (update site  and add  courselessons systems)
             var order = new CourseOrder
             {
                 UserId = userId,
@@ -186,5 +205,108 @@ namespace Tutorbub.Controllers
 
             return View(orders);
         }
+<<<<<<< HEAD
+=======
+
+        // ===== হেল্পার: কোর্স ডেটা =====
+        private CourseDetailViewModel? GetCourseById(int id)
+        {
+            var courses = new List<CourseDetailViewModel>
+            {
+                new CourseDetailViewModel
+                {
+                    Id = 1,
+                    Title = "English Grammar Course",
+                    Description = "Master English grammar with real certificates and interactive exercises.",
+                    Image = "https://i.ibb.co.com/KjyJyXy8/English-grammar-courses-online-with-real-certificates.jpg",
+                    Category = "Language",
+                    Price = 1499,
+                    Students = 12500,
+                    Rating = 4.9,
+                    Instructor = "Ms. Farhana Akter",
+                    Duration = "12 Weeks",
+                    Lessons = 48,
+                    Level = "Beginner to Intermediate"
+                },
+                new CourseDetailViewModel
+                {
+                    Id = 2,
+                    Title = "Basic WordPress Theme Development",
+                    Description = "Full course from beginner to expert — build custom WordPress themes.",
+                    Image = "https://i.ibb.co.com/ZpRSvpsk/Basic-Word-Press-theme-development-full-course.jpg",
+                    Category = "Web Development",
+                    Price = 1999,
+                    Students = 8300,
+                    Rating = 4.8,
+                    Instructor = "Mr. Rajib Hasan",
+                    Duration = "8 Weeks",
+                    Lessons = 36,
+                    Level = "Beginner"
+                },
+                new CourseDetailViewModel
+                {
+                    Id = 3,
+                    Title = "Complete React Front-end Developer",
+                    Description = "Master React.js with real-world projects and build modern web applications.",
+                    Image = "https://i.ibb.co.com/rf3RgYqG/Complete-React-Front-end-developer-course.jpg",
+                    Category = "Frontend",
+                    Price = 2499,
+                    Students = 15700,
+                    Rating = 4.9,
+                    Instructor = "Dr. Sarah Ahmed",
+                    Duration = "14 Weeks",
+                    Lessons = 62,
+                    Level = "Intermediate"
+                },
+                new CourseDetailViewModel
+                {
+                    Id = 4,
+                    Title = "Complete Web Design",
+                    Description = "From beginner to professional web designer — UI/UX design mastery.",
+                    Image = "https://i.ibb.co.com/XZSqdW0B/Complete-Web-Design-from-Figma-to-Webflow.jpg",
+                    Category = "Design",
+                    Price = 1799,
+                    Students = 10200,
+                    Rating = 4.7,
+                    Instructor = "Ms. Nusrat Jahan",
+                    Duration = "10 Weeks",
+                    Lessons = 40,
+                    Level = "Beginner"
+                },
+                new CourseDetailViewModel
+                {
+                    Id = 5,
+                    Title = "Flutter Development Bootcamp",
+                    Description = "Learn Flutter & Dart from scratch — build cross-platform mobile apps.",
+                    Image = "https://i.ibb.co.com/qZ60Vqg/Flutter-Development-Bootcamp-with-Dart.jpg",
+                    Category = "Mobile Development",
+                    Price = 2299,
+                    Students = 6900,
+                    Rating = 4.8,
+                    Instructor = "Mr. Kamal Hossain",
+                    Duration = "12 Weeks",
+                    Lessons = 55,
+                    Level = "Beginner to Intermediate"
+                },
+                new CourseDetailViewModel
+                {
+                    Id = 6,
+                    Title = "The Ultimate Figma Course",
+                    Description = "From zero to expert in UI/UX design — master Figma like a pro.",
+                    Image = "https://i.ibb.co.com/rGttSLJy/The-Ultimate-Figma-Course-From-Zero-to-Expert.jpg",
+                    Category = "Design",
+                    Price = 1599,
+                    Students = 9400,
+                    Rating = 4.9,
+                    Instructor = "Ms. Farhana Akter",
+                    Duration = "6 Weeks",
+                    Lessons = 28,
+                    Level = "Beginner"
+                }
+            };
+
+            return courses.FirstOrDefault(c => c.Id == id);
+        }
+>>>>>>> df3504e (update site  and add  courselessons systems)
     }
 }
