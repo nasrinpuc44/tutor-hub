@@ -31,6 +31,7 @@ namespace Tutorbub.Models
             string query = @"
                 SELECT ""Id"", ""UserName"", ""Password"", ""FullName"", 
                        ""Email"", ""CreatedAt"", ""LastLoginAt"", ""Role"", ""IsActive"",
+                       ""TotalPoints"",
                        ""MobileNumber"", ""ProfileImage"", ""Gender"", ""AgeRange"", 
                        ""PrimaryDeviceType"", ""YearsOfExperience"", ""AreaType"",
                        ""Country"", ""StreetAddress"", ""PermanentAddress"",
@@ -64,6 +65,7 @@ namespace Tutorbub.Models
             string query = @"
                 SELECT ""Id"", ""UserName"", ""Password"", ""FullName"", 
                        ""Email"", ""CreatedAt"", ""LastLoginAt"", ""Role"", ""IsActive"",
+                       ""TotalPoints"",
                        ""MobileNumber"", ""ProfileImage"", ""Gender"", ""AgeRange"", 
                        ""PrimaryDeviceType"", ""YearsOfExperience"", ""AreaType"",
                        ""Country"", ""StreetAddress"", ""PermanentAddress"",
@@ -167,6 +169,7 @@ namespace Tutorbub.Models
             string query = @"
                 SELECT ""Id"", ""UserName"", ""Password"", ""FullName"", 
                        ""Email"", ""CreatedAt"", ""LastLoginAt"", ""Role"", ""IsActive"",
+                       ""TotalPoints"",
                        ""MobileNumber"", ""ProfileImage"", ""Gender"", ""AgeRange"", 
                        ""PrimaryDeviceType"", ""YearsOfExperience"", ""AreaType"",
                        ""Country"", ""StreetAddress"", ""PermanentAddress"",
@@ -213,8 +216,8 @@ namespace Tutorbub.Models
             }
 
             string query = @"
-                INSERT INTO ""Users"" (""UserName"", ""Password"", ""FullName"", ""Email"", ""Role"")
-                VALUES (@username, @password, @fullname, @email, 'User')";
+                INSERT INTO ""Users"" (""UserName"", ""Password"", ""FullName"", ""Email"", ""Role"", ""TotalPoints"")
+                VALUES (@username, @password, @fullname, @email, 'User', 0)";
 
             try
             {
@@ -352,6 +355,91 @@ namespace Tutorbub.Models
             {
                 throw new Exception("Error updating last login: " + ex.Message);
             }
+        }
+
+        // ============================================================
+        // ===== ✅ POINTS SYSTEM (NEW) =====
+        // ============================================================
+
+        /// <summary>
+        /// ইউজারের TotalPoints-এ পয়েন্ট যোগ করা (positive) বা বিয়োগ করা (negative)।
+        /// Points কখনো 0 এর নিচে যাবে না।
+        /// </summary>
+        public bool AddPoints(int userId, int points)
+        {
+            string query = @"
+                UPDATE ""Users"" 
+                SET ""TotalPoints"" = GREATEST(0, COALESCE(""TotalPoints"", 0) + @points)
+                WHERE ""Id"" = @id";
+
+            try
+            {
+                using var connection = new NpgsqlConnection(_connectionString);
+                using var command = new NpgsqlCommand(query, connection);
+                command.Parameters.AddWithValue("@points", points);
+                command.Parameters.AddWithValue("@id", userId);
+                connection.Open();
+                return command.ExecuteNonQuery() > 0;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Error adding points: " + ex.Message);
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// ইউজারের বর্তমান TotalPoints বের করা।
+        /// </summary>
+        public int GetUserPoints(int userId)
+        {
+            string query = @"SELECT COALESCE(""TotalPoints"", 0) FROM ""Users"" WHERE ""Id"" = @id";
+
+            try
+            {
+                using var connection = new NpgsqlConnection(_connectionString);
+                using var command = new NpgsqlCommand(query, connection);
+                command.Parameters.AddWithValue("@id", userId);
+                connection.Open();
+                var result = command.ExecuteScalar();
+                if (result != null && result != DBNull.Value)
+                    return Convert.ToInt32(result);
+                return 0;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Error getting user points: " + ex.Message);
+                return 0;
+            }
+        }
+
+        /// <summary>
+        /// প্রতিটি Quiz Attempt-এর জন্য points হিসাব:
+        /// প্রতি সঠিক উত্তরে 1 point।
+        /// Quiz Attempt save হলে অটোমেটিক User-এর TotalPoints-এ যোগ হবে।
+        /// </summary>
+        public bool SaveQuizAttemptAndAwardPoints(QuizAttempt attempt, out string? errorMessage)
+        {
+            errorMessage = null;
+
+            // ১) Attempt save করা
+            if (!SaveQuizAttempt(attempt, out string? saveError))
+            {
+                errorMessage = saveError;
+                return false;
+            }
+
+            // ২) Points = Score (কারণ প্রতি সঠিক উত্তরে ১ পয়েন্ট, এবং Score = সঠিক উত্তরের সংখ্যা)
+            //    এখানে attempt.Score ইতিমধ্যে মোট সঠিক উত্তরের সমান (Marks=1 হলে)।
+            //    কিন্তু Marks ভিন্ন হলে Score ≠ সঠিক উত্তরের সংখ্যা।
+            //    তাই আমরা attempt.Score-ই ব্যবহার করব (কারণ Marks দিয়ে গুণ করা হয়েছে)।
+            //    তবে আপনার সিস্টেমে "প্রতি প্রশ্নে ১ পয়েন্ট" চাইলে Score = সঠিক উত্তরের সংখ্যা হওয়া উচিত।
+            if (attempt.Score > 0)
+            {
+                AddPoints(attempt.UserId, attempt.Score);
+            }
+
+            return true;
         }
 
         // ============================================================
@@ -753,18 +841,54 @@ namespace Tutorbub.Models
                 using var connection = new NpgsqlConnection(_connectionString);
                 connection.Open();
 
+                // Quiz related deletions
+                using (var deleteQuizQuestions = new NpgsqlCommand(
+                    @"DELETE FROM ""QuizQuestions"" WHERE ""QuizId"" IN (SELECT ""Id"" FROM ""ModuleQuizzes"" WHERE ""CourseId"" = @id)", connection))
+                {
+                    deleteQuizQuestions.Parameters.AddWithValue("@id", courseId);
+                    deleteQuizQuestions.ExecuteNonQuery();
+                }
+                using (var deleteQuizAttempts = new NpgsqlCommand(
+                    @"DELETE FROM ""QuizAttempts"" WHERE ""CourseId"" = @id", connection))
+                {
+                    deleteQuizAttempts.Parameters.AddWithValue("@id", courseId);
+                    deleteQuizAttempts.ExecuteNonQuery();
+                }
+                using (var deleteQuizzes = new NpgsqlCommand(
+                    @"DELETE FROM ""ModuleQuizzes"" WHERE ""CourseId"" = @id", connection))
+                {
+                    deleteQuizzes.Parameters.AddWithValue("@id", courseId);
+                    deleteQuizzes.ExecuteNonQuery();
+                }
+                using (var deleteAssignments = new NpgsqlCommand(
+                    @"DELETE FROM ""MilestoneAssignments"" WHERE ""CourseId"" = @id", connection))
+                {
+                    deleteAssignments.Parameters.AddWithValue("@id", courseId);
+                    deleteAssignments.ExecuteNonQuery();
+                }
                 using (var deleteLessons = new NpgsqlCommand(
                     @"DELETE FROM ""CourseLessons"" WHERE ""CourseId"" = @id", connection))
                 {
                     deleteLessons.Parameters.AddWithValue("@id", courseId);
                     deleteLessons.ExecuteNonQuery();
                 }
-
+                using (var deleteLessonCompletions = new NpgsqlCommand(
+                    @"DELETE FROM ""LessonCompletions"" WHERE ""CourseId"" = @id", connection))
+                {
+                    deleteLessonCompletions.Parameters.AddWithValue("@id", courseId);
+                    deleteLessonCompletions.ExecuteNonQuery();
+                }
                 using (var deleteOrders = new NpgsqlCommand(
                     @"DELETE FROM ""CourseOrders"" WHERE ""CourseId"" = @id", connection))
                 {
                     deleteOrders.Parameters.AddWithValue("@id", courseId);
                     deleteOrders.ExecuteNonQuery();
+                }
+                using (var deleteConfig = new NpgsqlCommand(
+                    @"DELETE FROM ""CourseMilestoneConfig"" WHERE ""CourseId"" = @id", connection))
+                {
+                    deleteConfig.Parameters.AddWithValue("@id", courseId);
+                    deleteConfig.ExecuteNonQuery();
                 }
 
                 using var deleteCourse = new NpgsqlCommand(
@@ -1449,10 +1573,10 @@ namespace Tutorbub.Models
                 using var connection = new NpgsqlConnection(_connectionString);
                 using var command = new NpgsqlCommand(query, connection);
 
-                command.Parameters.AddWithValue("@title", notice.Title ?? (object)DBNull.Value);
-                command.Parameters.AddWithValue("@content", notice.Content ?? (object)DBNull.Value);
-                command.Parameters.AddWithValue("@category", notice.Category ?? "News");
-                command.Parameters.AddWithValue("@imageUrl", string.IsNullOrEmpty(notice.ImageUrl) ? (object)DBNull.Value : notice.ImageUrl);
+                command.Parameters.AddWithValue("@title", notice.Title ?? "");
+                command.Parameters.AddWithValue("@content", notice.Content ?? "");
+                command.Parameters.AddWithValue("@category", string.IsNullOrWhiteSpace(notice.Category) ? "News" : notice.Category);
+                command.Parameters.AddWithValue("@imageUrl", notice.ImageUrl ?? "");
                 command.Parameters.AddWithValue("@publishedDate", notice.PublishedDate);
                 command.Parameters.AddWithValue("@isAnnouncement", notice.IsAnnouncement);
                 command.Parameters.AddWithValue("@isActive", notice.IsActive);
@@ -1552,10 +1676,10 @@ namespace Tutorbub.Models
                 using var command = new NpgsqlCommand(query, connection);
 
                 command.Parameters.AddWithValue("@id", notice.Id);
-                command.Parameters.AddWithValue("@title", notice.Title ?? (object)DBNull.Value);
-                command.Parameters.AddWithValue("@content", notice.Content ?? (object)DBNull.Value);
-                command.Parameters.AddWithValue("@category", notice.Category ?? "News");
-                command.Parameters.AddWithValue("@imageUrl", string.IsNullOrEmpty(notice.ImageUrl) ? (object)DBNull.Value : notice.ImageUrl);
+                command.Parameters.AddWithValue("@title", notice.Title ?? "");
+                command.Parameters.AddWithValue("@content", notice.Content ?? "");
+                command.Parameters.AddWithValue("@category", string.IsNullOrWhiteSpace(notice.Category) ? "News" : notice.Category);
+                command.Parameters.AddWithValue("@imageUrl", notice.ImageUrl ?? "");
                 command.Parameters.AddWithValue("@publishedDate", notice.PublishedDate);
                 command.Parameters.AddWithValue("@isAnnouncement", notice.IsAnnouncement);
                 command.Parameters.AddWithValue("@isActive", notice.IsActive);
@@ -1591,6 +1715,756 @@ namespace Tutorbub.Models
         }
 
         // ============================================================
+        // ===== QUIZ RELATED METHODS (Course-wise Module Quiz) =====
+        // ============================================================
+
+        public bool CreateModuleQuiz(ModuleQuiz quiz, out string? errorMessage)
+        {
+            errorMessage = null;
+            string query = @"
+                INSERT INTO ""ModuleQuizzes"" 
+                (""CourseId"", ""ModuleNumber"", ""Title"", ""Description"", 
+                 ""PassingScore"", ""TimeLimitMinutes"", ""IsPublished"", ""CreatedAt"")
+                VALUES 
+                (@courseId, @moduleNumber, @title, @description,
+                 @passingScore, @timeLimit, @isPublished, @createdAt)
+                RETURNING ""Id""";
+
+            try
+            {
+                using var connection = new NpgsqlConnection(_connectionString);
+                using var command = new NpgsqlCommand(query, connection);
+
+                command.Parameters.AddWithValue("@courseId", quiz.CourseId);
+                command.Parameters.AddWithValue("@moduleNumber", quiz.ModuleNumber);
+                command.Parameters.AddWithValue("@title", quiz.Title ?? "");
+                command.Parameters.AddWithValue("@description", quiz.Description ?? (object)DBNull.Value);
+                command.Parameters.AddWithValue("@passingScore", quiz.PassingScore);
+                command.Parameters.AddWithValue("@timeLimit", quiz.TimeLimitMinutes);
+                command.Parameters.AddWithValue("@isPublished", quiz.IsPublished);
+                command.Parameters.AddWithValue("@createdAt", DateTime.UtcNow);
+
+                connection.Open();
+                var result = command.ExecuteScalar();
+                if (result != null && int.TryParse(result.ToString(), out int newId))
+                {
+                    quiz.Id = newId;
+                    return true;
+                }
+                return false;
+            }
+            catch (Exception ex)
+            {
+                errorMessage = ex.Message;
+                return false;
+            }
+        }
+
+        public List<ModuleQuiz> GetQuizzesByCourse(int courseId)
+        {
+            var quizzes = new List<ModuleQuiz>();
+            string query = @"
+                SELECT q.""Id"", q.""CourseId"", q.""ModuleNumber"", q.""Title"", q.""Description"",
+                       q.""PassingScore"", q.""TimeLimitMinutes"", q.""IsPublished"", q.""CreatedAt"", q.""UpdatedAt"",
+                       (SELECT COUNT(*) FROM ""QuizQuestions"" WHERE ""QuizId"" = q.""Id"") as QuestionCount,
+                       COALESCE((SELECT SUM(""Marks"") FROM ""QuizQuestions"" WHERE ""QuizId"" = q.""Id""), 0) as TotalMarks
+                FROM ""ModuleQuizzes"" q
+                WHERE q.""CourseId"" = @courseId
+                ORDER BY q.""ModuleNumber""";
+
+            try
+            {
+                using var connection = new NpgsqlConnection(_connectionString);
+                using var command = new NpgsqlCommand(query, connection);
+                command.Parameters.AddWithValue("@courseId", courseId);
+                connection.Open();
+                using var reader = command.ExecuteReader();
+
+                while (reader.Read())
+                {
+                    quizzes.Add(new ModuleQuiz
+                    {
+                        Id = reader.GetInt32(reader.GetOrdinal("Id")),
+                        CourseId = reader.GetInt32(reader.GetOrdinal("CourseId")),
+                        ModuleNumber = Convert.ToInt32(reader["ModuleNumber"]),
+                        Title = reader["Title"]?.ToString() ?? "",
+                        Description = reader["Description"]?.ToString(),
+                        PassingScore = Convert.ToInt32(reader["PassingScore"]),
+                        TimeLimitMinutes = Convert.ToInt32(reader["TimeLimitMinutes"]),
+                        IsPublished = reader["IsPublished"] as bool? ?? false,
+                        CreatedAt = reader["CreatedAt"] as DateTime? ?? DateTime.UtcNow,
+                        UpdatedAt = reader["UpdatedAt"] as DateTime?,
+                        QuestionCount = Convert.ToInt32(reader["QuestionCount"]),
+                        TotalMarks = Convert.ToInt32(reader["TotalMarks"])
+                    });
+                }
+                return quizzes;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Error getting quizzes: " + ex.Message);
+                return new List<ModuleQuiz>();
+            }
+        }
+
+        public ModuleQuiz? GetQuizById(int quizId, bool includeQuestions = false)
+        {
+            string query = @"SELECT * FROM ""ModuleQuizzes"" WHERE ""Id"" = @id";
+            try
+            {
+                using var connection = new NpgsqlConnection(_connectionString);
+                using var command = new NpgsqlCommand(query, connection);
+                command.Parameters.AddWithValue("@id", quizId);
+                connection.Open();
+
+                ModuleQuiz? quiz = null;
+                using (var reader = command.ExecuteReader())
+                {
+                    if (reader.Read())
+                    {
+                        quiz = new ModuleQuiz
+                        {
+                            Id = reader.GetInt32(reader.GetOrdinal("Id")),
+                            CourseId = reader.GetInt32(reader.GetOrdinal("CourseId")),
+                            ModuleNumber = Convert.ToInt32(reader["ModuleNumber"]),
+                            Title = reader["Title"]?.ToString() ?? "",
+                            Description = reader["Description"]?.ToString(),
+                            PassingScore = Convert.ToInt32(reader["PassingScore"]),
+                            TimeLimitMinutes = Convert.ToInt32(reader["TimeLimitMinutes"]),
+                            IsPublished = reader["IsPublished"] as bool? ?? false,
+                            CreatedAt = reader["CreatedAt"] as DateTime? ?? DateTime.UtcNow,
+                            UpdatedAt = reader["UpdatedAt"] as DateTime?
+                        };
+                    }
+                }
+
+                if (quiz != null && includeQuestions)
+                {
+                    quiz.Questions = GetQuizQuestions(quizId);
+                    quiz.QuestionCount = quiz.Questions.Count;
+                    quiz.TotalMarks = quiz.Questions.Sum(q => q.Marks);
+                }
+
+                return quiz;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Error getting quiz by id: " + ex.Message);
+                return null;
+            }
+        }
+
+        public bool UpdateModuleQuiz(ModuleQuiz quiz, out string? errorMessage)
+        {
+            errorMessage = null;
+            string query = @"
+                UPDATE ""ModuleQuizzes"" SET
+                    ""ModuleNumber"" = @moduleNumber,
+                    ""Title"" = @title,
+                    ""Description"" = @description,
+                    ""PassingScore"" = @passingScore,
+                    ""TimeLimitMinutes"" = @timeLimit,
+                    ""IsPublished"" = @isPublished,
+                    ""UpdatedAt"" = @updatedAt
+                WHERE ""Id"" = @id";
+
+            try
+            {
+                using var connection = new NpgsqlConnection(_connectionString);
+                using var command = new NpgsqlCommand(query, connection);
+
+                command.Parameters.AddWithValue("@id", quiz.Id);
+                command.Parameters.AddWithValue("@moduleNumber", quiz.ModuleNumber);
+                command.Parameters.AddWithValue("@title", quiz.Title ?? "");
+                command.Parameters.AddWithValue("@description", quiz.Description ?? (object)DBNull.Value);
+                command.Parameters.AddWithValue("@passingScore", quiz.PassingScore);
+                command.Parameters.AddWithValue("@timeLimit", quiz.TimeLimitMinutes);
+                command.Parameters.AddWithValue("@isPublished", quiz.IsPublished);
+                command.Parameters.AddWithValue("@updatedAt", DateTime.UtcNow);
+
+                connection.Open();
+                return command.ExecuteNonQuery() > 0;
+            }
+            catch (Exception ex)
+            {
+                errorMessage = ex.Message;
+                return false;
+            }
+        }
+
+        public bool DeleteModuleQuiz(int quizId)
+        {
+            try
+            {
+                using var connection = new NpgsqlConnection(_connectionString);
+                connection.Open();
+                using var cmd = new NpgsqlCommand(@"DELETE FROM ""ModuleQuizzes"" WHERE ""Id"" = @id", connection);
+                cmd.Parameters.AddWithValue("@id", quizId);
+                return cmd.ExecuteNonQuery() > 0;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Error deleting quiz: " + ex.Message);
+                return false;
+            }
+        }
+
+        public bool ToggleQuizPublish(int quizId, bool isPublished)
+        {
+            string query = @"UPDATE ""ModuleQuizzes"" SET ""IsPublished"" = @isPub, ""UpdatedAt"" = @upd WHERE ""Id"" = @id";
+            try
+            {
+                using var connection = new NpgsqlConnection(_connectionString);
+                using var command = new NpgsqlCommand(query, connection);
+                command.Parameters.AddWithValue("@isPub", isPublished);
+                command.Parameters.AddWithValue("@upd", DateTime.UtcNow);
+                command.Parameters.AddWithValue("@id", quizId);
+                connection.Open();
+                return command.ExecuteNonQuery() > 0;
+            }
+            catch { return false; }
+        }
+
+        // ===== Quiz Questions =====
+        public List<QuizQuestionItem> GetQuizQuestions(int quizId)
+        {
+            var questions = new List<QuizQuestionItem>();
+            string query = @"SELECT * FROM ""QuizQuestions"" WHERE ""QuizId"" = @quizId ORDER BY ""QuestionOrder"", ""Id""";
+            try
+            {
+                using var connection = new NpgsqlConnection(_connectionString);
+                using var command = new NpgsqlCommand(query, connection);
+                command.Parameters.AddWithValue("@quizId", quizId);
+                connection.Open();
+                using var reader = command.ExecuteReader();
+
+                while (reader.Read())
+                {
+                    questions.Add(new QuizQuestionItem
+                    {
+                        Id = reader.GetInt32(reader.GetOrdinal("Id")),
+                        QuizId = reader.GetInt32(reader.GetOrdinal("QuizId")),
+                        QuestionText = reader["QuestionText"]?.ToString() ?? "",
+                        OptionA = reader["OptionA"]?.ToString() ?? "",
+                        OptionB = reader["OptionB"]?.ToString() ?? "",
+                        OptionC = reader["OptionC"]?.ToString() ?? "",
+                        OptionD = reader["OptionD"]?.ToString() ?? "",
+                        CorrectOption = reader["CorrectOption"]?.ToString() ?? "A",
+                        Marks = Convert.ToInt32(reader["Marks"]),
+                        QuestionOrder = Convert.ToInt32(reader["QuestionOrder"])
+                    });
+                }
+                return questions;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Error getting quiz questions: " + ex.Message);
+                return new List<QuizQuestionItem>();
+            }
+        }
+
+        public bool AddQuizQuestion(QuizQuestionItem q, out string? errorMessage)
+        {
+            errorMessage = null;
+            string query = @"
+                INSERT INTO ""QuizQuestions"" 
+                (""QuizId"", ""QuestionText"", ""OptionA"", ""OptionB"", ""OptionC"", ""OptionD"",
+                 ""CorrectOption"", ""Marks"", ""QuestionOrder"", ""CreatedAt"")
+                VALUES 
+                (@quizId, @qText, @a, @b, @c, @d, @correct, @marks, @order, @createdAt)
+                RETURNING ""Id""";
+
+            try
+            {
+                using var connection = new NpgsqlConnection(_connectionString);
+                using var command = new NpgsqlCommand(query, connection);
+
+                command.Parameters.AddWithValue("@quizId", q.QuizId);
+                command.Parameters.AddWithValue("@qText", q.QuestionText ?? "");
+                command.Parameters.AddWithValue("@a", q.OptionA ?? "");
+                command.Parameters.AddWithValue("@b", q.OptionB ?? "");
+                command.Parameters.AddWithValue("@c", q.OptionC ?? "");
+                command.Parameters.AddWithValue("@d", q.OptionD ?? "");
+                command.Parameters.AddWithValue("@correct", q.CorrectOption ?? "A");
+                command.Parameters.AddWithValue("@marks", q.Marks);
+                command.Parameters.AddWithValue("@order", q.QuestionOrder);
+                command.Parameters.AddWithValue("@createdAt", DateTime.UtcNow);
+
+                connection.Open();
+                var result = command.ExecuteScalar();
+                if (result != null && int.TryParse(result.ToString(), out int newId))
+                {
+                    q.Id = newId;
+                    return true;
+                }
+                return false;
+            }
+            catch (Exception ex)
+            {
+                errorMessage = ex.Message;
+                return false;
+            }
+        }
+
+        public bool DeleteQuizQuestion(int questionId)
+        {
+            try
+            {
+                using var connection = new NpgsqlConnection(_connectionString);
+                connection.Open();
+                using var cmd = new NpgsqlCommand(@"DELETE FROM ""QuizQuestions"" WHERE ""Id"" = @id", connection);
+                cmd.Parameters.AddWithValue("@id", questionId);
+                return cmd.ExecuteNonQuery() > 0;
+            }
+            catch { return false; }
+        }
+
+        // ===== Quiz Attempts =====
+        public bool SaveQuizAttempt(QuizAttempt attempt, out string? errorMessage)
+        {
+            errorMessage = null;
+            string query = @"
+                INSERT INTO ""QuizAttempts"" 
+                (""UserId"", ""QuizId"", ""CourseId"", ""Score"", ""TotalMarks"", 
+                 ""Percentage"", ""Passed"", ""AttemptedAt"")
+                VALUES 
+                (@userId, @quizId, @courseId, @score, @total,
+                 @pct, @passed, @attemptedAt)
+                RETURNING ""Id""";
+
+            try
+            {
+                using var connection = new NpgsqlConnection(_connectionString);
+                using var command = new NpgsqlCommand(query, connection);
+
+                command.Parameters.AddWithValue("@userId", attempt.UserId);
+                command.Parameters.AddWithValue("@quizId", attempt.QuizId);
+                command.Parameters.AddWithValue("@courseId", attempt.CourseId);
+                command.Parameters.AddWithValue("@score", attempt.Score);
+                command.Parameters.AddWithValue("@total", attempt.TotalMarks);
+                command.Parameters.AddWithValue("@pct", attempt.Percentage);
+                command.Parameters.AddWithValue("@passed", attempt.Passed);
+                command.Parameters.AddWithValue("@attemptedAt", DateTime.UtcNow);
+
+                connection.Open();
+                var result = command.ExecuteScalar();
+                if (result != null && int.TryParse(result.ToString(), out int newId))
+                {
+                    attempt.Id = newId;
+                    return true;
+                }
+                return false;
+            }
+            catch (Exception ex)
+            {
+                errorMessage = ex.Message;
+                return false;
+            }
+        }
+
+        public QuizAttempt? GetBestQuizAttempt(int userId, int quizId)
+        {
+            string query = @"
+                SELECT * FROM ""QuizAttempts"" 
+                WHERE ""UserId"" = @userId AND ""QuizId"" = @quizId
+                ORDER BY ""Percentage"" DESC, ""AttemptedAt"" DESC
+                LIMIT 1";
+
+            try
+            {
+                using var connection = new NpgsqlConnection(_connectionString);
+                using var command = new NpgsqlCommand(query, connection);
+                command.Parameters.AddWithValue("@userId", userId);
+                command.Parameters.AddWithValue("@quizId", quizId);
+                connection.Open();
+                using var reader = command.ExecuteReader();
+
+                if (reader.Read())
+                {
+                    return new QuizAttempt
+                    {
+                        Id = reader.GetInt32(reader.GetOrdinal("Id")),
+                        UserId = reader.GetInt32(reader.GetOrdinal("UserId")),
+                        QuizId = reader.GetInt32(reader.GetOrdinal("QuizId")),
+                        CourseId = reader.GetInt32(reader.GetOrdinal("CourseId")),
+                        Score = Convert.ToInt32(reader["Score"]),
+                        TotalMarks = Convert.ToInt32(reader["TotalMarks"]),
+                        Percentage = Convert.ToDecimal(reader["Percentage"]),
+                        Passed = reader["Passed"] as bool? ?? false,
+                        AttemptedAt = reader["AttemptedAt"] as DateTime? ?? DateTime.UtcNow
+                    };
+                }
+                return null;
+            }
+            catch { return null; }
+        }
+
+        public List<QuizAttempt> GetUserQuizAttempts(int userId, int courseId)
+        {
+            var attempts = new List<QuizAttempt>();
+            string query = @"
+                SELECT a.*, q.""Title"" as QuizTitle, q.""ModuleNumber""
+                FROM ""QuizAttempts"" a
+                LEFT JOIN ""ModuleQuizzes"" q ON a.""QuizId"" = q.""Id""
+                WHERE a.""UserId"" = @userId AND a.""CourseId"" = @courseId
+                ORDER BY a.""AttemptedAt"" DESC";
+
+            try
+            {
+                using var connection = new NpgsqlConnection(_connectionString);
+                using var command = new NpgsqlCommand(query, connection);
+                command.Parameters.AddWithValue("@userId", userId);
+                command.Parameters.AddWithValue("@courseId", courseId);
+                connection.Open();
+                using var reader = command.ExecuteReader();
+
+                while (reader.Read())
+                {
+                    attempts.Add(new QuizAttempt
+                    {
+                        Id = reader.GetInt32(reader.GetOrdinal("Id")),
+                        UserId = reader.GetInt32(reader.GetOrdinal("UserId")),
+                        QuizId = reader.GetInt32(reader.GetOrdinal("QuizId")),
+                        CourseId = reader.GetInt32(reader.GetOrdinal("CourseId")),
+                        Score = Convert.ToInt32(reader["Score"]),
+                        TotalMarks = Convert.ToInt32(reader["TotalMarks"]),
+                        Percentage = Convert.ToDecimal(reader["Percentage"]),
+                        Passed = reader["Passed"] as bool? ?? false,
+                        AttemptedAt = reader["AttemptedAt"] as DateTime? ?? DateTime.UtcNow,
+                        QuizTitle = reader["QuizTitle"]?.ToString() ?? "",
+                        ModuleNumber = reader["ModuleNumber"] != DBNull.Value ? Convert.ToInt32(reader["ModuleNumber"]) : 0
+                    });
+                }
+                return attempts;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Error getting user quiz attempts: " + ex.Message);
+                return new List<QuizAttempt>();
+            }
+        }
+
+        public QuizAttempt? GetQuizAttemptById(int attemptId, int userId)
+        {
+            string query = @"SELECT * FROM ""QuizAttempts"" WHERE ""Id"" = @id AND ""UserId"" = @u";
+            try
+            {
+                using var connection = new NpgsqlConnection(_connectionString);
+                using var command = new NpgsqlCommand(query, connection);
+                command.Parameters.AddWithValue("@id", attemptId);
+                command.Parameters.AddWithValue("@u", userId);
+                connection.Open();
+                using var reader = command.ExecuteReader();
+                if (reader.Read())
+                {
+                    return new QuizAttempt
+                    {
+                        Id = reader.GetInt32(reader.GetOrdinal("Id")),
+                        UserId = reader.GetInt32(reader.GetOrdinal("UserId")),
+                        QuizId = reader.GetInt32(reader.GetOrdinal("QuizId")),
+                        CourseId = reader.GetInt32(reader.GetOrdinal("CourseId")),
+                        Score = Convert.ToInt32(reader["Score"]),
+                        TotalMarks = Convert.ToInt32(reader["TotalMarks"]),
+                        Percentage = Convert.ToDecimal(reader["Percentage"]),
+                        Passed = reader["Passed"] as bool? ?? false,
+                        AttemptedAt = reader["AttemptedAt"] as DateTime? ?? DateTime.UtcNow
+                    };
+                }
+            }
+            catch { }
+            return null;
+        }
+
+        // ===== Lesson Completion Tracking =====
+        public bool MarkLessonCompleted(int userId, int courseId, int lessonId, int moduleNumber)
+        {
+            string query = @"
+                INSERT INTO ""LessonCompletions"" (""UserId"", ""CourseId"", ""LessonId"", ""ModuleNumber"", ""CompletedAt"")
+                VALUES (@userId, @courseId, @lessonId, @moduleNumber, @completedAt)
+                ON CONFLICT (""UserId"", ""LessonId"") DO NOTHING";
+
+            try
+            {
+                using var connection = new NpgsqlConnection(_connectionString);
+                using var command = new NpgsqlCommand(query, connection);
+                command.Parameters.AddWithValue("@userId", userId);
+                command.Parameters.AddWithValue("@courseId", courseId);
+                command.Parameters.AddWithValue("@lessonId", lessonId);
+                command.Parameters.AddWithValue("@moduleNumber", moduleNumber);
+                command.Parameters.AddWithValue("@completedAt", DateTime.UtcNow);
+                connection.Open();
+                return command.ExecuteNonQuery() > 0;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Error marking lesson completed: " + ex.Message);
+                return false;
+            }
+        }
+
+        public HashSet<int> GetCompletedLessonIds(int userId, int courseId)
+        {
+            var ids = new HashSet<int>();
+            string query = @"SELECT ""LessonId"" FROM ""LessonCompletions"" WHERE ""UserId"" = @u AND ""CourseId"" = @c";
+            try
+            {
+                using var connection = new NpgsqlConnection(_connectionString);
+                using var command = new NpgsqlCommand(query, connection);
+                command.Parameters.AddWithValue("@u", userId);
+                command.Parameters.AddWithValue("@c", courseId);
+                connection.Open();
+                using var reader = command.ExecuteReader();
+                while (reader.Read()) ids.Add(reader.GetInt32(0));
+                return ids;
+            }
+            catch { return ids; }
+        }
+
+        // Returns module -> (total lessons, completed lessons)
+        public Dictionary<int, (int Total, int Completed)> GetModuleProgress(int userId, int courseId)
+        {
+            var result = new Dictionary<int, (int Total, int Completed)>();
+
+            // 1) total lessons per module
+            var totalByModule = new Dictionary<int, int>();
+            string totalQuery = @"SELECT ""ModuleNumber"", COUNT(*) FROM ""CourseLessons"" WHERE ""CourseId"" = @c GROUP BY ""ModuleNumber""";
+            try
+            {
+                using var connection = new NpgsqlConnection(_connectionString);
+                using var command = new NpgsqlCommand(totalQuery, connection);
+                command.Parameters.AddWithValue("@c", courseId);
+                connection.Open();
+                using var reader = command.ExecuteReader();
+                while (reader.Read())
+                {
+                    totalByModule[Convert.ToInt32(reader[0])] = Convert.ToInt32(reader[1]);
+                }
+            }
+            catch { }
+
+            // 2) completed lessons per module
+            var completedByModule = new Dictionary<int, int>();
+            string completedQuery = @"
+                SELECT ""ModuleNumber"", COUNT(*) 
+                FROM ""LessonCompletions"" 
+                WHERE ""UserId"" = @u AND ""CourseId"" = @c 
+                GROUP BY ""ModuleNumber""";
+            try
+            {
+                using var connection = new NpgsqlConnection(_connectionString);
+                using var command = new NpgsqlCommand(completedQuery, connection);
+                command.Parameters.AddWithValue("@u", userId);
+                command.Parameters.AddWithValue("@c", courseId);
+                connection.Open();
+                using var reader = command.ExecuteReader();
+                while (reader.Read())
+                {
+                    completedByModule[Convert.ToInt32(reader[0])] = Convert.ToInt32(reader[1]);
+                }
+            }
+            catch { }
+
+            foreach (var kvp in totalByModule)
+            {
+                int module = kvp.Key;
+                int total = kvp.Value;
+                int completed = completedByModule.TryGetValue(module, out var c) ? c : 0;
+                result[module] = (total, completed);
+            }
+
+            return result;
+        }
+
+        // ===== Milestone Assignment Methods =====
+        public bool CreateMilestoneAssignment(MilestoneAssignment a, out string? errorMessage)
+        {
+            errorMessage = null;
+            string query = @"
+                INSERT INTO ""MilestoneAssignments"" 
+                (""CourseId"", ""MilestoneNumber"", ""Title"", ""Description"", ""Instructions"",
+                 ""TotalMarks"", ""DueDays"", ""IsPublished"", ""CreatedAt"")
+                VALUES 
+                (@courseId, @milestoneNum, @title, @desc, @instr,
+                 @marks, @days, @isPub, @createdAt)
+                RETURNING ""Id""";
+
+            try
+            {
+                using var connection = new NpgsqlConnection(_connectionString);
+                using var command = new NpgsqlCommand(query, connection);
+
+                command.Parameters.AddWithValue("@courseId", a.CourseId);
+                command.Parameters.AddWithValue("@milestoneNum", a.MilestoneNumber);
+                command.Parameters.AddWithValue("@title", a.Title ?? "");
+                command.Parameters.AddWithValue("@desc", a.Description ?? (object)DBNull.Value);
+                command.Parameters.AddWithValue("@instr", a.Instructions ?? (object)DBNull.Value);
+                command.Parameters.AddWithValue("@marks", a.TotalMarks);
+                command.Parameters.AddWithValue("@days", a.DueDays);
+                command.Parameters.AddWithValue("@isPub", a.IsPublished);
+                command.Parameters.AddWithValue("@createdAt", DateTime.UtcNow);
+
+                connection.Open();
+                var result = command.ExecuteScalar();
+                if (result != null && int.TryParse(result.ToString(), out int newId))
+                {
+                    a.Id = newId;
+                    return true;
+                }
+                return false;
+            }
+            catch (Exception ex)
+            {
+                errorMessage = ex.Message;
+                return false;
+            }
+        }
+
+        public List<MilestoneAssignment> GetAssignmentsByCourse(int courseId)
+        {
+            var list = new List<MilestoneAssignment>();
+            string query = @"SELECT * FROM ""MilestoneAssignments"" WHERE ""CourseId"" = @c ORDER BY ""MilestoneNumber""";
+            try
+            {
+                using var connection = new NpgsqlConnection(_connectionString);
+                using var command = new NpgsqlCommand(query, connection);
+                command.Parameters.AddWithValue("@c", courseId);
+                connection.Open();
+                using var reader = command.ExecuteReader();
+                while (reader.Read())
+                {
+                    list.Add(MapAssignment(reader));
+                }
+                return list;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Error getting assignments: " + ex.Message);
+                return list;
+            }
+        }
+
+        public MilestoneAssignment? GetAssignmentById(int id)
+        {
+            string query = @"SELECT * FROM ""MilestoneAssignments"" WHERE ""Id"" = @id";
+            try
+            {
+                using var connection = new NpgsqlConnection(_connectionString);
+                using var command = new NpgsqlCommand(query, connection);
+                command.Parameters.AddWithValue("@id", id);
+                connection.Open();
+                using var reader = command.ExecuteReader();
+                if (reader.Read()) return MapAssignment(reader);
+                return null;
+            }
+            catch { return null; }
+        }
+
+        public bool UpdateMilestoneAssignment(MilestoneAssignment a, out string? errorMessage)
+        {
+            errorMessage = null;
+            string query = @"
+                UPDATE ""MilestoneAssignments"" SET
+                    ""MilestoneNumber"" = @milestoneNum,
+                    ""Title"" = @title,
+                    ""Description"" = @desc,
+                    ""Instructions"" = @instr,
+                    ""TotalMarks"" = @marks,
+                    ""DueDays"" = @days,
+                    ""IsPublished"" = @isPub,
+                    ""UpdatedAt"" = @upd
+                WHERE ""Id"" = @id";
+
+            try
+            {
+                using var connection = new NpgsqlConnection(_connectionString);
+                using var command = new NpgsqlCommand(query, connection);
+
+                command.Parameters.AddWithValue("@id", a.Id);
+                command.Parameters.AddWithValue("@milestoneNum", a.MilestoneNumber);
+                command.Parameters.AddWithValue("@title", a.Title ?? "");
+                command.Parameters.AddWithValue("@desc", a.Description ?? (object)DBNull.Value);
+                command.Parameters.AddWithValue("@instr", a.Instructions ?? (object)DBNull.Value);
+                command.Parameters.AddWithValue("@marks", a.TotalMarks);
+                command.Parameters.AddWithValue("@days", a.DueDays);
+                command.Parameters.AddWithValue("@isPub", a.IsPublished);
+                command.Parameters.AddWithValue("@upd", DateTime.UtcNow);
+
+                connection.Open();
+                return command.ExecuteNonQuery() > 0;
+            }
+            catch (Exception ex)
+            {
+                errorMessage = ex.Message;
+                return false;
+            }
+        }
+
+        public bool DeleteMilestoneAssignment(int id)
+        {
+            try
+            {
+                using var connection = new NpgsqlConnection(_connectionString);
+                connection.Open();
+                using var cmd = new NpgsqlCommand(@"DELETE FROM ""MilestoneAssignments"" WHERE ""Id"" = @id", connection);
+                cmd.Parameters.AddWithValue("@id", id);
+                return cmd.ExecuteNonQuery() > 0;
+            }
+            catch { return false; }
+        }
+
+        public bool ToggleAssignmentPublish(int id, bool isPublished)
+        {
+            string query = @"UPDATE ""MilestoneAssignments"" SET ""IsPublished"" = @p, ""UpdatedAt"" = @u WHERE ""Id"" = @id";
+            try
+            {
+                using var connection = new NpgsqlConnection(_connectionString);
+                using var command = new NpgsqlCommand(query, connection);
+                command.Parameters.AddWithValue("@p", isPublished);
+                command.Parameters.AddWithValue("@u", DateTime.UtcNow);
+                command.Parameters.AddWithValue("@id", id);
+                connection.Open();
+                return command.ExecuteNonQuery() > 0;
+            }
+            catch { return false; }
+        }
+
+        // Milestone config (admin can set modules per milestone)
+        public int GetModulesPerMilestone(int courseId)
+        {
+            string query = @"SELECT ""ModulesPerMilestone"" FROM ""CourseMilestoneConfig"" WHERE ""CourseId"" = @c";
+            try
+            {
+                using var connection = new NpgsqlConnection(_connectionString);
+                using var command = new NpgsqlCommand(query, connection);
+                command.Parameters.AddWithValue("@c", courseId);
+                connection.Open();
+                var res = command.ExecuteScalar();
+                if (res != null && res != DBNull.Value) return Convert.ToInt32(res);
+                return 4;
+            }
+            catch { return 4; }
+        }
+
+        public bool SetModulesPerMilestone(int courseId, int modulesPerMilestone)
+        {
+            string query = @"
+                INSERT INTO ""CourseMilestoneConfig"" (""CourseId"", ""ModulesPerMilestone"", ""CreatedAt"")
+                VALUES (@c, @m, @t)
+                ON CONFLICT (""CourseId"") DO UPDATE SET ""ModulesPerMilestone"" = @m";
+            try
+            {
+                using var connection = new NpgsqlConnection(_connectionString);
+                using var command = new NpgsqlCommand(query, connection);
+                command.Parameters.AddWithValue("@c", courseId);
+                command.Parameters.AddWithValue("@m", modulesPerMilestone);
+                command.Parameters.AddWithValue("@t", DateTime.UtcNow);
+                connection.Open();
+                return command.ExecuteNonQuery() > 0;
+            }
+            catch { return false; }
+        }
+
+        // ============================================================
         // ===== PRIVATE MAPPERS =====
         // ============================================================
 
@@ -1607,6 +2481,7 @@ namespace Tutorbub.Models
                 LastLoginAt = reader["LastLoginAt"] as DateTime?,
                 Role = reader["Role"]?.ToString() ?? "User",
                 IsActive = reader["IsActive"] as bool? ?? true,
+                TotalPoints = reader["TotalPoints"] != DBNull.Value ? Convert.ToInt32(reader["TotalPoints"]) : 0,
                 MobileNumber = reader["MobileNumber"]?.ToString(),
                 ProfileImage = reader["ProfileImage"]?.ToString(),
                 Gender = reader["Gender"]?.ToString(),
@@ -1714,6 +2589,24 @@ namespace Tutorbub.Models
                 PublishedDate = reader["PublishedDate"] as DateTime? ?? DateTime.UtcNow,
                 IsAnnouncement = reader["IsAnnouncement"] as bool? ?? false,
                 IsActive = reader["IsActive"] as bool? ?? true,
+                CreatedAt = reader["CreatedAt"] as DateTime? ?? DateTime.UtcNow,
+                UpdatedAt = reader["UpdatedAt"] as DateTime?
+            };
+        }
+
+        private MilestoneAssignment MapAssignment(NpgsqlDataReader reader)
+        {
+            return new MilestoneAssignment
+            {
+                Id = reader.GetInt32(reader.GetOrdinal("Id")),
+                CourseId = reader.GetInt32(reader.GetOrdinal("CourseId")),
+                MilestoneNumber = Convert.ToInt32(reader["MilestoneNumber"]),
+                Title = reader["Title"]?.ToString() ?? "",
+                Description = reader["Description"]?.ToString(),
+                Instructions = reader["Instructions"]?.ToString(),
+                TotalMarks = Convert.ToInt32(reader["TotalMarks"]),
+                DueDays = Convert.ToInt32(reader["DueDays"]),
+                IsPublished = reader["IsPublished"] as bool? ?? false,
                 CreatedAt = reader["CreatedAt"] as DateTime? ?? DateTime.UtcNow,
                 UpdatedAt = reader["UpdatedAt"] as DateTime?
             };

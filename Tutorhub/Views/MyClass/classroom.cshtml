@@ -21,6 +21,97 @@
         min-width: 0;
     }
 
+    /* ===== Assignment Banner ===== */
+    .cr-assignment-banner {
+        background: linear-gradient(135deg, #FFF9E6 0%, #FFFAF0 100%);
+        border-radius: 14px;
+        padding: 16px 20px;
+        margin-bottom: 18px;
+        border-left: 5px solid #F4C744;
+        box-shadow: 0 4px 14px rgba(244, 199, 68, 0.15);
+    }
+
+        .cr-assignment-banner h6 {
+            color: #1F3B2C;
+            font-weight: 700;
+            margin: 0 0 8px;
+            font-size: 15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+            .cr-assignment-banner h6 i {
+                color: #D98E1F;
+            }
+
+        .cr-assignment-banner .assign-meta {
+            display: flex;
+            gap: 16px;
+            font-size: 12.5px;
+            color: #6B7568;
+            flex-wrap: wrap;
+            margin-bottom: 6px;
+        }
+
+            .cr-assignment-banner .assign-meta i {
+                color: #D98E1F;
+                margin-right: 5px;
+            }
+
+        .cr-assignment-banner .assign-title {
+            color: #1F3B2C;
+            font-weight: 700;
+            font-size: 14.5px;
+            margin: 0 0 4px;
+        }
+
+        .cr-assignment-banner .assign-desc {
+            color: #5B6B5E;
+            font-size: 13px;
+            margin: 0 0 8px;
+            line-height: 1.55;
+        }
+
+        .cr-assignment-banner details {
+            margin-top: 8px;
+        }
+
+        .cr-assignment-banner summary {
+            cursor: pointer;
+            color: #1F3B2C;
+            font-size: 12.5px;
+            font-weight: 600;
+            list-style: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+            .cr-assignment-banner summary::-webkit-details-marker {
+                display: none;
+            }
+
+            .cr-assignment-banner summary i {
+                transition: transform 0.2s;
+                font-size: 10px;
+            }
+
+        .cr-assignment-banner details[open] summary i {
+            transform: rotate(90deg);
+        }
+
+        .cr-assignment-banner .instr-box {
+            margin-top: 8px;
+            padding-left: 14px;
+            border-left: 3px solid #F4C744;
+            font-size: 12.5px;
+            color: #5B6B5E;
+            line-height: 1.6;
+            white-space: pre-wrap;
+        }
+
+    /* ===== Video wrap ===== */
     .cr-video-wrap {
         background: #1F3B2C;
         border-radius: 16px;
@@ -30,12 +121,12 @@
         box-shadow: 0 10px 34px rgba(31,59,44,0.18);
     }
 
-    .cr-video-wrap video {
-        width: 100%;
-        height: 100%;
-        display: block;
-        background: #1F3B2C;
-    }
+        .cr-video-wrap video {
+            width: 100%;
+            height: 100%;
+            display: block;
+            background: #1F3B2C;
+        }
 
     /* ===== Lesson info card ===== */
     .cr-info-card {
@@ -75,10 +166,10 @@
         border-top: 1px solid #f0f0f0;
     }
 
-    .cr-lesson-meta span i {
-        margin-right: 6px;
-        color: #1F3B2C;
-    }
+        .cr-lesson-meta span i {
+            margin-right: 6px;
+            color: #1F3B2C;
+        }
 
     .cr-nav-buttons {
         display: flex;
@@ -107,9 +198,9 @@
         border: 1.5px solid #1F3B2C;
     }
 
-    .cr-nav-prev:hover {
-        background: #F3F1E7;
-    }
+        .cr-nav-prev:hover {
+            background: #F3F1E7;
+        }
 
     .cr-nav-next {
         background: #1F3B2C;
@@ -117,11 +208,11 @@
         box-shadow: 0 6px 18px rgba(31,59,44,0.25);
     }
 
-    .cr-nav-next:hover {
-        opacity: 0.9;
-        transform: translateY(-1px);
-        box-shadow: 0 8px 22px rgba(31,59,44,0.35);
-    }
+        .cr-nav-next:hover {
+            opacity: 0.9;
+            transform: translateY(-1px);
+            box-shadow: 0 8px 22px rgba(31,59,44,0.35);
+        }
 
     /* ===== Action tabs ===== */
     .cr-tabs-card {
@@ -158,16 +249,18 @@
         white-space: nowrap;
     }
 
-    .cr-tab:hover {
-        color: #1F3B2C;
-    }
+        .cr-tab:hover {
+            color: #1F3B2C;
+        }
 
-    .cr-tab.active {
-        color: #1F3B2C;
-        border-bottom-color: #1F3B2C;
-    }
+        .cr-tab.active {
+            color: #1F3B2C;
+            border-bottom-color: #1F3B2C;
+        }
 
-    .cr-tab i { font-size: 14px; }
+        .cr-tab i {
+            font-size: 14px;
+        }
 
     .cr-tab-content {
         padding: 22px 24px 26px;
@@ -177,26 +270,26 @@
         min-height: 180px;
     }
 
-    .cr-tab-content textarea {
-        width: 100%;
-        background: #FAF9F4;
-        border: 1.5px solid #E5E1D3;
-        border-radius: 10px;
-        color: #1F3B2C;
-        padding: 14px 16px;
-        font-family: inherit;
-        font-size: 14px;
-        outline: none;
-        resize: vertical;
-        min-height: 120px;
-        transition: border-color 0.2s;
-    }
+        .cr-tab-content textarea {
+            width: 100%;
+            background: #FAF9F4;
+            border: 1.5px solid #E5E1D3;
+            border-radius: 10px;
+            color: #1F3B2C;
+            padding: 14px 16px;
+            font-family: inherit;
+            font-size: 14px;
+            outline: none;
+            resize: vertical;
+            min-height: 120px;
+            transition: border-color 0.2s;
+        }
 
-    .cr-tab-content textarea:focus {
-        border-color: #1F3B2C;
-        box-shadow: 0 0 0 3px rgba(31,59,44,0.08);
-        background: white;
-    }
+            .cr-tab-content textarea:focus {
+                border-color: #1F3B2C;
+                box-shadow: 0 0 0 3px rgba(31,59,44,0.08);
+                background: white;
+            }
 
     .cr-btn-save {
         background: #1F3B2C;
@@ -214,10 +307,10 @@
         gap: 6px;
     }
 
-    .cr-btn-save:hover {
-        opacity: 0.9;
-        transform: translateY(-1px);
-    }
+        .cr-btn-save:hover {
+            opacity: 0.9;
+            transform: translateY(-1px);
+        }
 
     /* ===== RIGHT: Module Sidebar ===== */
     .cr-right {
@@ -244,33 +337,35 @@
         margin-bottom: 16px;
     }
 
-    .cr-search input {
-        width: 100%;
-        background: white;
-        border: 1.5px solid #E5E1D3;
-        border-radius: 10px;
-        color: #1F3B2C;
-        padding: 11px 14px 11px 42px;
-        font-size: 13.5px;
-        outline: none;
-        transition: all 0.2s;
-    }
+        .cr-search input {
+            width: 100%;
+            background: white;
+            border: 1.5px solid #E5E1D3;
+            border-radius: 10px;
+            color: #1F3B2C;
+            padding: 11px 14px 11px 42px;
+            font-size: 13.5px;
+            outline: none;
+            transition: all 0.2s;
+        }
 
-    .cr-search input::placeholder { color: #A8B5A9; }
+            .cr-search input::placeholder {
+                color: #A8B5A9;
+            }
 
-    .cr-search input:focus {
-        border-color: #1F3B2C;
-        box-shadow: 0 0 0 3px rgba(31,59,44,0.08);
-    }
+            .cr-search input:focus {
+                border-color: #1F3B2C;
+                box-shadow: 0 0 0 3px rgba(31,59,44,0.08);
+            }
 
-    .cr-search i {
-        position: absolute;
-        left: 15px;
-        top: 50%;
-        transform: translateY(-50%);
-        color: #8A9188;
-        font-size: 14px;
-    }
+        .cr-search i {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #8A9188;
+            font-size: 14px;
+        }
 
     .cr-progress-info {
         display: flex;
@@ -282,7 +377,9 @@
         font-weight: 500;
     }
 
-    .cr-progress-info strong { color: #1F3B2C; }
+        .cr-progress-info strong {
+            color: #1F3B2C;
+        }
 
     .cr-progress-bar {
         height: 6px;
@@ -305,11 +402,14 @@
         padding: 14px;
     }
 
-    .cr-modules::-webkit-scrollbar { width: 6px; }
-    .cr-modules::-webkit-scrollbar-thumb {
-        background: #D5CFB8;
-        border-radius: 10px;
-    }
+        .cr-modules::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .cr-modules::-webkit-scrollbar-thumb {
+            background: #D5CFB8;
+            border-radius: 10px;
+        }
 
     .cr-module {
         background: #FAF9F4;
@@ -320,13 +420,13 @@
         transition: border-color 0.2s;
     }
 
-    .cr-module:hover {
-        border-color: #D5CFB8;
-    }
+        .cr-module:hover {
+            border-color: #D5CFB8;
+        }
 
-    .cr-module.open {
-        border-color: #1F3B2C;
-    }
+        .cr-module.open {
+            border-color: #1F3B2C;
+        }
 
     .cr-module-header {
         display: flex;
@@ -338,36 +438,36 @@
         transition: background 0.2s;
     }
 
-    .cr-module-header:hover {
-        background: rgba(31,59,44,0.03);
-    }
+        .cr-module-header:hover {
+            background: rgba(31,59,44,0.03);
+        }
 
     .cr-module-title {
         flex: 1;
         min-width: 0;
     }
 
-    .cr-module-title h6 {
-        font-size: 13.5px;
-        font-weight: 700;
-        color: #1F3B2C;
-        margin: 0 0 4px;
-        line-height: 1.4;
-    }
+        .cr-module-title h6 {
+            font-size: 13.5px;
+            font-weight: 700;
+            color: #1F3B2C;
+            margin: 0 0 4px;
+            line-height: 1.4;
+        }
 
-    .cr-module-title .cr-mod-meta {
-        font-size: 11.5px;
-        color: #8A9188;
-        display: flex;
-        gap: 8px;
-        align-items: center;
-        font-weight: 500;
-    }
+        .cr-module-title .cr-mod-meta {
+            font-size: 11.5px;
+            color: #8A9188;
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            font-weight: 500;
+        }
 
-    .cr-module-title .cr-mod-meta i {
-        font-size: 10px;
-        color: #1F3B2C;
-    }
+            .cr-module-title .cr-mod-meta i {
+                font-size: 10px;
+                color: #1F3B2C;
+            }
 
     .cr-module-caret {
         color: #8A9188;
@@ -405,15 +505,15 @@
         margin-top: 4px;
     }
 
-    .cr-lesson-item:hover {
-        background: #F3F1E7;
-    }
+        .cr-lesson-item:hover {
+            background: #F3F1E7;
+        }
 
-    .cr-lesson-item.active {
-        background: #F3F1E7;
-        border-left: 3px solid #1F3B2C;
-        padding-left: 9px;
-    }
+        .cr-lesson-item.active {
+            background: #F3F1E7;
+            border-left: 3px solid #1F3B2C;
+            padding-left: 9px;
+        }
 
     .cr-lesson-icon {
         width: 24px;
@@ -427,33 +527,33 @@
         margin-top: 1px;
     }
 
-    .cr-lesson-icon.completed {
-        background: #2ecc71;
-        color: #fff;
-    }
+        .cr-lesson-icon.completed {
+            background: #2ecc71;
+            color: #fff;
+        }
 
-    .cr-lesson-icon.pending {
-        background: #E5E1D3;
-        color: #6B7568;
-    }
+        .cr-lesson-icon.pending {
+            background: #E5E1D3;
+            color: #6B7568;
+        }
 
-    .cr-lesson-icon.active-icon {
-        background: #1F3B2C;
-        color: #fff;
-    }
+        .cr-lesson-icon.active-icon {
+            background: #1F3B2C;
+            color: #fff;
+        }
 
     .cr-lesson-text {
         flex: 1;
         min-width: 0;
     }
 
-    .cr-lesson-text .lt {
-        font-size: 13px;
-        color: #4B5648;
-        font-weight: 500;
-        line-height: 1.4;
-        margin: 0 0 3px;
-    }
+        .cr-lesson-text .lt {
+            font-size: 13px;
+            color: #4B5648;
+            font-weight: 500;
+            line-height: 1.4;
+            margin: 0 0 3px;
+        }
 
     .cr-lesson-item.active .lt {
         color: #1F3B2C;
@@ -468,9 +568,85 @@
         gap: 5px;
     }
 
-    .cr-lesson-text .lt-meta i {
-        font-size: 10px;
+        .cr-lesson-text .lt-meta i {
+            font-size: 10px;
+        }
+
+    /* ===== Quiz Button ===== */
+    .cr-quiz-btn {
+        display: flex;
+        align-items: flex-start;
+        gap: 12px;
+        padding: 12px;
+        margin-top: 8px;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.2s;
+        text-decoration: none;
+        background: linear-gradient(135deg, #E8F0E9 0%, #F4F8F4 100%);
+        border-left: 3px solid #1F3B2C;
     }
+
+        .cr-quiz-btn:hover {
+            background: linear-gradient(135deg, #D9EDDF 0%, #E8F0E9 100%);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(31,59,44,0.12);
+            color: inherit;
+        }
+
+        .cr-quiz-btn .quiz-icon {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: #1F3B2C;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            flex-shrink: 0;
+        }
+
+        .cr-quiz-btn .quiz-text {
+            flex: 1;
+            min-width: 0;
+        }
+
+            .cr-quiz-btn .quiz-text .quiz-title {
+                font-size: 13px;
+                font-weight: 700;
+                color: #1F3B2C;
+                margin: 0 0 3px;
+                line-height: 1.35;
+            }
+
+            .cr-quiz-btn .quiz-text .quiz-tag {
+                font-size: 11.5px;
+                color: #0c6b7c;
+                font-weight: 600;
+                display: flex;
+                align-items: center;
+                gap: 5px;
+            }
+
+                .cr-quiz-btn .quiz-text .quiz-tag i {
+                    font-size: 10px;
+                }
+
+    .cr-quiz-locked {
+        padding: 12px;
+        margin-top: 8px;
+        background: #FFF9E6;
+        border-radius: 8px;
+        font-size: 12px;
+        color: #8a5a00;
+        text-align: center;
+        border-left: 3px solid #F4C744;
+    }
+
+        .cr-quiz-locked i {
+            margin-right: 5px;
+        }
 
     /* ===== Responsive ===== */
     @@media (max-width: 1100px) {
@@ -478,6 +654,7 @@
             grid-template-columns: 1fr;
             padding: 16px;
         }
+
         .cr-right {
             position: static;
             max-height: none;
@@ -485,24 +662,97 @@
     }
 
     @@media (max-width: 576px) {
-        .cr-wrapper { padding: 10px; gap: 14px; }
-        .cr-info-card { padding: 18px 16px; }
-        .cr-info-card h2 { font-size: 17px; }
-        .cr-nav-btn { padding: 10px 18px; font-size: 13px; }
-        .cr-nav-buttons { justify-content: stretch; }
-        .cr-nav-btn { flex: 1; justify-content: center; }
-        .cr-tab { padding: 13px 14px; font-size: 13px; }
-        .cr-tab-content { padding: 18px 16px; }
-        .cr-right-head { padding: 16px 14px 12px; }
-        .cr-modules { padding: 10px; }
+        .cr-wrapper {
+            padding: 10px;
+            gap: 14px;
+        }
+
+        .cr-info-card {
+            padding: 18px 16px;
+        }
+
+            .cr-info-card h2 {
+                font-size: 17px;
+            }
+
+        .cr-nav-btn {
+            padding: 10px 18px;
+            font-size: 13px;
+        }
+
+        .cr-nav-buttons {
+            justify-content: stretch;
+        }
+
+        .cr-nav-btn {
+            flex: 1;
+            justify-content: center;
+        }
+
+        .cr-tab {
+            padding: 13px 14px;
+            font-size: 13px;
+        }
+
+        .cr-tab-content {
+            padding: 18px 16px;
+        }
+
+        .cr-right-head {
+            padding: 16px 14px 12px;
+        }
+
+        .cr-modules {
+            padding: 10px;
+        }
     }
 </style>
+
+<!-- Hidden anti-forgery token for AJAX -->
+@Html.AntiForgeryToken()
 
 <div class="cr-wrapper">
 
     <!-- ================= LEFT: Video + Info ================= -->
     <div class="cr-left">
 
+        <!-- ===== Milestone Assignment Banner ===== -->
+        @if (Model.AvailableAssignments != null && Model.AvailableAssignments.Any())
+        {
+            foreach (var a in Model.AvailableAssignments)
+            {
+                <div class="cr-assignment-banner">
+                    <h6>
+                        <i class="fas fa-tasks"></i>
+                        Milestone @a.MilestoneNumber Assignment
+                    </h6>
+
+                    <p class="assign-title">@a.Title</p>
+
+                    @if (!string.IsNullOrEmpty(a.Description))
+                    {
+                        <p class="assign-desc">@a.Description</p>
+                    }
+
+                    <div class="assign-meta">
+                        <span><i class="fas fa-star"></i> @a.TotalMarks Marks</span>
+                        <span><i class="fas fa-clock"></i> Due: @a.DueDays days</span>
+                    </div>
+
+                    @if (!string.IsNullOrEmpty(a.Instructions))
+                    {
+                        <details>
+                            <summary>
+                                <i class="fas fa-chevron-right"></i> View Instructions
+                            </summary>
+                            <div class="instr-box">@a.Instructions</div>
+                        </details>
+                    }
+                </div>
+            }
+        }
+
+        <!-- ===== Video Player ===== -->
         <div class="cr-video-wrap">
             <video id="mainVideo"
                    controls
@@ -514,7 +764,7 @@
             </video>
         </div>
 
-        <!-- Lesson info card -->
+        <!-- ===== Lesson info card ===== -->
         <div class="cr-info-card">
             <div class="cr-eyebrow">Now Playing</div>
             <h2 id="activeLessonTitle">@Model.ActiveLessonTitle</h2>
@@ -536,7 +786,7 @@
             </div>
         </div>
 
-        <!-- Tabs card -->
+        <!-- ===== Tabs card ===== -->
         <div class="cr-tabs-card">
             <div class="cr-tabs">
                 <button class="cr-tab active" data-tab="notes">
@@ -640,6 +890,13 @@
                                 <span><i class="fas fa-clock"></i> @module.TotalDuration</span>
                                 <span>•</span>
                                 <span>@module.CompletedLessons/@module.TotalLessons</span>
+                                @if (module.IsModuleCompleted)
+                                {
+                                    <span>•</span>
+                                    <span style="color:#2ecc71; font-weight:700;">
+                                        <i class="fas fa-check-circle"></i> Completed
+                                    </span>
+                                }
                             </div>
                         </div>
                         <i class="fas fa-chevron-up cr-module-caret"></i>
@@ -679,6 +936,29 @@
                                 </div>
                             </div>
                         }
+
+                        <!-- ===== Module Quiz Button ===== -->
+                        @if (module.QuizAvailable && module.QuizId.HasValue)
+                        {
+                            <a href="/Practice/TakeQuiz?quizId=@module.QuizId" class="cr-quiz-btn">
+                                <div class="quiz-icon">
+                                    <i class="fas fa-question"></i>
+                                </div>
+                                <div class="quiz-text">
+                                    <p class="quiz-title">@module.QuizTitle</p>
+                                    <p class="quiz-tag">
+                                        <i class="fas fa-play-circle"></i> Take Quiz Now
+                                    </p>
+                                </div>
+                            </a>
+                        }
+                        else if (module.IsModuleCompleted)
+                        {
+                            <div class="cr-quiz-locked">
+                                <i class="fas fa-clock"></i>
+                                Quiz will be available soon
+                            </div>
+                        }
                     </div>
                 </div>
             }
@@ -688,6 +968,12 @@
 
 @section Scripts {
     <script>
+        // ===== Course ID and Completed Lessons for AJAX =====
+        const COURSE_ID = @Model.CourseId;
+        const completedLessons = new Set([
+                    @Html.Raw(string.Join(",", Model.Modules.SelectMany(m => m.Lessons).Where(l => l.IsCompleted).Select(l => l.Id)))
+                ]);
+
         // ===== All lessons (flat) for prev/next =====
         const allLessons = [];
         document.querySelectorAll('.cr-lesson-item').forEach(el => {
@@ -703,29 +989,30 @@
         let currentIndex = allLessons.findIndex(l => l.element.classList.contains('active'));
         if (currentIndex < 0) currentIndex = 0;
 
+        // ===== Anti-Forgery Token Helper =====
+        function getToken() {
+            const t = document.querySelector('input[name="__RequestVerificationToken"]');
+            return t ? t.value : '';
+        }
+
         // ===== Play lesson =====
         function playLesson(el) {
             const video = document.getElementById('mainVideo');
             const title = document.getElementById('activeLessonTitle');
 
-            // remove active from all
             document.querySelectorAll('.cr-lesson-item').forEach(x => x.classList.remove('active'));
             el.classList.add('active');
 
-            // update video
             const src = el.dataset.video;
             const source = video.querySelector('source');
             source.src = src;
             video.load();
-            video.play().catch(() => {});
+            video.play().catch(() => { });
 
-            // update title
             title.textContent = el.dataset.title;
 
-            // update index
             currentIndex = allLessons.findIndex(l => l.element === el);
 
-            // update icon (mark as active)
             document.querySelectorAll('.cr-lesson-icon').forEach(ic => {
                 if (!ic.classList.contains('completed')) {
                     ic.classList.remove('active-icon');
@@ -790,7 +1077,7 @@
         }
 
         // ===== Search lessons =====
-        document.getElementById('lessonSearch').addEventListener('input', function () {
+        document.getElementById('lessonSearch')?.addEventListener('input', function () {
             const query = this.value.toLowerCase().trim();
             document.querySelectorAll('.cr-lesson-item').forEach(item => {
                 const title = item.dataset.title.toLowerCase();
@@ -809,5 +1096,171 @@
             if (e.key === 'ArrowRight') goNext();
             else if (e.key === 'ArrowLeft') goPrev();
         });
+
+        // ============================================================
+        // ===== LESSON COMPLETION TRACKING =====
+        // ============================================================
+
+        function markLessonComplete(lessonId, moduleNumber) {
+            if (completedLessons.has(lessonId)) return;
+
+            const formData = new FormData();
+            formData.append('courseId', COURSE_ID);
+            formData.append('lessonId', lessonId);
+            formData.append('moduleNumber', moduleNumber);
+            formData.append('__RequestVerificationToken', getToken());
+
+            fetch('/MyClass/MarkLessonComplete', { method: 'POST', body: formData })
+                .then(r => r.json())
+                .then(d => {
+                    if (d.success) {
+                        completedLessons.add(lessonId);
+
+                        const lessonEl = document.querySelector(`.cr-lesson-item[data-lesson-id="${lessonId}"]`);
+                        if (lessonEl) {
+                            const icon = lessonEl.querySelector('.cr-lesson-icon');
+                            if (icon) {
+                                icon.className = 'cr-lesson-icon completed';
+                                icon.innerHTML = '<i class="fas fa-check"></i>';
+                            }
+                        }
+
+                        if (d.moduleCompleted && d.quizId) {
+                            showQuizAvailableToast(d.quizId, d.quizTitle);
+                        }
+
+                        if (d.milestoneCompleted && d.milestoneNumber) {
+                            showMilestoneCompleteToast(d.milestoneNumber);
+                        }
+                    }
+                })
+                .catch(err => {
+                    console.warn('Failed to mark lesson complete:', err);
+                });
+        }
+
+        function showQuizAvailableToast(quizId, quizTitle) {
+            const div = document.createElement('div');
+            div.style.cssText = `
+                        position: fixed;
+                        top: 100px;
+                        right: 20px;
+                        background: linear-gradient(135deg, #1F3B2C 0%, #2d5a42 100%);
+                        color: white;
+                        padding: 16px 22px;
+                        border-radius: 12px;
+                        box-shadow: 0 12px 40px rgba(0,0,0,0.25);
+                        z-index: 9999;
+                        font-family: inherit;
+                        max-width: 340px;
+                        cursor: pointer;
+                        animation: slideInRight 0.4s ease;
+                    `;
+            div.innerHTML = `
+                        <div style="display:flex; align-items:flex-start; gap:12px;">
+                            <i class="fas fa-trophy" style="color:#F4C744; font-size:22px; margin-top:2px;"></i>
+                            <div>
+                                <p style="margin:0 0 4px; font-weight:700; font-size:14px;">Module Completed!</p>
+                                <p style="margin:0; font-size:12.5px; opacity:0.9;">
+                                    ${escapeHtml(quizTitle || 'A quiz')} is now available.
+                                </p>
+                                <p style="margin:6px 0 0; font-size:11.5px; opacity:0.75;">
+                                    <i class="fas fa-mouse-pointer"></i> Click to take the quiz
+                                </p>
+                            </div>
+                        </div>
+                    `;
+            div.addEventListener('click', () => {
+                window.location.href = '/Practice/TakeQuiz?quizId=' + quizId;
+            });
+            document.body.appendChild(div);
+
+            setTimeout(() => {
+                div.style.transition = 'opacity 0.3s, transform 0.3s';
+                div.style.opacity = '0';
+                div.style.transform = 'translateX(20px)';
+                setTimeout(() => div.remove(), 300);
+            }, 8000);
+        }
+
+        function showMilestoneCompleteToast(milestoneNumber) {
+            const div = document.createElement('div');
+            div.style.cssText = `
+                        position: fixed;
+                        top: 100px;
+                        right: 20px;
+                        background: linear-gradient(135deg, #D98E1F 0%, #F4C744 100%);
+                        color: #1F3B2C;
+                        padding: 18px 24px;
+                        border-radius: 12px;
+                        box-shadow: 0 12px 40px rgba(217,142,31,0.35);
+                        z-index: 9999;
+                        font-family: inherit;
+                        max-width: 340px;
+                        animation: slideInRight 0.4s ease;
+                    `;
+            div.innerHTML = `
+                        <div style="display:flex; align-items:flex-start; gap:12px;">
+                            <i class="fas fa-award" style="font-size:26px; margin-top:2px;"></i>
+                            <div>
+                                <p style="margin:0 0 4px; font-weight:800; font-size:15px;">
+                                    🎉 Milestone ${milestoneNumber} Complete!
+                                </p>
+                                <p style="margin:0; font-size:13px; font-weight:600;">
+                                    An assignment has been unlocked for you.
+                                </p>
+                            </div>
+                        </div>
+                    `;
+            document.body.appendChild(div);
+
+            setTimeout(() => {
+                div.style.transition = 'opacity 0.3s, transform 0.3s';
+                div.style.opacity = '0';
+                div.style.transform = 'translateX(20px)';
+                setTimeout(() => div.remove(), 300);
+            }, 10000);
+        }
+
+        function escapeHtml(text) {
+            if (!text) return '';
+            return String(text)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#39;');
+        }
+
+        // ============================================================
+        // ===== AUTO-MARK LESSON COMPLETE WHEN VIDEO ENDS =====
+        // ============================================================
+        document.addEventListener('DOMContentLoaded', function () {
+            const video = document.getElementById('mainVideo');
+            if (!video) return;
+
+            video.addEventListener('ended', function () {
+                const activeLesson = document.querySelector('.cr-lesson-item.active');
+                if (!activeLesson) return;
+
+                const lessonId = parseInt(activeLesson.dataset.lessonId);
+                const moduleEl = activeLesson.closest('.cr-module');
+                const moduleNumber = moduleEl ? parseInt(moduleEl.dataset.module) : 1;
+
+                markLessonComplete(lessonId, moduleNumber);
+            });
+        });
+
+        // ===== Add slide-in animation CSS =====
+        (function () {
+            const style = document.createElement('style');
+            style.textContent = `
+                        @@keyframes slideInRight {
+                            from { opacity: 0; transform: translateX(40px); }
+                            to { opacity: 1; transform: translateX(0); }
+                        }
+                    `;
+            document.head.appendChild(style);
+        })();
     </script>
 }

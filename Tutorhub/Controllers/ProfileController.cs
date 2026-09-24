@@ -1,4 +1,7 @@
 ﻿// 📁 Controllers/ProfileController.cs
+// লোকেশন: Tutorbub/Controllers/ProfileController.cs
+// ✅ User এর TotalPoints প্রোফাইলে দেখানোর জন্য ViewBag-এ পাঠানো হচ্ছে।
+
 using Microsoft.AspNetCore.Mvc;
 using Tutorbub.Models;
 using System;
@@ -69,12 +72,20 @@ namespace Tutorbub.Controllers
                 PortfolioLink = user.PortfolioLink ?? string.Empty,
                 LinkedInProfile = user.LinkedInProfile ?? string.Empty,
                 ProfileImageLink = user.ProfileImageLink ?? string.Empty,
+
+                // ✅ পয়েন্ট সিস্টেম
+                TotalPoints = user.TotalPoints,
+
                 Skills = new System.Collections.Generic.List<UserSkill>(),
                 CourseOrders = new System.Collections.Generic.List<CourseOrder>(),
                 Certificates = new System.Collections.Generic.List<Certificate>()
             };
 
             ViewBag.IsProfileComplete = profile.IsProfileComplete();
+
+            // ✅ পয়েন্ট আলাদাভাবে ViewBag-এও পাঠানো (UI-তে সহজে ব্যবহারের জন্য)
+            ViewBag.TotalPoints = user.TotalPoints;
+
             return View(profile);
         }
 
@@ -351,7 +362,10 @@ namespace Tutorbub.Controllers
                     user.PortfolioLink,
                     user.LinkedInProfile,
                     user.ProfileImageLink,
-                    user.Role
+                    user.Role,
+
+                    // ✅ পয়েন্ট সিস্টেম
+                    user.TotalPoints
                 }
             });
         }

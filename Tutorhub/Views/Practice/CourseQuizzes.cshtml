@@ -1,0 +1,424 @@
+﻿@{
+    ViewData["Title"] = "Quizzes & Assignments";
+    Layout = "_Layout";
+    var course = ViewBag.Course as Tutorbub.Models.Course;
+    var quizzes = ViewBag.Quizzes as List<Tutorbub.Models.ModuleQuiz> ?? new();
+    var assignments = ViewBag.Assignments as List<Tutorbub.Models.MilestoneAssignment> ?? new();
+    var moduleProgress = ViewBag.ModuleProgress as Dictionary<int, (int Total, int Completed)> ?? new();
+    var completedModules = ViewBag.CompletedModules as List<int> ?? new();
+    var completedMilestones = ViewBag.CompletedMilestones as List<int> ?? new();
+    var attempts = ViewBag.QuizAttempts as List<Tutorbub.Models.QuizAttempt> ?? new();
+    int modulesPerMilestone = ViewBag.ModulesPerMilestone ?? 4;
+}
+
+<style>
+    .cq-wrapper {
+        max-width: 1100px;
+        margin: 0 auto;
+        padding: 30px 20px 60px;
+    }
+
+    .cq-header {
+        margin-bottom: 26px;
+    }
+
+        .cq-header h1 {
+            font-family: 'Georgia', serif;
+            font-size: 30px;
+            color: #1F3B2C;
+            margin: 0 0 6px;
+        }
+
+        .cq-header p {
+            color: #5B6B5E;
+            margin: 0;
+            font-size: 15px;
+        }
+
+    .cq-section-title {
+        font-size: 18px;
+        font-weight: 700;
+        color: #1F3B2C;
+        margin: 30px 0 16px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+        .cq-section-title i {
+            color: #1F3B2C;
+        }
+
+    .quiz-card {
+        background: white;
+        border-radius: 14px;
+        padding: 18px 20px;
+        margin-bottom: 12px;
+        box-shadow: 0 2px 12px rgba(0,0,0,0.05);
+        border: 1px solid rgba(0,0,0,0.04);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 16px;
+        flex-wrap: wrap;
+    }
+
+        .quiz-card .qinfo {
+            flex: 1;
+            min-width: 200px;
+        }
+
+            .quiz-card .qinfo h5 {
+                font-size: 16px;
+                color: #1F3B2C;
+                font-weight: 700;
+                margin: 0 0 6px;
+            }
+
+            .quiz-card .qinfo .qmeta {
+                font-size: 12.5px;
+                color: #6B7568;
+                display: flex;
+                gap: 12px;
+                flex-wrap: wrap;
+            }
+
+                .quiz-card .qinfo .qmeta i {
+                    color: #1F3B2C;
+                    margin-right: 4px;
+                }
+
+    .status-badge {
+        padding: 5px 14px;
+        border-radius: 30px;
+        font-size: 11.5px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.4px;
+    }
+
+        .status-badge.passed {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status-badge.failed {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .status-badge.available {
+            background: #cfe2ff;
+            color: #084298;
+        }
+
+        .status-badge.locked {
+            background: #e2e3e5;
+            color: #41464b;
+        }
+
+    .btn-take {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        padding: 10px 22px;
+        background: #1F3B2C;
+        color: white;
+        border-radius: 10px;
+        font-weight: 600;
+        font-size: 13.5px;
+        text-decoration: none;
+        transition: all 0.25s;
+        border: none;
+        cursor: pointer;
+    }
+
+        .btn-take:hover {
+            opacity: 0.9;
+            transform: translateY(-1px);
+            color: white;
+        }
+
+        .btn-take.disabled {
+            background: #D5CFB8;
+            color: #8A9188;
+            pointer-events: none;
+            cursor: not-allowed;
+        }
+
+    /* ✅ Attempted শো-ব্যাজ */
+    .attempted-info {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 9px 16px;
+        border-radius: 10px;
+        font-weight: 600;
+        font-size: 13px;
+        background: #F3F1E7;
+        color: #6B7568;
+        border: 1.5px dashed #D5CFB8;
+    }
+
+        .attempted-info i {
+            color: #8A9188;
+        }
+
+    /* ✅ Result দেখার বাটন */
+    .btn-view-result {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        padding: 10px 20px;
+        background: white;
+        color: #1F3B2C;
+        border: 1.5px solid #1F3B2C;
+        border-radius: 10px;
+        font-weight: 600;
+        font-size: 13.5px;
+        text-decoration: none;
+        transition: all 0.25s;
+    }
+
+        .btn-view-result:hover {
+            background: #1F3B2C;
+            color: white;
+        }
+
+    .assignment-card {
+        background: linear-gradient(135deg, #FAF9F4 0%, #FFFFFF 100%);
+        border-radius: 14px;
+        padding: 20px 22px;
+        margin-bottom: 14px;
+        border-left: 5px solid #F4C744;
+        box-shadow: 0 2px 12px rgba(0,0,0,0.05);
+    }
+
+        .assignment-card h5 {
+            color: #1F3B2C;
+            font-weight: 700;
+            margin: 0 0 8px;
+            font-size: 17px;
+        }
+
+        .assignment-card p {
+            color: #5B6B5E;
+            font-size: 13.5px;
+            margin: 0 0 12px;
+            line-height: 1.6;
+        }
+
+        .assignment-card .meta {
+            display: flex;
+            gap: 16px;
+            font-size: 12.5px;
+            color: #6B7568;
+            flex-wrap: wrap;
+        }
+
+            .assignment-card .meta i {
+                color: #D98E1F;
+                margin-right: 5px;
+            }
+
+    .empty-box {
+        text-align: center;
+        padding: 40px 20px;
+        background: white;
+        border-radius: 14px;
+        color: #8A9188;
+    }
+
+        .empty-box i {
+            font-size: 42px;
+            color: #E7E4D9;
+            display: block;
+            margin-bottom: 12px;
+        }
+
+    .back-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 9px 18px;
+        background: white;
+        color: #1F3B2C;
+        border-radius: 10px;
+        border: 1.5px solid #1F3B2C;
+        font-weight: 600;
+        font-size: 13.5px;
+        text-decoration: none;
+    }
+
+    @@media (max-width: 576px) {
+        .cq-header h1 {
+            font-size: 22px;
+        }
+
+        .quiz-card {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .btn-take, .btn-view-result {
+            width: 100%;
+            justify-content: center;
+        }
+    }
+</style>
+
+<div class="cq-wrapper">
+
+    <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+        <div class="cq-header">
+            <h1><i class="fas fa-question-circle me-2"></i>Quizzes &amp; Assignments</h1>
+            <p>Course: <strong>@course?.Title</strong></p>
+        </div>
+        <a href="/MyClass/Classroom?courseId=@course?.Id" class="back-btn">
+            <i class="fas fa-arrow-left"></i> Back to Classroom
+        </a>
+    </div>
+
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger">@TempData["Error"]</div>
+    }
+    @if (TempData["Info"] != null)
+    {
+        <div class="alert alert-info">@TempData["Info"]</div>
+    }
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success">@TempData["Success"]</div>
+    }
+
+    <!-- ===== Module Quizzes ===== -->
+    <h3 class="cq-section-title"><i class="fas fa-question-circle"></i> Module Quizzes</h3>
+
+    @if (quizzes.Count == 0)
+    {
+        <div class="empty-box">
+            <i class="fas fa-question-circle"></i>
+            <p>No quizzes published yet for this course.</p>
+        </div>
+    }
+    else
+    {
+        foreach (var q in quizzes)
+        {
+            var bestAttempt = attempts.FirstOrDefault(a => a.QuizId == q.Id);
+            bool moduleDone = completedModules.Contains(q.ModuleNumber);
+            bool alreadyAttempted = bestAttempt != null;
+
+            string badgeClass = "locked";
+            string badgeText = "Locked";
+
+            if (moduleDone)
+            {
+                if (alreadyAttempted)
+                {
+                    badgeClass = bestAttempt.Passed ? "passed" : "failed";
+                    badgeText = bestAttempt.Passed
+                        ? $"Passed ({bestAttempt.Percentage}%)"
+                        : $"Failed ({bestAttempt.Percentage}%)";
+                }
+                else
+                {
+                    badgeClass = "available";
+                    badgeText = "Available";
+                }
+            }
+
+            <div class="quiz-card">
+                <div class="qinfo">
+                    <h5>
+                        <span class="badge bg-dark me-2">Module @q.ModuleNumber</span>
+                        @q.Title
+                    </h5>
+                    <div class="qmeta">
+                        <span><i class="fas fa-list-ol"></i> @q.QuestionCount Questions</span>
+                        <span><i class="fas fa-star"></i> @q.TotalMarks Marks</span>
+                        <span><i class="fas fa-check-circle"></i> Pass: @q.PassingScore%</span>
+                        @if (q.TimeLimitMinutes > 0)
+                        {
+                            <span><i class="fas fa-clock"></i> @q.TimeLimitMinutes min</span>
+                        }
+                    </div>
+                </div>
+                <div class="d-flex align-items-center gap-2 flex-wrap">
+                    <span class="status-badge @badgeClass">@badgeText</span>
+
+                    @* ✅ শুধু প্রথমবারের জন্য "Start Quiz" দেখাবে *@
+                    @if (moduleDone && !alreadyAttempted)
+                    {
+                        <a href="/Practice/TakeQuiz?quizId=@q.Id" class="btn-take">
+                            <i class="fas fa-play"></i> Start Quiz
+                        </a>
+                    }
+                    else if (alreadyAttempted)
+                    {
+                        @* ✅ Attempt হয়ে গেলে শুধু "View Result" দেখাবে — কোনো Retake নেই *@
+                        <span class="attempted-info">
+                            <i class="fas fa-check-double"></i>
+                            Already Attempted
+                        </span>
+                        <a href="/Practice/QuizResult?attemptId=@bestAttempt.Id" class="btn-view-result">
+                            <i class="fas fa-eye"></i> View Result
+                        </a>
+                    }
+                </div>
+            </div>
+        }
+    }
+
+    <!-- ===== Milestone Assignments ===== -->
+    <h3 class="cq-section-title"><i class="fas fa-tasks"></i> Milestone Assignments</h3>
+    <p style="color:#8A9188; font-size:13px; margin-top:-10px; margin-bottom:14px;">
+        প্রতি <strong>@modulesPerMilestone</strong>টি Module Complete হলে একটি Assignment Available হবে।
+    </p>
+
+    @if (assignments.Count == 0)
+    {
+        <div class="empty-box">
+            <i class="fas fa-tasks"></i>
+            <p>No assignments published yet for this course.</p>
+        </div>
+    }
+    else
+    {
+        foreach (var a in assignments)
+        {
+            bool available = completedMilestones.Contains(a.MilestoneNumber);
+            <div class="assignment-card" style="@(available ? "" : "opacity:0.5; border-left-color:#D5CFB8;")">
+                <h5>
+                    <span class="badge bg-warning text-dark me-2">Milestone @a.MilestoneNumber</span>
+                    @a.Title
+                    @if (!available)
+                    {
+                        <i class="fas fa-lock ms-2" style="color:#8A9188; font-size:14px;"></i>
+                    }
+                </h5>
+                @if (!string.IsNullOrEmpty(a.Description))
+                {
+                    <p>@a.Description</p>
+                }
+                @if (available && !string.IsNullOrEmpty(a.Instructions))
+                {
+                    <div style="background:#FFF9E6; padding:14px 16px; border-radius:8px; margin-bottom:12px; font-size:13px; color:#5B6B5E;">
+                        <strong style="color:#1F3B2C;"><i class="fas fa-info-circle me-1"></i>Instructions:</strong><br />
+                        @a.Instructions
+                    </div>
+                }
+                <div class="meta">
+                    <span><i class="fas fa-star"></i> @a.TotalMarks Marks</span>
+                    <span><i class="fas fa-clock"></i> Due: @a.DueDays days</span>
+                    @if (!available)
+                    {
+                        <span style="color:#D98E1F;"><i class="fas fa-lock"></i> Complete Milestone @a.MilestoneNumber to unlock</span>
+                    }
+                </div>
+            </div>
+        }
+    }
+
+</div>

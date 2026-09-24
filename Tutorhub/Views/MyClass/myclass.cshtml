@@ -272,9 +272,9 @@
         <p>All the courses you've enrolled in — continue your learning journey</p>
     </div>
 
-    @if (ViewBag.Error != null)
+    @if (TempData["Error"] != null)
     {
-        <div class="alert alert-danger" style="max-width:600px; margin:0 auto 20px;">@ViewBag.Error</div>
+        <div class="alert alert-danger" style="max-width:600px; margin:0 auto 20px;">@TempData["Error"]</div>
     }
 
     @if (Model == null || Model.Count == 0)
@@ -306,7 +306,7 @@
             @foreach (var course in Model)
             {
                 var image = string.IsNullOrEmpty(course.CourseImage)
-                    ? "https://i.ibb.co/fd9sY88Y/IMG-6916-1.png"
+                    ? "https://i.ibb.co/fd9s88Y/IMG-6916-1.png"
                     : course.CourseImage;
 
                 <div class="mc-card">

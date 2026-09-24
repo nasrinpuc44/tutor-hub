@@ -1,0 +1,1124 @@
+﻿@model Tutorbub.Models.CourseQuizAssignmentViewModel
+
+@{
+    ViewData["Title"] = "Quiz & Assignment - " + Model.CourseTitle;
+    Layout = "_Layout";
+}
+
+<style>
+    .admin-sidebar {
+        position: fixed;
+        top: 80px;
+        left: 0;
+        bottom: 0;
+        width: 250px;
+        background-color: #1F3B2C;
+        color: white;
+        padding: 20px 0;
+        overflow-y: auto;
+        z-index: 100;
+        transition: transform 0.3s ease;
+    }
+
+    .admin-sidebar-brand {
+        padding: 0 20px 20px 20px;
+        border-bottom: 1px solid rgba(255,255,255,0.1);
+        margin-bottom: 15px;
+    }
+
+    .admin-sidebar-brand h4 {
+        color: #F3F1E7;
+        font-weight: 600;
+        margin: 0;
+    }
+
+    .admin-sidebar-brand small {
+        color: #8A9188;
+        font-size: 12px;
+    }
+
+    .admin-sidebar-menu {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    .admin-sidebar-menu li a {
+        display: flex;
+        align-items: center;
+        padding: 12px 20px;
+        color: #C7D0C9;
+        text-decoration: none;
+        transition: all 0.3s ease;
+        border-left: 3px solid transparent;
+        font-size: 14px;
+        cursor: pointer;
+    }
+
+    .admin-sidebar-menu li a:hover,
+    .admin-sidebar-menu li a.active {
+        background-color: rgba(255,255,255,0.08);
+        color: #ffffff;
+        border-left-color: #F4C744;
+    }
+
+    .admin-sidebar-menu li a i {
+        width: 24px;
+        margin-right: 10px;
+        font-size: 16px;
+        text-align: center;
+    }
+
+    .admin-main-content {
+        margin-left: 250px;
+        padding: 20px;
+        min-height: calc(100vh - 80px);
+    }
+
+    .sidebar-toggle {
+        display: none;
+        position: fixed;
+        top: 90px;
+        left: 15px;
+        z-index: 101;
+        background-color: #1F3B2C;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        padding: 10px 12px;
+        font-size: 18px;
+        cursor: pointer;
+    }
+
+    .sidebar-overlay {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: rgba(0,0,0,0.5);
+        z-index: 99;
+    }
+
+    .sidebar-overlay.active {
+        display: block;
+    }
+
+    .page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+        flex-wrap: wrap;
+        gap: 12px;
+    }
+
+    .page-header h2 {
+        color: #1F3B2C;
+        margin: 0;
+        font-size: 24px;
+        font-weight: 700;
+    }
+
+    .page-header .course-subtitle {
+        color: #6B7568;
+        font-size: 14px;
+        margin-top: 4px;
+    }
+
+    .page-header .course-subtitle strong {
+        color: #1F3B2C;
+    }
+
+    .btn-back {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 10px 18px;
+        background: white;
+        color: #1F3B2C;
+        border: 1.5px solid #1F3B2C;
+        border-radius: 10px;
+        font-weight: 600;
+        font-size: 13.5px;
+        text-decoration: none;
+        transition: all 0.2s;
+    }
+
+    .btn-back:hover {
+        background: #1F3B2C;
+        color: white;
+    }
+
+    .info-card {
+        background: linear-gradient(135deg, #FFF9E6 0%, #FFFAF0 100%);
+        border-radius: 14px;
+        padding: 16px 20px;
+        border-left: 5px solid #F4C744;
+        margin-bottom: 22px;
+        font-size: 13.5px;
+        color: #4B5648;
+        line-height: 1.6;
+    }
+
+    .info-card i.fa-info-circle {
+        color: #D98E1F;
+        margin-right: 6px;
+        font-size: 16px;
+    }
+
+    .info-card strong {
+        color: #1F3B2C;
+    }
+
+    .config-card {
+        background: white;
+        border-radius: 14px;
+        box-shadow: 0 4px 16px rgba(0,0,0,0.06);
+        padding: 20px 22px;
+        margin-bottom: 22px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 16px;
+        border: 1px solid rgba(0,0,0,0.04);
+    }
+
+    .config-card h6 {
+        color: #1F3B2C;
+        font-weight: 700;
+        margin: 0 0 4px;
+        font-size: 15px;
+    }
+
+    .config-card small {
+        color: #8A9188;
+        font-size: 12.5px;
+    }
+
+    .config-input-group {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .config-input-group input {
+        width: 90px;
+        padding: 10px 14px;
+        border: 1.5px solid #E5E1D3;
+        border-radius: 10px;
+        font-size: 14px;
+        font-weight: 600;
+        text-align: center;
+        background: #FAF9F4;
+        color: #1F3B2C;
+        outline: none;
+        transition: all 0.2s;
+    }
+
+    .config-input-group input:focus {
+        border-color: #1F3B2C;
+        background: white;
+        box-shadow: 0 0 0 3px rgba(31,59,44,0.08);
+    }
+
+    .tabs-nav {
+        display: flex;
+        gap: 4px;
+        border-bottom: 2px solid #E5E1D3;
+        margin-bottom: 22px;
+        overflow-x: auto;
+    }
+
+    .tab-btn {
+        background: none;
+        border: none;
+        padding: 12px 22px;
+        font-size: 14px;
+        font-weight: 700;
+        color: #6B7568;
+        cursor: pointer;
+        border-bottom: 3px solid transparent;
+        margin-bottom: -2px;
+        transition: all 0.2s;
+        white-space: nowrap;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .tab-btn:hover {
+        color: #1F3B2C;
+    }
+
+    .tab-btn.active {
+        color: #1F3B2C;
+        border-bottom-color: #1F3B2C;
+    }
+
+    .tab-btn i {
+        font-size: 14px;
+    }
+
+    .tab-content {
+        display: none;
+    }
+
+    .tab-content.active {
+        display: block;
+    }
+
+    .add-btn-wrap {
+        display: flex;
+        justify-content: flex-end;
+        margin-bottom: 16px;
+    }
+
+    .btn-primary-custom {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 11px 24px;
+        background: #1F3B2C;
+        color: white;
+        border: none;
+        border-radius: 10px;
+        font-weight: 600;
+        font-size: 13.5px;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+
+    .btn-primary-custom:hover {
+        opacity: 0.9;
+        transform: translateY(-1px);
+        box-shadow: 0 6px 18px rgba(31,59,44,0.22);
+        color: white;
+    }
+
+    .item-row {
+        background: white;
+        border-radius: 12px;
+        padding: 16px 18px;
+        margin-bottom: 10px;
+        display: flex;
+        gap: 14px;
+        align-items: center;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.04);
+        border: 1px solid rgba(0,0,0,0.05);
+        flex-wrap: wrap;
+        transition: box-shadow 0.2s;
+    }
+
+    .item-row:hover {
+        box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+    }
+
+    .item-row .item-info {
+        flex: 1;
+        min-width: 200px;
+    }
+
+    .item-row .item-info h5 {
+        font-size: 15px;
+        font-weight: 700;
+        color: #1F3B2C;
+        margin: 0 0 8px;
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 8px;
+        line-height: 1.4;
+    }
+
+    .item-row .item-info .meta {
+        font-size: 12.5px;
+        color: #6B7568;
+        display: flex;
+        gap: 14px;
+        flex-wrap: wrap;
+    }
+
+    .item-row .item-info .meta i {
+        color: #1F3B2C;
+        margin-right: 5px;
+    }
+
+    .item-row .item-actions {
+        display: flex;
+        gap: 6px;
+        flex-wrap: wrap;
+    }
+
+    .pill {
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 10.5px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        display: inline-block;
+    }
+
+    .pill.published {
+        background: #d4edda;
+        color: #155724;
+    }
+
+    .pill.draft {
+        background: #fff3cd;
+        color: #856404;
+    }
+
+    .module-badge {
+        background: #1F3B2C;
+        color: white;
+        padding: 3px 10px;
+        border-radius: 6px;
+        font-size: 11px;
+        font-weight: 700;
+    }
+
+    .milestone-badge {
+        background: #8e63d9;
+        color: white;
+        padding: 3px 10px;
+        border-radius: 6px;
+        font-size: 11px;
+        font-weight: 700;
+    }
+
+    .btn-sm {
+        padding: 7px 14px;
+        border-radius: 8px;
+        font-size: 12.5px;
+        font-weight: 600;
+        border: none;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        text-decoration: none;
+        transition: all 0.2s;
+    }
+
+    .btn-sm:hover {
+        transform: translateY(-1px);
+    }
+
+    .btn-questions {
+        background: #0d6efd;
+        color: white;
+    }
+
+    .btn-questions:hover {
+        background: #0b5ed7;
+        color: white;
+    }
+
+    .btn-publish {
+        background: #2ecc71;
+        color: white;
+    }
+
+    .btn-publish:hover {
+        background: #27ae60;
+        color: white;
+    }
+
+    .btn-unpublish {
+        background: #f39c12;
+        color: white;
+    }
+
+    .btn-unpublish:hover {
+        background: #e67e22;
+        color: white;
+    }
+
+    .btn-del {
+        background: white;
+        color: #e74c3c;
+        border: 1.5px solid #e74c3c;
+    }
+
+    .btn-del:hover {
+        background: #f8d7da;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 50px 20px;
+        background: white;
+        border-radius: 14px;
+        box-shadow: 0 2px 12px rgba(0,0,0,0.04);
+    }
+
+    .empty-state i {
+        font-size: 52px;
+        color: #E7E4D9;
+        display: block;
+        margin-bottom: 14px;
+    }
+
+    .empty-state h5 {
+        color: #1F3B2C;
+        font-size: 17px;
+        font-weight: 700;
+        margin: 0 0 6px;
+    }
+
+    .empty-state p {
+        color: #8A9188;
+        font-size: 13.5px;
+        margin: 0;
+    }
+
+    .modal-content {
+        background-color: #ffffff !important;
+        border-radius: 16px !important;
+        border: none !important;
+        box-shadow: 0 20px 60px rgba(0,0,0,0.15) !important;
+    }
+
+    .modal-header {
+        background-color: #1F3B2C !important;
+        color: white !important;
+        border-radius: 16px 16px 0 0 !important;
+        padding: 16px 22px !important;
+        border-bottom: none !important;
+    }
+
+    .modal-header .modal-title {
+        font-size: 16px;
+        font-weight: 700;
+    }
+
+    .modal-header .btn-close {
+        filter: brightness(0) invert(1) !important;
+        opacity: 0.8;
+    }
+
+    .modal-body {
+        padding: 22px !important;
+    }
+
+    .modal-body label {
+        font-weight: 700;
+        color: #1F3B2C;
+        font-size: 13px;
+        margin-bottom: 6px;
+        display: block;
+    }
+
+    .modal-body .form-control,
+    .modal-body .form-select {
+        border-radius: 10px;
+        border: 1.5px solid #E5E1D3;
+        padding: 10px 14px;
+        font-size: 14px;
+        background: #FAF9F4;
+        transition: all 0.2s;
+    }
+
+    .modal-body .form-control:focus,
+    .modal-body .form-select:focus {
+        border-color: #1F3B2C;
+        background: white;
+        box-shadow: 0 0 0 3px rgba(31,59,44,0.08);
+    }
+
+    .modal-body .form-check-input {
+        accent-color: #1F3B2C;
+        transform: scale(1.15);
+    }
+
+    .modal-body .form-check-label {
+        font-weight: 500;
+        font-size: 13.5px;
+        color: #4B5648;
+        margin-left: 6px;
+    }
+
+    .modal-footer {
+        padding: 14px 22px !important;
+        border-top: 1px solid #f0f0f0 !important;
+        background: #FAF9F4 !important;
+        border-radius: 0 0 16px 16px !important;
+    }
+
+    .modal-footer .btn {
+        padding: 10px 22px;
+        border-radius: 10px;
+        font-weight: 600;
+        font-size: 13.5px;
+    }
+
+    @@media (max-width: 992px) {
+        .admin-sidebar {
+            transform: translateX(-100%);
+        }
+
+        .admin-sidebar.open {
+            transform: translateX(0);
+        }
+
+        .sidebar-toggle {
+            display: block;
+        }
+
+        .admin-main-content {
+            margin-left: 0;
+            padding: 20px 15px;
+        }
+    }
+
+    @@media (max-width: 576px) {
+        .page-header h2 {
+            font-size: 20px;
+        }
+
+        .item-row {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        .item-row .item-actions {
+            justify-content: flex-end;
+        }
+
+        .config-card {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        .config-input-group {
+            justify-content: space-between;
+        }
+    }
+</style>
+
+<button class="sidebar-toggle" id="sidebarToggle"><i class="fas fa-bars"></i></button>
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+<div class="admin-sidebar" id="sidebar">
+    <div class="admin-sidebar-brand">
+        <h4><i class="fas fa-shield-alt me-2"></i>Admin Panel</h4>
+        <small>Smart Tutor Hub</small>
+    </div>
+    <ul class="admin-sidebar-menu">
+        <li><a asp-controller="Admin" asp-action="Dashboard"><i class="fas fa-chart-pie"></i> Dashboard</a></li>
+        <li><a asp-controller="Admin" asp-action="TeacherRequests"><i class="fas fa-user-graduate"></i> Teacher Requests</a></li>
+        <li><a asp-controller="Admin" asp-action="Payments"><i class="fas fa-money-check-alt"></i> Payments</a></li>
+        <li><a asp-controller="Admin" asp-action="AddCourse"><i class="fas fa-plus-circle"></i> Add Course</a></li>
+        <li><a asp-controller="Admin" asp-action="ManageCourses"><i class="fas fa-tasks"></i> Manage Courses</a></li>
+        <li><a asp-controller="Admin" asp-action="QuizAssignmentOverview" class="active"><i class="fas fa-question-circle"></i> Quiz & Assignment</a></li>
+        <li><a asp-controller="Admin" asp-action="ManageNotices"><i class="fas fa-newspaper"></i> News & Announcements</a></li>
+        <li style="border-top: 1px solid rgba(255,255,255,0.05); margin-top: 10px; padding-top: 10px;">
+            <form method="post" asp-controller="Account" asp-action="Logout" id="logoutForm">
+                @Html.AntiForgeryToken()
+                <a href="#" onclick="document.getElementById('logoutForm').submit(); return false;" style="color: #e74c3c;"><i class="fas fa-sign-out-alt"></i> Logout</a>
+            </form>
+        </li>
+    </ul>
+</div>
+
+<div class="admin-main-content">
+
+    <div class="page-header">
+        <div>
+            <h2><i class="fas fa-question-circle me-2"></i>Quiz & Assignment</h2>
+            <div class="course-subtitle">
+                <i class="fas fa-book me-1"></i> Course: <strong>@Model.CourseTitle</strong>
+            </div>
+        </div>
+        <a asp-controller="Admin" asp-action="QuizAssignmentOverview" class="btn-back">
+            <i class="fas fa-arrow-left"></i> Back to Courses
+        </a>
+    </div>
+
+    @Html.AntiForgeryToken()
+
+    <div class="info-card">
+        <i class="fas fa-info-circle"></i>
+        <strong>System Flow:</strong>
+        প্রতি Module Complete → Module Quiz Available |
+        প্রতি <strong>@Model.ModulesPerMilestone</strong>টি Module Complete → Milestone Complete → Milestone Assignment Available
+    </div>
+
+    <div class="config-card">
+        <div>
+            <h6><i class="fas fa-cog me-2"></i>Milestone Configuration</h6>
+            <small>কতটি Module Complete হলে ১টি Milestone Complete হবে?</small>
+        </div>
+        <div class="config-input-group">
+            <input type="number" id="modulesPerMilestone" value="@Model.ModulesPerMilestone" min="1" max="20" />
+            <button class="btn-primary-custom" onclick="saveMilestoneConfig()">
+                <i class="fas fa-save"></i> Save
+            </button>
+        </div>
+    </div>
+
+    <div class="tabs-nav">
+        <button class="tab-btn active" data-tab="quizzes" onclick="switchTab('quizzes')">
+            <i class="fas fa-question-circle"></i> Module Quizzes
+            <span class="badge bg-secondary ms-1" style="font-size:10px;">@Model.Quizzes.Count</span>
+        </button>
+        <button class="tab-btn" data-tab="assignments" onclick="switchTab('assignments')">
+            <i class="fas fa-tasks"></i> Milestone Assignments
+            <span class="badge bg-secondary ms-1" style="font-size:10px;">@Model.Assignments.Count</span>
+        </button>
+    </div>
+
+    <div class="tab-content active" id="tab-quizzes">
+        <div class="add-btn-wrap">
+            <button class="btn-primary-custom" onclick="openQuizModal()">
+                <i class="fas fa-plus-circle"></i> Create New Quiz
+            </button>
+        </div>
+
+        @if (Model.Quizzes == null || Model.Quizzes.Count == 0)
+        {
+            <div class="empty-state">
+                <i class="fas fa-question-circle"></i>
+                <h5>No quizzes yet</h5>
+                <p>প্রতিটি Module-এর জন্য Quiz তৈরি করুন যাতে student module complete করার পর quiz দিতে পারে।</p>
+            </div>
+        }
+        else
+        {
+            foreach (var q in Model.Quizzes)
+            {
+                <div class="item-row" id="quiz-@q.Id">
+                    <div class="item-info">
+                        <h5>
+                            <span class="module-badge">Module @q.ModuleNumber</span>
+                            @q.Title
+                            <span class="pill @(q.IsPublished ? "published" : "draft")">
+                                @(q.IsPublished ? "Published" : "Draft")
+                            </span>
+                        </h5>
+                        <div class="meta">
+                            <span><i class="fas fa-list-ol"></i> @q.QuestionCount Questions</span>
+                            <span><i class="fas fa-star"></i> @q.TotalMarks Marks</span>
+                            <span><i class="fas fa-check-circle"></i> Pass: @q.PassingScore%</span>
+                            @if (q.TimeLimitMinutes > 0)
+                            {
+                                <span><i class="fas fa-clock"></i> @q.TimeLimitMinutes min</span>
+                            }
+                        </div>
+                    </div>
+                    <div class="item-actions">
+                        <a href="/Admin/ManageQuizQuestions?quizId=@q.Id" class="btn-sm btn-questions">
+                            <i class="fas fa-list"></i> Questions
+                        </a>
+                        @if (q.IsPublished)
+                        {
+                            <button class="btn-sm btn-unpublish" onclick="toggleQuizPublish(@q.Id, false)">
+                                <i class="fas fa-eye-slash"></i> Unpublish
+                            </button>
+                        }
+                        else
+                        {
+                            <button class="btn-sm btn-publish" onclick="toggleQuizPublish(@q.Id, true)">
+                                <i class="fas fa-check"></i> Publish
+                            </button>
+                        }
+                        <button class="btn-sm btn-del" onclick="deleteQuiz(@q.Id, '@Html.Raw(System.Text.Encodings.Web.JavaScriptEncoder.Default.Encode(q.Title))')">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                </div>
+            }
+        }
+    </div>
+
+    <div class="tab-content" id="tab-assignments">
+        <div class="add-btn-wrap">
+            <button class="btn-primary-custom" onclick="openAssignmentModal()">
+                <i class="fas fa-plus-circle"></i> Create New Assignment
+            </button>
+        </div>
+
+        @if (Model.Assignments == null || Model.Assignments.Count == 0)
+        {
+            <div class="empty-state">
+                <i class="fas fa-tasks"></i>
+                <h5>No assignments yet</h5>
+                <p>প্রতিটি Milestone-এর জন্য Assignment তৈরি করুন — Milestone Complete হলে student এটা দেখতে পাবে।</p>
+            </div>
+        }
+        else
+        {
+            foreach (var a in Model.Assignments)
+            {
+                <div class="item-row" id="assignment-@a.Id">
+                    <div class="item-info">
+                        <h5>
+                            <span class="milestone-badge">Milestone @a.MilestoneNumber</span>
+                            @a.Title
+                            <span class="pill @(a.IsPublished ? "published" : "draft")">
+                                @(a.IsPublished ? "Published" : "Draft")
+                            </span>
+                        </h5>
+                        <div class="meta">
+                            <span><i class="fas fa-star"></i> @a.TotalMarks Marks</span>
+                            <span><i class="fas fa-clock"></i> Due: @a.DueDays days</span>
+                        </div>
+                    </div>
+                    <div class="item-actions">
+                        @if (a.IsPublished)
+                        {
+                            <button class="btn-sm btn-unpublish" onclick="toggleAssignmentPublish(@a.Id, false)">
+                                <i class="fas fa-eye-slash"></i> Unpublish
+                            </button>
+                        }
+                        else
+                        {
+                            <button class="btn-sm btn-publish" onclick="toggleAssignmentPublish(@a.Id, true)">
+                                <i class="fas fa-check"></i> Publish
+                            </button>
+                        }
+                        <button class="btn-sm btn-del" onclick="deleteAssignment(@a.Id, '@Html.Raw(System.Text.Encodings.Web.JavaScriptEncoder.Default.Encode(a.Title))')">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                </div>
+            }
+        }
+    </div>
+
+</div>
+
+<div class="modal fade" id="quizModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="fas fa-question-circle me-2"></i>Create Module Quiz</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="quizCourseId" value="@Model.CourseId" />
+
+                <div class="mb-3">
+                    <label>Module Number <span style="color:#e74c3c;">*</span></label>
+                    <input type="number" id="quizModuleNumber" class="form-control" value="1" min="1" />
+                </div>
+
+                <div class="mb-3">
+                    <label>Quiz Title <span style="color:#e74c3c;">*</span></label>
+                    <input type="text" id="quizTitle" class="form-control" placeholder="e.g. Module 1 - Basics Quiz" maxlength="200" />
+                </div>
+
+                <div class="mb-3">
+                    <label>Description <span style="color:#8A9188; font-weight:400;">(Optional)</span></label>
+                    <textarea id="quizDescription" class="form-control" rows="2"></textarea>
+                </div>
+
+                <div class="row">
+                    <div class="col-6 mb-3">
+                        <label>Passing Score (%)</label>
+                        <input type="number" id="quizPassing" class="form-control" value="60" min="0" max="100" />
+                    </div>
+                    <div class="col-6 mb-3">
+                        <label>Time Limit (min)</label>
+                        <input type="number" id="quizTimeLimit" class="form-control" value="0" min="0" />
+                    </div>
+                </div>
+
+                <div class="form-check mt-2">
+                    <input class="form-check-input" type="checkbox" id="quizPublished" />
+                    <label class="form-check-label" for="quizPublished">
+                        Publish immediately
+                    </label>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-success" onclick="createQuiz()" style="background:#1F3B2C; border-color:#1F3B2C;">
+                    <i class="fas fa-save me-1"></i> Create Quiz
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="assignmentModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="fas fa-tasks me-2"></i>Create Milestone Assignment</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label>Milestone Number <span style="color:#e74c3c;">*</span></label>
+                    <input type="number" id="assignMilestoneNum" class="form-control" value="1" min="1" />
+                </div>
+
+                <div class="mb-3">
+                    <label>Assignment Title <span style="color:#e74c3c;">*</span></label>
+                    <input type="text" id="assignTitle" class="form-control" maxlength="200" />
+                </div>
+
+                <div class="mb-3">
+                    <label>Description <span style="color:#8A9188; font-weight:400;">(Optional)</span></label>
+                    <textarea id="assignDescription" class="form-control" rows="2"></textarea>
+                </div>
+
+                <div class="mb-3">
+                    <label>Instructions <span style="color:#8A9188; font-weight:400;">(For students)</span></label>
+                    <textarea id="assignInstructions" class="form-control" rows="4"></textarea>
+                </div>
+
+                <div class="row">
+                    <div class="col-6 mb-3">
+                        <label>Total Marks</label>
+                        <input type="number" id="assignMarks" class="form-control" value="100" min="1" />
+                    </div>
+                    <div class="col-6 mb-3">
+                        <label>Due Days</label>
+                        <input type="number" id="assignDays" class="form-control" value="7" min="1" />
+                    </div>
+                </div>
+
+                <div class="form-check mt-2">
+                    <input class="form-check-input" type="checkbox" id="assignPublished" />
+                    <label class="form-check-label" for="assignPublished">
+                        Publish immediately
+                    </label>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-success" onclick="createAssignment()" style="background:#1F3B2C; border-color:#1F3B2C;">
+                    <i class="fas fa-save me-1"></i> Create Assignment
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        const COURSE_ID = @Model.CourseId;
+
+        document.getElementById('sidebarToggle')?.addEventListener('click', function () {
+            document.getElementById('sidebar').classList.toggle('open');
+            document.getElementById('sidebarOverlay').classList.toggle('active');
+        });
+        document.getElementById('sidebarOverlay')?.addEventListener('click', function () {
+            document.getElementById('sidebar').classList.remove('open');
+            document.getElementById('sidebarOverlay').classList.remove('active');
+        });
+
+        function getToken() {
+            const t = document.querySelector('input[name="__RequestVerificationToken"]');
+            return t ? t.value : '';
+        }
+
+        function switchTab(tab) {
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.querySelector('.tab-btn[data-tab="' + tab + '"]')?.classList.add('active');
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            document.getElementById('tab-' + tab)?.classList.add('active');
+        }
+
+        function openQuizModal() {
+            document.getElementById('quizModuleNumber').value = 1;
+            document.getElementById('quizTitle').value = '';
+            document.getElementById('quizDescription').value = '';
+            document.getElementById('quizPassing').value = 60;
+            document.getElementById('quizTimeLimit').value = 0;
+            document.getElementById('quizPublished').checked = false;
+            new bootstrap.Modal(document.getElementById('quizModal')).show();
+        }
+
+        function createQuiz() {
+            const moduleNumber = parseInt(document.getElementById('quizModuleNumber').value) || 0;
+            const title = document.getElementById('quizTitle').value.trim();
+            const description = document.getElementById('quizDescription').value.trim();
+            const passingScore = parseInt(document.getElementById('quizPassing').value) || 60;
+            const timeLimit = parseInt(document.getElementById('quizTimeLimit').value) || 0;
+            const isPublished = document.getElementById('quizPublished').checked;
+
+            if (moduleNumber < 1) { alert('Module Number must be at least 1.'); return; }
+            if (!title) { alert('Quiz title is required.'); return; }
+
+            const formData = new FormData();
+            formData.append('courseId', COURSE_ID);
+            formData.append('moduleNumber', moduleNumber);
+            formData.append('title', title);
+            formData.append('description', description);
+            formData.append('passingScore', passingScore);
+            formData.append('timeLimitMinutes', timeLimit);
+            formData.append('isPublished', isPublished);
+            formData.append('__RequestVerificationToken', getToken());
+
+            const btn = document.querySelector('#quizModal .btn-success');
+            const originalHtml = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> Creating...';
+            btn.disabled = true;
+
+            fetch('/Admin/CreateQuiz', { method: 'POST', body: formData })
+                .then(r => r.json())
+                .then(data => {
+                    btn.innerHTML = originalHtml;
+                    btn.disabled = false;
+                    alert(data.message || 'Done');
+                    if (data.success) location.reload();
+                })
+                .catch(err => {
+                    btn.innerHTML = originalHtml;
+                    btn.disabled = false;
+                    alert('Error: ' + err.message);
+                });
+        }
+
+        function toggleQuizPublish(id, isPublished) {
+            const action = isPublished ? 'publish' : 'unpublish';
+            if (!confirm('Are you sure you want to ' + action + ' this quiz?')) return;
+
+            const formData = new FormData();
+            formData.append('id', id);
+            formData.append('isPublished', isPublished);
+            formData.append('__RequestVerificationToken', getToken());
+
+            fetch('/Admin/ToggleQuizPublish', { method: 'POST', body: formData })
+                .then(r => r.json())
+                .then(data => {
+                    alert(data.message);
+                    if (data.success) location.reload();
+                })
+                .catch(() => alert('Error updating quiz status.'));
+        }
+
+        function deleteQuiz(id, title) {
+            if (!confirm('Delete quiz "' + title + '"?\n\nThis will remove all its questions permanently.')) return;
+
+            const formData = new FormData();
+            formData.append('id', id);
+            formData.append('__RequestVerificationToken', getToken());
+
+            fetch('/Admin/DeleteQuiz', { method: 'POST', body: formData })
+                .then(r => r.json())
+                .then(data => {
+                    alert(data.message);
+                    if (data.success) location.reload();
+                })
+                .catch(() => alert('Error deleting quiz.'));
+        }
+
+        function openAssignmentModal() {
+            document.getElementById('assignMilestoneNum').value = 1;
+            document.getElementById('assignTitle').value = '';
+            document.getElementById('assignDescription').value = '';
+            document.getElementById('assignInstructions').value = '';
+            document.getElementById('assignMarks').value = 100;
+            document.getElementById('assignDays').value = 7;
+            document.getElementById('assignPublished').checked = false;
+            new bootstrap.Modal(document.getElementById('assignmentModal')).show();
+        }
+
+        function createAssignment() {
+            const milestoneNumber = parseInt(document.getElementById('assignMilestoneNum').value) || 0;
+            const title = document.getElementById('assignTitle').value.trim();
+            const description = document.getElementById('assignDescription').value.trim();
+            const instructions = document.getElementById('assignInstructions').value.trim();
+            const totalMarks = parseInt(document.getElementById('assignMarks').value) || 100;
+            const dueDays = parseInt(document.getElementById('assignDays').value) || 7;
+            const isPublished = document.getElementById('assignPublished').checked;
+
+            if (milestoneNumber < 1) { alert('Milestone Number must be at least 1.'); return; }
+            if (!title) { alert('Assignment title is required.'); return; }
+
+            const formData = new FormData();
+            formData.append('courseId', COURSE_ID);
+            formData.append('milestoneNumber', milestoneNumber);
+            formData.append('title', title);
+            formData.append('description', description);
+            formData.append('instructions', instructions);
+            formData.append('totalMarks', totalMarks);
+            formData.append('dueDays', dueDays);
+            formData.append('isPublished', isPublished);
+            formData.append('__RequestVerificationToken', getToken());
+
+            const btn = document.querySelector('#assignmentModal .btn-success');
+            const originalHtml = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> Creating...';
+            btn.disabled = true;
+
+            fetch('/Admin/CreateAssignment', { method: 'POST', body: formData })
+                .then(r => r.json())
+                .then(data => {
+                    btn.innerHTML = originalHtml;
+                    btn.disabled = false;
+                    alert(data.message || 'Done');
+                    if (data.success) location.reload();
+                })
+                .catch(err => {
+                    btn.innerHTML = originalHtml;
+                    btn.disabled = false;
+                    alert('Error: ' + err.message);
+                });
+        }
+
+        function toggleAssignmentPublish(id, isPublished) {
+            const action = isPublished ? 'publish' : 'unpublish';
+            if (!confirm('Are you sure you want to ' + action + ' this assignment?')) return;
+
+            const formData = new FormData();
+            formData.append('id', id);
+            formData.append('isPublished', isPublished);
+            formData.append('__RequestVerificationToken', getToken());
+
+            fetch('/Admin/ToggleAssignmentPublish', { method: 'POST', body: formData })
+                .then(r => r.json())
+                .then(data => {
+                    alert(data.message);
+                    if (data.success) location.reload();
+                })
+                .catch(() => alert('Error updating assignment status.'));
+        }
+
+        function deleteAssignment(id, title) {
+            if (!confirm('Delete assignment "' + title + '"?')) return;
+
+            const formData = new FormData();
+            formData.append('id', id);
+            formData.append('__RequestVerificationToken', getToken());
+
+            fetch('/Admin/DeleteAssignment', { method: 'POST', body: formData })
+                .then(r => r.json())
+                .then(data => {
+                    alert(data.message);
+                    if (data.success) location.reload();
+                })
+                .catch(() => alert('Error deleting assignment.'));
+        }
+
+        function saveMilestoneConfig() {
+            const value = parseInt(document.getElementById('modulesPerMilestone').value) || 0;
+
+            if (value < 1 || value > 20) {
+                alert('Modules per milestone must be between 1 and 20.');
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('courseId', COURSE_ID);
+            formData.append('modulesPerMilestone', value);
+            formData.append('__RequestVerificationToken', getToken());
+
+            fetch('/Admin/SetModulesPerMilestone', { method: 'POST', body: formData })
+                .then(r => r.json())
+                .then(data => {
+                    alert(data.message);
+                    if (data.success) location.reload();
+                })
+                .catch(() => alert('Error saving configuration.'));
+        }
+    </script>
+}

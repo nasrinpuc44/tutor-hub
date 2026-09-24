@@ -1,4 +1,6 @@
-﻿<!DOCTYPE html>
+﻿@* 📁 Views/Shared/_Layout.cshtml *@
+@* লোকেশন: Tutorbub/Views/Shared/_Layout.cshtml *@
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
@@ -10,598 +12,619 @@
     <script src="https://cdn.tailwindcss.com"></script>
 
     <script>
-            tailwind.config = {
-                theme: {
-                    extend: {
-                        colors: {
-                            primary: '#1F3B2C',
-                            cream: '#F3F1E7'
-                        },
-                        fontFamily: {
-                            serif: ['Georgia', 'Cambria', '"Times New Roman"', 'Times', 'serif']
-                        }
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#1F3B2C',
+                        cream: '#F3F1E7'
+                    },
+                    fontFamily: {
+                        serif: ['Georgia', 'Cambria', '"Times New Roman"', 'Times', 'serif']
                     }
                 }
             }
+        }
     </script>
 
     <script>
-            if (!('PageSwapEvent' in window)) document.documentElement.classList.add('no-vt');
+        if (!('PageSwapEvent' in window)) document.documentElement.classList.add('no-vt');
     </script>
 
     <script type="speculationrules">
-            {
-                "prefetch": [
-                    {
-                        "where": {
-                            "and": [
-                                { "href_matches": "/*" },
-                                { "not": { "selector_matches": "[data-no-prefetch], [download], [target=_blank]" } }
-                            ]
-                        },
-                        "eagerness": "moderate"
-                    }
-                ]
-            }
+        {
+            "prefetch": [
+                {
+                    "where": {
+                        "and": [
+                            { "href_matches": "/*" },
+                            { "not": { "selector_matches": "[data-no-prefetch], [download], [target=_blank]" } }
+                        ]
+                    },
+                    "eagerness": "moderate"
+                }
+            ]
+        }
     </script>
 
     <style>
-            body {
-                background-color: #F3F1E7;
-            }
+        body {
+            background-color: #F3F1E7;
+        }
 
-            .navbar-custom {
-                background-color: #F3F1E7 !important;
-                border-bottom: 1px solid rgba(0,0,0,0.05);
-            }
+        .navbar-custom {
+            background-color: #F3F1E7 !important;
+            border-bottom: 1px solid rgba(0,0,0,0.05);
+        }
 
-            .btn-primary-custom {
-                background-color: #1F3B2C !important;
-                border-color: #1F3B2C !important;
-            }
+        .btn-primary-custom {
+            background-color: #1F3B2C !important;
+            border-color: #1F3B2C !important;
+        }
 
-                .btn-primary-custom:hover {
-                    background-color: #152a1f !important;
-                    border-color: #152a1f !important;
-                }
+        .btn-primary-custom:hover {
+            background-color: #152a1f !important;
+            border-color: #152a1f !important;
+        }
 
-            .text-primary-custom {
-                color: #1F3B2C !important;
-            }
+        .text-primary-custom {
+            color: #1F3B2C !important;
+        }
 
-            .bg-primary-custom {
-                background-color: #1F3B2C !important;
-            }
+        .bg-primary-custom {
+            background-color: #1F3B2C !important;
+        }
 
-            .border-primary-custom {
-                border-color: #1F3B2C !important;
-            }
+        .border-primary-custom {
+            border-color: #1F3B2C !important;
+        }
 
-            .footer-custom {
-                background-color: #F3F1E7;
-                border-top: 1px solid rgba(0,0,0,0.05);
-            }
+        .footer-custom {
+            background-color: #F3F1E7;
+            border-top: 1px solid rgba(0,0,0,0.05);
+        }
 
-            .sidebar-overlay {
-                display: none;
-                position: fixed;
-                top: 0;
-                left: 0;
-                right: 0;
-                bottom: 0;
-                background-color: rgba(0, 0, 0, 0.5);
-                z-index: 99;
-            }
+        .sidebar-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 99;
+        }
 
-                .sidebar-overlay.active {
-                    display: block;
-                }
+        .sidebar-overlay.active {
+            display: block;
+        }
 
-            .page-content {
-                padding-top: 80px;
-            }
+        .page-content {
+            padding-top: 80px;
+        }
 
+        .admin-page .main-content {
+            margin-left: 250px;
+            padding: 20px;
+            min-height: calc(100vh - 80px);
+        }
+
+        @@media (max-width: 992px) {
             .admin-page .main-content {
-                margin-left: 250px;
-                padding: 20px;
-                min-height: calc(100vh - 80px);
+                margin-left: 0;
+                padding: 20px 15px;
             }
+        }
 
-            @@media (max-width: 992px) {
-                .admin-page .main-content {
-                    margin-left: 0;
-                    padding: 20px 15px;
-                }
-            }
+        /* ===== Navbar overlap/wrap fix ===== */
+        .nav-desktop-link {
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
 
-            /* ===== ড্রপডাউন মেনু স্টাইল ===== */
-            .profile-dropdown .dropdown-toggle {
-                color: #1F3B2C !important;
-                text-decoration: none !important;
-                font-weight: 500;
-                transition: opacity 0.3s;
-                background: none;
-                border: none;
-                display: flex;
-                align-items: center;
-                gap: 6px;
-                padding: 0;
-                cursor: pointer;
-            }
+        .profile-dropdown .dropdown-toggle {
+            white-space: nowrap;
+        }
 
-                .profile-dropdown .dropdown-toggle:hover {
-                    opacity: 0.7;
-                }
+        .profile-dropdown .dropdown-toggle > span:not(.caret) {
+            max-width: 170px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
 
-                .profile-dropdown .dropdown-toggle i {
-                    font-size: 18px;
-                }
+        /* ===== ড্রপডাউন মেনু স্টাইল ===== */
+        .profile-dropdown .dropdown-toggle {
+            color: #1F3B2C !important;
+            text-decoration: none !important;
+            font-weight: 500;
+            transition: opacity 0.3s;
+            background: none;
+            border: none;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 0;
+            cursor: pointer;
+        }
 
-                .profile-dropdown .dropdown-toggle .caret {
-                    font-size: 12px;
-                    margin-left: 4px;
-                }
+        .profile-dropdown .dropdown-toggle:hover {
+            opacity: 0.7;
+        }
 
-            .profile-dropdown .dropdown-menu {
-                border: none;
-                border-radius: 12px;
-                box-shadow: 0 8px 30px rgba(0,0,0,0.12);
-                padding: 8px 0;
-                min-width: 240px;
-                background: white;
-                margin-top: 8px;
-            }
+        .profile-dropdown .dropdown-toggle i {
+            font-size: 18px;
+        }
 
-                .profile-dropdown .dropdown-menu .dropdown-header {
-                    padding: 10px 20px 6px;
-                    font-weight: 600;
-                    color: #1F3B2C;
-                    border-bottom: 1px solid #f0f0f0;
-                    margin-bottom: 4px;
-                }
+        .profile-dropdown .dropdown-toggle .caret {
+            font-size: 12px;
+            margin-left: 4px;
+        }
 
-                    .profile-dropdown .dropdown-menu .dropdown-header small {
-                        display: block;
-                        font-weight: 400;
-                        color: #6B7568;
-                        font-size: 12px;
-                    }
+        .profile-dropdown .dropdown-menu {
+            border: none;
+            border-radius: 12px;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.12);
+            padding: 8px 0;
+            min-width: 240px;
+            background: white;
+            margin-top: 8px;
+        }
 
-                .profile-dropdown .dropdown-menu .dropdown-item {
-                    padding: 10px 20px;
-                    color: #4B5648;
-                    font-size: 14px;
-                    font-weight: 500;
-                    transition: all 0.2s;
-                    display: flex;
-                    align-items: center;
-                    gap: 10px;
-                }
+        .profile-dropdown .dropdown-menu .dropdown-header {
+            padding: 10px 20px 6px;
+            font-weight: 600;
+            color: #1F3B2C;
+            border-bottom: 1px solid #f0f0f0;
+            margin-bottom: 4px;
+        }
 
-                    .profile-dropdown .dropdown-menu .dropdown-item:hover {
-                        background-color: #F3F1E7;
-                        color: #1F3B2C;
-                    }
+        .profile-dropdown .dropdown-menu .dropdown-header small {
+            display: block;
+            font-weight: 400;
+            color: #6B7568;
+            font-size: 12px;
+        }
 
-                    .profile-dropdown .dropdown-menu .dropdown-item i {
-                        width: 20px;
-                        text-align: center;
-                        color: #6B7568;
-                        font-size: 14px;
-                    }
+        .profile-dropdown .dropdown-menu .dropdown-item {
+            padding: 10px 20px;
+            color: #4B5648;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
 
-                    .profile-dropdown .dropdown-menu .dropdown-item:hover i {
-                        color: #1F3B2C;
-                    }
+        .profile-dropdown .dropdown-menu .dropdown-item:hover {
+            background-color: #F3F1E7;
+            color: #1F3B2C;
+        }
 
-                .profile-dropdown .dropdown-menu .dropdown-divider {
-                    margin: 4px 0;
-                    border-color: #f0f0f0;
-                }
+        .profile-dropdown .dropdown-menu .dropdown-item i {
+            width: 20px;
+            text-align: center;
+            color: #6B7568;
+            font-size: 14px;
+        }
 
-                .profile-dropdown .dropdown-menu .dropdown-item.text-danger {
-                    color: #e74c3c;
-                }
+        .profile-dropdown .dropdown-menu .dropdown-item:hover i {
+            color: #1F3B2C;
+        }
 
-                    .profile-dropdown .dropdown-menu .dropdown-item.text-danger i {
-                        color: #e74c3c;
-                    }
+        .profile-dropdown .dropdown-menu .dropdown-divider {
+            margin: 4px 0;
+            border-color: #f0f0f0;
+        }
 
-                    .profile-dropdown .dropdown-menu .dropdown-item.text-danger:hover {
-                        background-color: #fde8e8;
-                    }
+        .profile-dropdown .dropdown-menu .dropdown-item.text-danger {
+            color: #e74c3c;
+        }
 
-                .profile-dropdown .dropdown-menu .dropdown-item .badge-role {
-                    font-size: 10px;
-                    padding: 2px 10px;
-                    border-radius: 20px;
-                    font-weight: 600;
-                    background: #eef2f6;
-                    color: #6B7568;
-                    margin-left: auto;
-                }
+        .profile-dropdown .dropdown-menu .dropdown-item.text-danger i {
+            color: #e74c3c;
+        }
 
-                    .profile-dropdown .dropdown-menu .dropdown-item .badge-role.teacher {
-                        background: #d1ecf1;
-                        color: #0c6b7c;
-                    }
+        .profile-dropdown .dropdown-menu .dropdown-item.text-danger:hover {
+            background-color: #fde8e8;
+        }
 
-                    .profile-dropdown .dropdown-menu .dropdown-item .badge-role.admin {
-                        background: #fff3cd;
-                        color: #b8860b;
-                    }
+        .profile-dropdown .dropdown-menu .dropdown-item .badge-role {
+            font-size: 10px;
+            padding: 2px 10px;
+            border-radius: 20px;
+            font-weight: 600;
+            background: #eef2f6;
+            color: #6B7568;
+            margin-left: auto;
+        }
 
-            .profile-dropdown .dropdown-menu {
-                display: block;
-                opacity: 0;
-                visibility: hidden;
-                transform: translateY(-8px);
-                transition: all 0.2s ease;
-                pointer-events: none;
-            }
+        .profile-dropdown .dropdown-menu .dropdown-item .badge-role.teacher {
+            background: #d1ecf1;
+            color: #0c6b7c;
+        }
 
-            .profile-dropdown.show .dropdown-menu {
-                opacity: 1;
-                visibility: visible;
-                transform: translateY(0);
-                pointer-events: auto;
-            }
+        .profile-dropdown .dropdown-menu .dropdown-item .badge-role.admin {
+            background: #fff3cd;
+            color: #b8860b;
+        }
 
-            /* ===== Notification Bell ===== */
-            .notification-wrapper {
-                position: relative;
-                margin-right: 14px;
-            }
+        .profile-dropdown .dropdown-menu {
+            display: block;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-8px);
+            transition: all 0.2s ease;
+            pointer-events: none;
+        }
 
-            .notification-bell {
-                background: none;
-                border: none;
-                color: #1F3B2C;
-                font-size: 20px;
-                cursor: pointer;
-                position: relative;
-                padding: 8px;
-                transition: transform 0.2s;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-            }
+        .profile-dropdown.show .dropdown-menu {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+            pointer-events: auto;
+        }
 
-                .notification-bell:hover {
-                    transform: scale(1.1);
-                }
+        /* ===== Notification Bell ===== */
+        .notification-wrapper {
+            position: relative;
+            margin-right: 14px;
+        }
 
-                .notification-bell .notif-badge {
-                    position: absolute;
-                    top: 2px;
-                    right: 0px;
-                    background: #e74c3c;
-                    color: white;
-                    font-size: 10px;
-                    font-weight: 700;
-                    padding: 2px 6px;
-                    border-radius: 10px;
-                    min-width: 18px;
-                    text-align: center;
-                    border: 2px solid #F3F1E7;
-                    display: none;
-                }
+        .notification-bell {
+            background: none;
+            border: none;
+            color: #1F3B2C;
+            font-size: 20px;
+            cursor: pointer;
+            position: relative;
+            padding: 8px;
+            transition: transform 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
 
-                    .notification-bell .notif-badge.show {
-                        display: block;
-                    }
+        .notification-bell:hover {
+            transform: scale(1.1);
+        }
 
+        .notification-bell .notif-badge {
+            position: absolute;
+            top: 2px;
+            right: 0px;
+            background: #e74c3c;
+            color: white;
+            font-size: 10px;
+            font-weight: 700;
+            padding: 2px 6px;
+            border-radius: 10px;
+            min-width: 18px;
+            text-align: center;
+            border: 2px solid #F3F1E7;
+            display: none;
+        }
+
+        .notification-bell .notif-badge.show {
+            display: block;
+        }
+
+        .notif-dropdown {
+            position: absolute;
+            top: calc(100% + 8px);
+            right: 0;
+            width: 380px;
+            max-width: 92vw;
+            background: white;
+            border-radius: 14px;
+            box-shadow: 0 12px 40px rgba(0,0,0,0.15);
+            border: 1px solid rgba(0,0,0,0.06);
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-8px);
+            transition: all 0.2s ease;
+            pointer-events: none;
+            z-index: 1000;
+            overflow: hidden;
+        }
+
+        .notification-wrapper.show .notif-dropdown {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+            pointer-events: auto;
+        }
+
+        .notif-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 14px 18px;
+            border-bottom: 1px solid #f0f0f0;
+            background: #FAF9F4;
+        }
+
+        .notif-header h6 {
+            margin: 0;
+            font-size: 14px;
+            font-weight: 700;
+            color: #1F3B2C;
+        }
+
+        .notif-header-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .notif-header-actions button {
+            background: none;
+            border: none;
+            color: #1F3B2C;
+            font-size: 11px;
+            font-weight: 600;
+            cursor: pointer;
+            padding: 4px 8px;
+            border-radius: 6px;
+            transition: background 0.2s;
+        }
+
+        .notif-header-actions button:hover {
+            background: #E7E4D9;
+        }
+
+        .notif-list {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .notif-list::-webkit-scrollbar {
+            width: 5px;
+        }
+
+        .notif-list::-webkit-scrollbar-thumb {
+            background: #D5CFB8;
+            border-radius: 10px;
+        }
+
+        .notif-item {
+            display: flex;
+            gap: 12px;
+            padding: 14px 18px;
+            border-bottom: 1px solid #f5f5f5;
+            transition: background 0.2s;
+            cursor: pointer;
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .notif-item:hover {
+            background: #FAF9F4;
+        }
+
+        .notif-item.unread {
+            background: #FFFDF5;
+            border-left: 3px solid #F4C744;
+        }
+
+        .notif-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            font-size: 16px;
+        }
+
+        .notif-icon.info {
+            background: #d1ecf1;
+            color: #0c6b7c;
+        }
+
+        .notif-icon.success {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .notif-icon.warning {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .notif-icon.danger {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .notif-content {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .notif-content .notif-title {
+            font-size: 13.5px;
+            font-weight: 700;
+            color: #1F3B2C;
+            margin: 0 0 2px;
+            line-height: 1.3;
+        }
+
+        .notif-content .notif-message {
+            font-size: 12.5px;
+            color: #6B7568;
+            margin: 0 0 4px;
+            line-height: 1.4;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .notif-content .notif-time {
+            font-size: 11px;
+            color: #8A9188;
+        }
+
+        .notif-empty {
+            text-align: center;
+            padding: 40px 20px;
+            color: #8A9188;
+        }
+
+        .notif-empty i {
+            font-size: 36px;
+            color: #E7E4D9;
+            margin-bottom: 10px;
+            display: block;
+        }
+
+        .notif-empty p {
+            margin: 0;
+            font-size: 13px;
+        }
+
+        .notif-footer {
+            padding: 10px 18px;
+            border-top: 1px solid #f0f0f0;
+            background: #FAF9F4;
+            text-align: center;
+        }
+
+        .notif-footer a {
+            font-size: 12px;
+            font-weight: 600;
+            color: #1F3B2C;
+            text-decoration: none;
+        }
+
+        .notif-footer a:hover {
+            text-decoration: underline;
+        }
+
+        @@media (max-width: 576px) {
             .notif-dropdown {
-                position: absolute;
-                top: calc(100% + 8px);
-                right: 0;
-                width: 380px;
-                max-width: 92vw;
-                background: white;
-                border-radius: 14px;
-                box-shadow: 0 12px 40px rgba(0,0,0,0.15);
-                border: 1px solid rgba(0,0,0,0.06);
-                opacity: 0;
-                visibility: hidden;
-                transform: translateY(-8px);
-                transition: all 0.2s ease;
-                pointer-events: none;
-                z-index: 1000;
-                overflow: hidden;
+                width: 320px;
+                right: -60px;
             }
+        }
 
-            .notification-wrapper.show .notif-dropdown {
+        /* ===== Smooth Page Transition ===== */
+        @@media (prefers-reduced-motion: no-preference) {
+            @@view-transition {
+                navigation: auto;
+            }
+        }
+
+        ::view-transition-old(root),
+        ::view-transition-new(root) {
+            animation-duration: 0.3s;
+            animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        @@keyframes pageEnter {
+            from {
+                opacity: 0;
+                transform: translateY(12px);
+            }
+            to {
                 opacity: 1;
-                visibility: visible;
                 transform: translateY(0);
-                pointer-events: auto;
             }
+        }
 
-            .notif-header {
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-                padding: 14px 18px;
-                border-bottom: 1px solid #f0f0f0;
-                background: #FAF9F4;
-            }
+        html.no-vt main {
+            animation: pageEnter 0.4s cubic-bezier(0.22, 1, 0.36, 1) backwards;
+            transition: opacity 0.2s ease, transform 0.2s ease;
+        }
 
-                .notif-header h6 {
-                    margin: 0;
-                    font-size: 14px;
-                    font-weight: 700;
-                    color: #1F3B2C;
-                }
+        html.no-vt main.page-leaving {
+            opacity: 0;
+            transform: translateY(-6px);
+            pointer-events: none;
+        }
 
-            .notif-header-actions {
-                display: flex;
-                gap: 8px;
-            }
+        #pageProgress {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 3px;
+            width: 0;
+            background: linear-gradient(90deg, #1F3B2C, #F4C744);
+            z-index: 9999;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s ease;
+        }
 
-                .notif-header-actions button {
-                    background: none;
-                    border: none;
-                    color: #1F3B2C;
-                    font-size: 11px;
-                    font-weight: 600;
-                    cursor: pointer;
-                    padding: 4px 8px;
-                    border-radius: 6px;
-                    transition: background 0.2s;
-                }
+        #pageProgress.active {
+            opacity: 1;
+            width: 75%;
+            transition: width 6s cubic-bezier(0.1, 0.6, 0.2, 1), opacity 0.2s ease;
+        }
 
-                    .notif-header-actions button:hover {
-                        background: #E7E4D9;
-                    }
+        /* ===== Smooth Buttons ===== */
+        button,
+        .btn,
+        a.rounded-full {
+            transition-property: color, background-color, border-color, opacity, box-shadow, transform;
+            transition-duration: 0.2s;
+            transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+        }
 
-            .notif-list {
-                max-height: 400px;
-                overflow-y: auto;
-            }
+        .btn-primary-custom:hover,
+        a.rounded-full[style*="background-color"]:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 16px rgba(31, 59, 44, 0.22);
+        }
 
-                .notif-list::-webkit-scrollbar {
-                    width: 5px;
-                }
+        button:not(:disabled):active,
+        .btn:not(:disabled):active,
+        a.rounded-full:active,
+        .btn-primary-custom:active,
+        a.rounded-full[style*="background-color"]:active {
+            transform: scale(0.96);
+            box-shadow: none;
+        }
 
-                .notif-list::-webkit-scrollbar-thumb {
-                    background: #D5CFB8;
-                    border-radius: 10px;
-                }
+        button:focus-visible,
+        .btn:focus-visible,
+        a.rounded-full:focus-visible {
+            outline: 2px solid #1F3B2C;
+            outline-offset: 2px;
+        }
 
-            .notif-item {
-                display: flex;
-                gap: 12px;
-                padding: 14px 18px;
-                border-bottom: 1px solid #f5f5f5;
-                transition: background 0.2s;
-                cursor: pointer;
-                text-decoration: none;
-                color: inherit;
-            }
-
-                .notif-item:hover {
-                    background: #FAF9F4;
-                }
-
-                .notif-item.unread {
-                    background: #FFFDF5;
-                    border-left: 3px solid #F4C744;
-                }
-
-            .notif-icon {
-                width: 40px;
-                height: 40px;
-                border-radius: 50%;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                flex-shrink: 0;
-                font-size: 16px;
-            }
-
-                .notif-icon.info {
-                    background: #d1ecf1;
-                    color: #0c6b7c;
-                }
-
-                .notif-icon.success {
-                    background: #d4edda;
-                    color: #155724;
-                }
-
-                .notif-icon.warning {
-                    background: #fff3cd;
-                    color: #856404;
-                }
-
-                .notif-icon.danger {
-                    background: #f8d7da;
-                    color: #721c24;
-                }
-
-            .notif-content {
-                flex: 1;
-                min-width: 0;
-            }
-
-                .notif-content .notif-title {
-                    font-size: 13.5px;
-                    font-weight: 700;
-                    color: #1F3B2C;
-                    margin: 0 0 2px;
-                    line-height: 1.3;
-                }
-
-                .notif-content .notif-message {
-                    font-size: 12.5px;
-                    color: #6B7568;
-                    margin: 0 0 4px;
-                    line-height: 1.4;
-                    display: -webkit-box;
-                    -webkit-line-clamp: 2;
-                    -webkit-box-orient: vertical;
-                    overflow: hidden;
-                }
-
-                .notif-content .notif-time {
-                    font-size: 11px;
-                    color: #8A9188;
-                }
-
-            .notif-empty {
-                text-align: center;
-                padding: 40px 20px;
-                color: #8A9188;
-            }
-
-                .notif-empty i {
-                    font-size: 36px;
-                    color: #E7E4D9;
-                    margin-bottom: 10px;
-                    display: block;
-                }
-
-                .notif-empty p {
-                    margin: 0;
-                    font-size: 13px;
-                }
-
-            .notif-footer {
-                padding: 10px 18px;
-                border-top: 1px solid #f0f0f0;
-                background: #FAF9F4;
-                text-align: center;
-            }
-
-                .notif-footer a {
-                    font-size: 12px;
-                    font-weight: 600;
-                    color: #1F3B2C;
-                    text-decoration: none;
-                }
-
-                    .notif-footer a:hover {
-                        text-decoration: underline;
-                    }
-
-            @@media (max-width: 576px) {
-                .notif-dropdown {
-                    width: 320px;
-                    right: -60px;
-                }
-            }
-
-            /* ===== Smooth Page Transition ===== */
-            @@media (prefers-reduced-motion: no-preference) {
-                @@view-transition {
-                    navigation: auto;
-                }
-            }
-
-            ::view-transition-old(root),
-            ::view-transition-new(root) {
-                animation-duration: 0.3s;
-                animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
-            }
-
-            @@keyframes pageEnter {
-                from {
-                    opacity: 0;
-                    transform: translateY(12px);
-                }
-
-                to {
-                    opacity: 1;
-                    transform: translateY(0);
-                }
-            }
-
+        @@media (prefers-reduced-motion: reduce) {
             html.no-vt main {
-                animation: pageEnter 0.4s cubic-bezier(0.22, 1, 0.36, 1) backwards;
-                transition: opacity 0.2s ease, transform 0.2s ease;
+                animation: none;
+                transition: none;
             }
 
-                html.no-vt main.page-leaving {
-                    opacity: 0;
-                    transform: translateY(-6px);
-                    pointer-events: none;
-                }
-
-            #pageProgress {
-                position: fixed;
-                top: 0;
-                left: 0;
-                height: 3px;
-                width: 0;
-                background: linear-gradient(90deg, #1F3B2C, #F4C744);
-                z-index: 9999;
-                opacity: 0;
-                pointer-events: none;
-                transition: opacity 0.2s ease;
+            html.no-vt main.page-leaving {
+                transform: none;
             }
 
-                #pageProgress.active {
-                    opacity: 1;
-                    width: 75%;
-                    transition: width 6s cubic-bezier(0.1, 0.6, 0.2, 1), opacity 0.2s ease;
-                }
-
-            /* ===== Smooth Buttons ===== */
-            button,
-            .btn,
-            a.rounded-full {
-                transition-property: color, background-color, border-color, opacity, box-shadow, transform;
-                transition-duration: 0.2s;
-                transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+            #pageProgress.active {
+                transition: none;
             }
 
-                .btn-primary-custom:hover,
-                a.rounded-full[style*="background-color"]:hover {
-                    transform: translateY(-1px);
-                    box-shadow: 0 6px 16px rgba(31, 59, 44, 0.22);
-                }
-
-                button:not(:disabled):active,
-                .btn:not(:disabled):active,
-                a.rounded-full:active,
-                .btn-primary-custom:active,
-                a.rounded-full[style*="background-color"]:active {
-                    transform: scale(0.96);
-                    box-shadow: none;
-                }
-
-                button:focus-visible,
-                .btn:focus-visible,
-                a.rounded-full:focus-visible {
-                    outline: 2px solid #1F3B2C;
-                    outline-offset: 2px;
-                }
-
-            @@media (prefers-reduced-motion: reduce) {
-                html.no-vt main {
-                    animation: none;
-                    transition: none;
-                }
-
-                    html.no-vt main.page-leaving {
-                        transform: none;
-                    }
-
-                #pageProgress.active {
-                    transition: none;
-                }
-
-                button, .btn, a.rounded-full {
-                    transition: none;
-                }
-
-                    button:active, .btn:active, a.rounded-full:active,
-                    .btn-primary-custom:hover, .btn-primary-custom:active,
-                    a.rounded-full[style*="background-color"]:hover,
-                    a.rounded-full[style*="background-color"]:active {
-                        transform: none;
-                    }
+            button, .btn, a.rounded-full {
+                transition: none;
             }
+
+            button:active, .btn:active, a.rounded-full:active,
+            .btn-primary-custom:hover, .btn-primary-custom:active,
+            a.rounded-full[style*="background-color"]:hover,
+            a.rounded-full[style*="background-color"]:active {
+                transform: none;
+            }
+        }
+
+        /* ===== Logo ===== */
+        .brand-logo {
+            width: 56px;
+            height: 56px;
+        }
     </style>
 </head>
 <body>
@@ -613,37 +636,55 @@
     <!-- NAVBAR -->
     <!-- ========================================= -->
     <header class="sticky-top z-50 border-b border-black/5" style="background-color:#F3F1E7;">
-        <nav class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="h-20 flex items-center justify-between">
+        <nav class="max-w-[1440px] mx-auto px-4 sm:px-6 xl:px-8">
+            <div class="h-20 flex items-center justify-between gap-4">
 
                 <!-- Logo -->
-                <div>
-                    <a asp-controller="Home" asp-action="Index" class="flex items-center gap-2.5">
-                        <img src="https://i.ibb.co/fd9sY88Y/IMG-6916-1.png" alt="Smart Tutor Hub logo" class="w-12 h-12 rounded-full object-cover flex-shrink-0" />
-                        <span class="font-serif text-lg sm:text-xl font-bold tracking-wide" style="color:#1F3B2C;">
-                            SMART TUTOR HUB
-                        </span>
+                <div class="flex-shrink-0">
+                    <a asp-controller="Home" asp-action="Index" class="flex items-center">
+                        <img src="https://i.ibb.co/fd9sY88Y/IMG-6916-1.png" alt="Smart Tutor Hub logo" class="brand-logo rounded-full object-cover flex-shrink-0" />
                     </a>
                 </div>
 
                 <!-- Desktop Menu -->
-                <div class="hidden lg:flex items-center gap-7 xl:gap-8">
-                    <a asp-controller="Home" asp-action="Index" class="text-sm font-medium transition hover:opacity-70" style="color:#4B5648;">Home</a>
-                    <a asp-controller="Learn" asp-action="Index" class="text-sm font-medium transition hover:opacity-70" style="color:#4B5648;">Learn</a>
-                    <a asp-controller="Practice" asp-action="Index" class="text-sm font-medium transition hover:opacity-70" style="color:#4B5648;">Practice</a>
-                    <a asp-controller="Leaderboard" asp-action="Leaderboard" class="text-sm font-medium transition hover:opacity-70" style="color:#4B5648;">Leaderboard</a>
-                    <a asp-controller="FindTutor" asp-action="Index" class="text-sm font-medium transition hover:opacity-70" style="color:#4B5648;">Find Tutor</a>
-                    <a asp-controller="Notice" asp-action="Index" class="text-sm font-medium transition hover:opacity-70" style="color:#4B5648;">Notice</a>
+                <div class="hidden xl:flex items-center gap-5 2xl:gap-8">
+                    <a asp-controller="Home" asp-action="Index" class="nav-desktop-link text-sm font-medium transition hover:opacity-70" style="color:#4B5648;">
+                        <i class="fas fa-house me-1" style="font-size:12px;"></i>Home
+                    </a>
+                    <a asp-controller="Learn" asp-action="Index" class="nav-desktop-link text-sm font-medium transition hover:opacity-70" style="color:#4B5648;">
+                        <i class="fas fa-book-open me-1" style="font-size:12px;"></i>Learn
+                    </a>
+
+                    @* ========================================================
+                       ✅ Practice লিংক সরিয়ে দেওয়া হয়েছে — এখন Course-এর ভিতরে
+                       (Classroom → Module Complete → Quiz)
+                       ======================================================== *@
+
+                    <a asp-controller="Leaderboard" asp-action="Leaderboard" class="nav-desktop-link text-sm font-medium transition hover:opacity-70" style="color:#4B5648;">
+                        <i class="fas fa-trophy me-1" style="font-size:12px;"></i>Leaderboard
+                    </a>
+                    <a asp-controller="FindTutor" asp-action="Index" class="nav-desktop-link text-sm font-medium transition hover:opacity-70" style="color:#4B5648;">
+                        <i class="fas fa-chalkboard-user me-1" style="font-size:12px;"></i>Find Tutor
+                    </a>
+                    <a asp-controller="Notice" asp-action="Index" class="nav-desktop-link text-sm font-medium transition hover:opacity-70" style="color:#4B5648;">
+                        <i class="fas fa-bullhorn me-1" style="font-size:12px;"></i>Notice
+                    </a>
+
+                    <!-- ✅ Helpdesk Button -->
+                    <a asp-controller="Helpdesk" asp-action="Index" class="nav-desktop-link text-sm font-medium transition hover:opacity-70" style="color:#4B5648;">
+                        <i class="fas fa-headset me-1" style="font-size:12px;"></i>Helpdesk
+                    </a>
+
                     @if (Context.Session.GetString("UserName") != null)
                     {
-                        <a asp-controller="MyClass" asp-action="MyClass" class="text-sm font-medium transition hover:opacity-70" style="color:#4B5648;">
+                        <a asp-controller="MyClass" asp-action="MyClass" class="nav-desktop-link text-sm font-medium transition hover:opacity-70" style="color:#4B5648;">
                             <i class="fas fa-chalkboard me-1" style="font-size:12px;"></i>My Class
                         </a>
                     }
                 </div>
 
                 <!-- Desktop Right Side -->
-                <div class="hidden lg:flex items-center">
+                <div class="hidden xl:flex items-center flex-shrink-0">
                     @if (Context.Session.GetString("UserName") != null)
                     {
                         var userRole = Context.Session.GetString("UserRole");
@@ -762,7 +803,7 @@
                 </div>
 
                 <!-- Mobile Menu Button -->
-                <button id="mobileMenuButton" type="button" class="lg:hidden focus:outline-none" style="color:#1F3B2C;">
+                <button id="mobileMenuButton" type="button" class="xl:hidden focus:outline-none" style="color:#1F3B2C;">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="w-7 h-7">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
                     </svg>
@@ -770,14 +811,32 @@
             </div>
 
             <!-- Mobile Menu -->
-            <div id="mobileMenu" class="hidden lg:hidden pb-5">
+            <div id="mobileMenu" class="hidden xl:hidden pb-5">
                 <div class="flex flex-col gap-4">
-                    <a asp-controller="Home" asp-action="Index" class="text-sm" style="color:#4B5648;">Home</a>
-                    <a asp-controller="Learn" asp-action="Index" class="text-sm" style="color:#4B5648;">Learn</a>
-                    <a asp-controller="Practice" asp-action="Index" class="text-sm" style="color:#4B5648;">Practice</a>
-                    <a asp-controller="Leaderboard" asp-action="Leaderboard" class="text-sm" style="color:#4B5648;">Leaderboard</a>
-                    <a asp-controller="FindTutor" asp-action="Index" class="text-sm" style="color:#4B5648;">Find Tutor</a>
-                    <a asp-controller="Notice" asp-action="Index" class="text-sm" style="color:#4B5648;">Notice</a>
+                    <a asp-controller="Home" asp-action="Index" class="text-sm" style="color:#4B5648;">
+                        <i class="fas fa-house me-1"></i> Home
+                    </a>
+                    <a asp-controller="Learn" asp-action="Index" class="text-sm" style="color:#4B5648;">
+                        <i class="fas fa-book-open me-1"></i> Learn
+                    </a>
+
+                    @* ✅ Practice লিংক মোবাইল মেনু থেকেও সরানো হয়েছে *@
+
+                    <a asp-controller="Leaderboard" asp-action="Leaderboard" class="text-sm" style="color:#4B5648;">
+                        <i class="fas fa-trophy me-1"></i> Leaderboard
+                    </a>
+                    <a asp-controller="FindTutor" asp-action="Index" class="text-sm" style="color:#4B5648;">
+                        <i class="fas fa-chalkboard-user me-1"></i> Find Tutor
+                    </a>
+                    <a asp-controller="Notice" asp-action="Index" class="text-sm" style="color:#4B5648;">
+                        <i class="fas fa-bullhorn me-1"></i> Notice
+                    </a>
+
+                    <!-- ✅ Helpdesk Link (Mobile) -->
+                    <a asp-controller="Helpdesk" asp-action="Index" class="text-sm" style="color:#4B5648;">
+                        <i class="fas fa-headset me-1"></i> Helpdesk
+                    </a>
+
                     @if (Context.Session.GetString("UserName") != null)
                     {
                         <a asp-controller="MyClass" asp-action="MyClass" class="text-sm" style="color:#4B5648;">
@@ -924,227 +983,227 @@
     <!-- JAVASCRIPT -->
     <!-- ========================================= -->
     <script>
-            // ===== SMOOTH PAGE TRANSITION =====
-            (function () {
-                const progress = document.getElementById('pageProgress');
-                const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-                const LEAVE_DELAY = prefersReducedMotion ? 0 : 200;
-                const nativeTransition = document.documentElement.classList.contains('no-vt') === false;
-                let navigating = false;
+        // ===== SMOOTH PAGE TRANSITION =====
+        (function() {
+            const progress = document.getElementById('pageProgress');
+            const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+            const LEAVE_DELAY = prefersReducedMotion ? 0 : 200;
+            const nativeTransition = document.documentElement.classList.contains('no-vt') === false;
+            let navigating = false;
 
-                function startProgress() {
-                    if (!progress) return;
-                    progress.classList.add('active');
+            function startProgress() {
+                if (!progress) return;
+                progress.classList.add('active');
+            }
+
+            function resetState() {
+                navigating = false;
+                document.querySelector('main')?.classList.remove('page-leaving');
+                if (progress) {
+                    progress.classList.remove('active');
+                    progress.style.width = '0';
+                    void progress.offsetWidth;
+                    progress.style.width = '';
                 }
+            }
 
-                function resetState() {
-                    navigating = false;
-                    document.querySelector('main')?.classList.remove('page-leaving');
-                    if (progress) {
-                        progress.classList.remove('active');
-                        progress.style.width = '0';
-                        void progress.offsetWidth;
-                        progress.style.width = '';
-                    }
+            window.smoothNavigate = function(url) {
+                if (navigating) return;
+                navigating = true;
+                startProgress();
+                if (nativeTransition) {
+                    window.location.href = url;
+                } else {
+                    document.querySelector('main')?.classList.add('page-leaving');
+                    setTimeout(function() { window.location.href = url; }, LEAVE_DELAY);
                 }
+                setTimeout(resetState, 10000);
+            };
 
-                window.smoothNavigate = function (url) {
-                    if (navigating) return;
-                    navigating = true;
-                    startProgress();
-                    if (nativeTransition) {
-                        window.location.href = url;
-                    } else {
-                        document.querySelector('main')?.classList.add('page-leaving');
-                        setTimeout(function () { window.location.href = url; }, LEAVE_DELAY);
-                    }
-                    setTimeout(resetState, 10000);
-                };
+            document.addEventListener('click', function(e) {
+                if (e.defaultPrevented) return;
+                if (e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
 
-                document.addEventListener('click', function (e) {
-                    if (e.defaultPrevented) return;
-                    if (e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+                const link = e.target.closest('a');
+                if (!link) return;
 
-                    const link = e.target.closest('a');
-                    if (!link) return;
+                const href = link.getAttribute('href');
+                if (!href || href.startsWith('#') || /^(javascript|mailto|tel):/i.test(href)) return;
+                if (link.target && link.target !== '_self') return;
+                if (link.hasAttribute('download') || link.hasAttribute('data-bs-toggle') || link.hasAttribute('data-no-transition')) return;
 
-                    const href = link.getAttribute('href');
-                    if (!href || href.startsWith('#') || /^(javascript|mailto|tel):/i.test(href)) return;
-                    if (link.target && link.target !== '_self') return;
-                    if (link.hasAttribute('download') || link.hasAttribute('data-bs-toggle') || link.hasAttribute('data-no-transition')) return;
+                let url;
+                try { url = new URL(link.href, window.location.href); } catch { return; }
+                if (url.origin !== window.location.origin) return;
+                if (url.pathname === window.location.pathname && url.search === window.location.search && url.hash) return;
 
-                    let url;
-                    try { url = new URL(link.href, window.location.href); } catch { return; }
-                    if (url.origin !== window.location.origin) return;
-                    if (url.pathname === window.location.pathname && url.search === window.location.search && url.hash) return;
-
-                    if (nativeTransition) {
-                        startProgress();
-                        setTimeout(resetState, 10000);
-                        return;
-                    }
-
-                    e.preventDefault();
-                    window.smoothNavigate(url.href);
-                });
-
-                document.addEventListener('submit', function (e) {
-                    if (e.defaultPrevented) return;
+                if (nativeTransition) {
                     startProgress();
                     setTimeout(resetState, 10000);
-                });
+                    return;
+                }
 
-                window.addEventListener('pageshow', function (e) {
-                    if (e.persisted) resetState();
-                });
-            })();
+                e.preventDefault();
+                window.smoothNavigate(url.href);
+            });
+
+            document.addEventListener('submit', function(e) {
+                if (e.defaultPrevented) return;
+                startProgress();
+                setTimeout(resetState, 10000);
+            });
+
+            window.addEventListener('pageshow', function(e) {
+                if (e.persisted) resetState();
+            });
+        })();
     </script>
 
     <script>
-            // ===== Mobile Menu Toggle =====
-            const mobileMenuButton = document.getElementById("mobileMenuButton");
-            const mobileMenu = document.getElementById("mobileMenu");
+        // ===== Mobile Menu Toggle =====
+        const mobileMenuButton = document.getElementById("mobileMenuButton");
+        const mobileMenu = document.getElementById("mobileMenu");
 
-            mobileMenuButton.addEventListener("click", function () {
-                mobileMenu.classList.toggle("hidden");
-            });
+        mobileMenuButton.addEventListener("click", function() {
+            mobileMenu.classList.toggle("hidden");
+        });
 
-            // ===== Profile Dropdown =====
-            document.addEventListener('DOMContentLoaded', function () {
-                const dropdownToggle = document.querySelector('.profile-dropdown .dropdown-toggle');
-                if (dropdownToggle) {
-                    dropdownToggle.addEventListener('click', function (e) {
-                        e.preventDefault();
-                        const parent = this.closest('.profile-dropdown');
-                        if (parent) {
-                            parent.classList.toggle('show');
-                        }
-                        document.getElementById('notifWrapper')?.classList.remove('show');
-                    });
-                }
-
-                document.addEventListener('click', function (e) {
-                    const dropdown = document.querySelector('.profile-dropdown');
-                    if (dropdown && !dropdown.contains(e.target)) {
-                        dropdown.classList.remove('show');
+        // ===== Profile Dropdown =====
+        document.addEventListener('DOMContentLoaded', function() {
+            const dropdownToggle = document.querySelector('.profile-dropdown .dropdown-toggle');
+            if (dropdownToggle) {
+                dropdownToggle.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const parent = this.closest('.profile-dropdown');
+                    if (parent) {
+                        parent.classList.toggle('show');
                     }
+                    document.getElementById('notifWrapper')?.classList.remove('show');
                 });
+            }
+
+            document.addEventListener('click', function(e) {
+                const dropdown = document.querySelector('.profile-dropdown');
+                if (dropdown && !dropdown.contains(e.target)) {
+                    dropdown.classList.remove('show');
+                }
             });
+        });
 
-            // ===== NOTIFICATION SYSTEM =====
-            (function () {
-                const wrapper = document.getElementById('notifWrapper');
-                const bell = document.getElementById('notifBell');
-                const badge = document.getElementById('notifBadge');
-                const list = document.getElementById('notifList');
+        // ===== NOTIFICATION SYSTEM =====
+        (function() {
+            const wrapper = document.getElementById('notifWrapper');
+            const bell = document.getElementById('notifBell');
+            const badge = document.getElementById('notifBadge');
+            const list = document.getElementById('notifList');
 
-                if (!wrapper || !bell) return;
+            if (!wrapper || !bell) return;
 
-                function getToken() {
-                    const token = document.querySelector('input[name="__RequestVerificationToken"]');
-                    return token ? token.value : '';
-                }
+            function getToken() {
+                const token = document.querySelector('input[name="__RequestVerificationToken"]');
+                return token ? token.value : '';
+            }
 
-                function loadUnreadCount() {
-                    fetch('/Notification/GetUnreadCount')
-                        .then(r => r.json())
-                        .then(data => {
-                            if (data.success && data.count > 0) {
-                                badge.textContent = data.count > 99 ? '99+' : data.count;
-                                badge.classList.add('show');
-                            } else {
-                                badge.classList.remove('show');
-                            }
-                        })
-                        .catch(() => {});
-                }
+            function loadUnreadCount() {
+                fetch('/Notification/GetUnreadCount')
+                    .then(r => r.json())
+                    .then(data => {
+                        if (data.success && data.count > 0) {
+                            badge.textContent = data.count > 99 ? '99+' : data.count;
+                            badge.classList.add('show');
+                        } else {
+                            badge.classList.remove('show');
+                        }
+                    })
+                    .catch(() => { });
+            }
 
-                function loadNotifications() {
-                    list.innerHTML = '<div class="notif-empty"><i class="fas fa-spinner fa-spin"></i><p>Loading...</p></div>';
+            function loadNotifications() {
+                list.innerHTML = '<div class="notif-empty"><i class="fas fa-spinner fa-spin"></i><p>Loading...</p></div>';
 
-                    fetch('/Notification/GetNotifications')
-                        .then(r => r.json())
-                        .then(data => {
-                            if (!data.success || !data.notifications || data.notifications.length === 0) {
-                                list.innerHTML = `
-                                    <div class="notif-empty">
-                                        <i class="fas fa-bell-slash"></i>
-                                        <p>No notifications yet</p>
-                                    </div>`;
-                                return;
-                            }
+                fetch('/Notification/GetNotifications')
+                    .then(r => r.json())
+                    .then(data => {
+                        if (!data.success || !data.notifications || data.notifications.length === 0) {
+                            list.innerHTML = `
+                                <div class="notif-empty">
+                                    <i class="fas fa-bell-slash"></i>
+                                    <p>No notifications yet</p>
+                                </div>`;
+                            return;
+                        }
 
-                            let html = '';
-                            data.notifications.forEach(n => {
-                                const unreadClass = n.isRead ? '' : 'unread';
-                                const typeClass = n.type || 'info';
-                                const icon = n.icon || 'fa-bell';
-                                const linkAttr = n.link ? `data-link="${n.link}"` : '';
+                        let html = '';
+                        data.notifications.forEach(n => {
+                            const unreadClass = n.isRead ? '' : 'unread';
+                            const typeClass = n.type || 'info';
+                            const icon = n.icon || 'fa-bell';
+                            const linkAttr = n.link ? `data-link="${n.link}"` : '';
 
-                                html += `
-                                    <div class="notif-item ${unreadClass}" ${linkAttr} data-id="${n.id}">
-                                        <div class="notif-icon ${typeClass}">
-                                            <i class="fas ${icon}"></i>
-                                        </div>
-                                        <div class="notif-content">
-                                            <p class="notif-title">${escapeHtml(n.title)}</p>
-                                            <p class="notif-message">${escapeHtml(n.message)}</p>
-                                            <span class="notif-time"><i class="far fa-clock me-1"></i>${n.timeAgo}</span>
-                                        </div>
-                                    </div>`;
-                            });
-
-                            list.innerHTML = html;
-
-                            list.querySelectorAll('.notif-item').forEach(item => {
-                                item.addEventListener('click', function () {
-                                    const id = this.getAttribute('data-id');
-                                    const link = this.getAttribute('data-link');
-                                    markOneRead(id);
-                                    if (link) {
-                                        window.smoothNavigate ? window.smoothNavigate(link) : (window.location.href = link);
-                                    }
-                                });
-                            });
-                        })
-                        .catch(() => {
-                            list.innerHTML = '<div class="notif-empty"><i class="fas fa-exclamation-circle"></i><p>Failed to load</p></div>';
+                            html += `
+                                <div class="notif-item ${unreadClass}" ${linkAttr} data-id="${n.id}">
+                                    <div class="notif-icon ${typeClass}">
+                                        <i class="fas ${icon}"></i>
+                                    </div>
+                                    <div class="notif-content">
+                                        <p class="notif-title">${escapeHtml(n.title)}</p>
+                                        <p class="notif-message">${escapeHtml(n.message)}</p>
+                                        <span class="notif-time"><i class="far fa-clock me-1"></i>${n.timeAgo}</span>
+                                    </div>
+                                </div>`;
                         });
-                }
 
-                function escapeHtml(text) {
-                    if (!text) return '';
-                    return String(text)
-                        .replace(/&/g, '&amp;')
-                        .replace(/</g, '&lt;')
-                        .replace(/>/g, '&gt;')
-                        .replace(/"/g, '&quot;')
-                        .replace(/'/g, '&#39;');
-                }
+                        list.innerHTML = html;
 
-                function markOneRead(id) {
-                    const formData = new FormData();
-                    formData.append('id', id);
-                    const headers = { 'RequestVerificationToken': getToken() };
-
-                    fetch('/Notification/MarkAsRead', {
-                        method: 'POST',
-                        body: formData,
-                        headers: headers
-                    }).then(() => {
-                        loadUnreadCount();
-                    }).catch(() => {});
-                }
-
-                window.markAllRead = function () {
-                    const formData = new FormData();
-                    const headers = { 'RequestVerificationToken': getToken() };
-
-                    fetch('/Notification/MarkAllAsRead', {
-                        method: 'POST',
-                        body: formData,
-                        headers: headers
+                        list.querySelectorAll('.notif-item').forEach(item => {
+                            item.addEventListener('click', function() {
+                                const id = this.getAttribute('data-id');
+                                const link = this.getAttribute('data-link');
+                                markOneRead(id);
+                                if (link) {
+                                    window.smoothNavigate ? window.smoothNavigate(link) : (window.location.href = link);
+                                }
+                            });
+                        });
                     })
+                    .catch(() => {
+                        list.innerHTML = '<div class="notif-empty"><i class="fas fa-exclamation-circle"></i><p>Failed to load</p></div>';
+                    });
+            }
+
+            function escapeHtml(text) {
+                if (!text) return '';
+                return String(text)
+                    .replace(/&/g, '&amp;')
+                    .replace(/</g, '&lt;')
+                    .replace(/>/g, '&gt;')
+                    .replace(/"/g, '&quot;')
+                    .replace(/'/g, '&#39;');
+            }
+
+            function markOneRead(id) {
+                const formData = new FormData();
+                formData.append('id', id);
+                const headers = { 'RequestVerificationToken': getToken() };
+
+                fetch('/Notification/MarkAsRead', {
+                    method: 'POST',
+                    body: formData,
+                    headers: headers
+                }).then(() => {
+                    loadUnreadCount();
+                }).catch(() => { });
+            }
+
+            window.markAllRead = function() {
+                const formData = new FormData();
+                const headers = { 'RequestVerificationToken': getToken() };
+
+                fetch('/Notification/MarkAllAsRead', {
+                    method: 'POST',
+                    body: formData,
+                    headers: headers
+                })
                     .then(r => r.json())
                     .then(data => {
                         if (data.success) {
@@ -1152,19 +1211,19 @@
                             loadNotifications();
                         }
                     });
-                };
+            };
 
-                window.clearAllNotifications = function () {
-                    if (!confirm('সব নোটিফিকেশন মুছে ফেলতে চান?')) return;
+            window.clearAllNotifications = function() {
+                if (!confirm('সব নোটিফিকেশন মুছে ফেলতে চান?')) return;
 
-                    const formData = new FormData();
-                    const headers = { 'RequestVerificationToken': getToken() };
+                const formData = new FormData();
+                const headers = { 'RequestVerificationToken': getToken() };
 
-                    fetch('/Notification/ClearAll', {
-                        method: 'POST',
-                        body: formData,
-                        headers: headers
-                    })
+                fetch('/Notification/ClearAll', {
+                    method: 'POST',
+                    body: formData,
+                    headers: headers
+                })
                     .then(r => r.json())
                     .then(data => {
                         if (data.success) {
@@ -1172,30 +1231,30 @@
                             loadNotifications();
                         }
                     });
-                };
+            };
 
-                bell.addEventListener('click', function (e) {
-                    e.stopPropagation();
-                    const isOpen = wrapper.classList.contains('show');
+            bell.addEventListener('click', function(e) {
+                e.stopPropagation();
+                const isOpen = wrapper.classList.contains('show');
 
-                    if (isOpen) {
-                        wrapper.classList.remove('show');
-                    } else {
-                        wrapper.classList.add('show');
-                        loadNotifications();
-                        document.querySelector('.profile-dropdown')?.classList.remove('show');
-                    }
-                });
+                if (isOpen) {
+                    wrapper.classList.remove('show');
+                } else {
+                    wrapper.classList.add('show');
+                    loadNotifications();
+                    document.querySelector('.profile-dropdown')?.classList.remove('show');
+                }
+            });
 
-                document.addEventListener('click', function (e) {
-                    if (!wrapper.contains(e.target)) {
-                        wrapper.classList.remove('show');
-                    }
-                });
+            document.addEventListener('click', function(e) {
+                if (!wrapper.contains(e.target)) {
+                    wrapper.classList.remove('show');
+                }
+            });
 
-                loadUnreadCount();
-                setInterval(loadUnreadCount, 30000);
-            })();
+            loadUnreadCount();
+            setInterval(loadUnreadCount, 30000);
+        })();
     </script>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>

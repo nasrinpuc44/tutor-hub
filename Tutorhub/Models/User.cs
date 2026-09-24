@@ -16,6 +16,9 @@ namespace Tutorbub.Models
         public string Role { get; set; } = "User";
         public bool IsActive { get; set; } = true;
 
+        // ===== ✅ পয়েন্ট সিস্টেম (নতুন) =====
+        public int TotalPoints { get; set; } = 0;
+
         // ===== প্রোফাইল ফিল্ড =====
         public string? MobileNumber { get; set; }
         public string? ProfileImage { get; set; }

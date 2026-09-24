@@ -4,6 +4,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Tutorbub.Models;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -21,7 +22,9 @@ namespace Tutorbub.Controllers
             _webHostEnvironment = webHostEnvironment;
         }
 
-        // ===== ড্যাশবোর্ড =====
+        // ============================================================
+        // ===== DASHBOARD =====
+        // ============================================================
         public IActionResult Dashboard()
         {
             var role = HttpContext.Session.GetString("UserRole");
@@ -44,7 +47,10 @@ namespace Tutorbub.Controllers
             return View(users);
         }
 
-        // ===== ইউজার ডিটেইলস =====
+        // ============================================================
+        // ===== USER MANAGEMENT =====
+        // ============================================================
+
         [HttpGet]
         public IActionResult UserDetails(int id)
         {
@@ -96,7 +102,6 @@ namespace Tutorbub.Controllers
             return Json(new { success = false, message = "User not found" });
         }
 
-        // ===== ইউজার ডিলিট =====
         [HttpPost]
         [ValidateAntiForgeryToken]
         public IActionResult DeleteUser(int id)
@@ -120,7 +125,6 @@ namespace Tutorbub.Controllers
             return Json(new { success = false, message = "Failed to delete user" });
         }
 
-        // ===== ইউজার স্ট্যাটাস টগল =====
         [HttpPost]
         [ValidateAntiForgeryToken]
         public IActionResult ToggleUserStatus(int id, bool isActive)
@@ -167,7 +171,6 @@ namespace Tutorbub.Controllers
             return Json(new { success = false, message = "Failed to update user status" });
         }
 
-        // ===== পাসওয়ার্ড আপডেট =====
         [HttpPost]
         [ValidateAntiForgeryToken]
         public IActionResult UpdatePassword(int id, string newPassword)
@@ -199,7 +202,10 @@ namespace Tutorbub.Controllers
             return Json(new { success = false, message = "Failed to update password" });
         }
 
-        // ===== Teacher Request দেখা =====
+        // ============================================================
+        // ===== TEACHER REQUESTS =====
+        // ============================================================
+
         public IActionResult TeacherRequests()
         {
             var role = HttpContext.Session.GetString("UserRole");
@@ -219,7 +225,6 @@ namespace Tutorbub.Controllers
             return View(requests);
         }
 
-        // ===== Teacher Request অ্যাপ্রুভ/রিজেক্ট =====
         [HttpPost]
         [ValidateAntiForgeryToken]
         public IActionResult ProcessTeacherRequest(int id, string action, string? adminNote)
@@ -274,7 +279,6 @@ namespace Tutorbub.Controllers
             return Json(new { success = false, message = "Failed to process request" });
         }
 
-        // ===== Teacher ডিলিট =====
         [HttpPost]
         [ValidateAntiForgeryToken]
         public IActionResult DeleteTeacherAccount(int id, int requestId)
@@ -322,7 +326,6 @@ namespace Tutorbub.Controllers
             return Json(new { success = false, message = "Failed to delete: no matching user or request was found" });
         }
 
-        // ===== Teacher Request ডিটেইলস =====
         [HttpGet]
         public IActionResult GetTeacherRequestDetails(int id)
         {
@@ -557,7 +560,7 @@ namespace Tutorbub.Controllers
         }
 
         // ============================================================
-        // ===== UPLOAD COURSE LESSON VIDEO =====
+        // ===== UPLOAD COURSE LESSON =====
         // ============================================================
 
         [HttpGet]
@@ -640,7 +643,6 @@ namespace Tutorbub.Controllers
             return Json(new { success = false, message = "Failed to delete lesson." });
         }
 
-        // ===== ভিডিও ফাইল আপলোড =====
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> UploadLessonVideo(IFormFile lessonVideo)
@@ -792,7 +794,6 @@ namespace Tutorbub.Controllers
                 return View(model);
             }
 
-            // 🔍 ডিবাগ লগ
             Console.WriteLine("========== AddNotice POST ==========");
             Console.WriteLine($"Title: {model.Title}");
             Console.WriteLine($"IsAnnouncement: {model.IsAnnouncement}");
@@ -800,11 +801,10 @@ namespace Tutorbub.Controllers
             Console.WriteLine($"Category: {model.Category}");
             Console.WriteLine("====================================");
 
-            // ✅ Announcement হলে Force Active + Image clear
             if (model.IsAnnouncement)
             {
                 model.ImageUrl = string.Empty;
-                model.IsActive = true;   // ⚠️ মূল ফিক্স
+                model.IsActive = true;
             }
 
             model.CreatedAt = DateTime.UtcNow;
@@ -855,7 +855,6 @@ namespace Tutorbub.Controllers
                 return View(model);
             }
 
-            // 🔍 ডিবাগ লগ
             Console.WriteLine("========== EditNotice POST ==========");
             Console.WriteLine($"Id: {model.Id}");
             Console.WriteLine($"Title: {model.Title}");
@@ -863,11 +862,10 @@ namespace Tutorbub.Controllers
             Console.WriteLine($"IsActive: {model.IsActive}");
             Console.WriteLine("=====================================");
 
-            // ✅ Announcement হলে Force Active + Image clear
             if (model.IsAnnouncement)
             {
                 model.ImageUrl = string.Empty;
-                model.IsActive = true;   // ⚠️ মূল ফিক্স
+                model.IsActive = true;
             }
 
             if (_dbHelper.UpdateNotice(model, out string? error))
@@ -894,10 +892,6 @@ namespace Tutorbub.Controllers
 
             return Json(new { success = false, message = "Failed to delete notice." });
         }
-
-        // ============================================================
-        // ===== UPLOAD NOTICE IMAGE =====
-        // ============================================================
 
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -950,6 +944,278 @@ namespace Tutorbub.Controllers
             {
                 return Json(new { success = false, message = $"Error: {ex.Message}" });
             }
+        }
+
+        // ============================================================
+        // ===== QUIZ & ASSIGNMENT OVERVIEW (NEW) =====
+        // ===== List all courses with quiz/assignment counts =====
+        // ============================================================
+
+        // GET: /Admin/QuizAssignmentOverview
+        [HttpGet]
+        public IActionResult QuizAssignmentOverview()
+        {
+            var role = HttpContext.Session.GetString("UserRole");
+            if (role != "Admin") return RedirectToAction("Login", "Account");
+
+            var courses = _dbHelper.GetAllCourses();
+
+            // প্রতিটি course-এর quiz ও assignment count বের করা
+            var quizCounts = new Dictionary<int, int>();
+            var assignCounts = new Dictionary<int, int>();
+
+            foreach (var c in courses)
+            {
+                try
+                {
+                    quizCounts[c.Id] = _dbHelper.GetQuizzesByCourse(c.Id).Count;
+                }
+                catch
+                {
+                    quizCounts[c.Id] = 0;
+                }
+
+                try
+                {
+                    assignCounts[c.Id] = _dbHelper.GetAssignmentsByCourse(c.Id).Count;
+                }
+                catch
+                {
+                    assignCounts[c.Id] = 0;
+                }
+            }
+
+            ViewBag.QuizCounts = quizCounts;
+            ViewBag.AssignCounts = assignCounts;
+
+            return View(courses);
+        }
+
+        // ============================================================
+        // ===== COURSE QUIZ & ASSIGNMENT MANAGEMENT =====
+        // ============================================================
+
+        // GET: /Admin/ManageQuizAssignment?courseId=5
+        [HttpGet]
+        public IActionResult ManageQuizAssignment(int courseId)
+        {
+            var role = HttpContext.Session.GetString("UserRole");
+            if (role != "Admin") return RedirectToAction("Login", "Account");
+
+            var course = _dbHelper.GetCourseById(courseId);
+            if (course == null)
+            {
+                TempData["Error"] = "Course not found.";
+                return RedirectToAction("ManageCourses");
+            }
+
+            var vm = new CourseQuizAssignmentViewModel
+            {
+                CourseId = courseId,
+                CourseTitle = course.Title,
+                Quizzes = _dbHelper.GetQuizzesByCourse(courseId),
+                Assignments = _dbHelper.GetAssignmentsByCourse(courseId),
+                ModulesPerMilestone = _dbHelper.GetModulesPerMilestone(courseId)
+            };
+
+            return View(vm);
+        }
+
+        // POST: /Admin/CreateQuiz
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult CreateQuiz(int courseId, int moduleNumber, string title,
+            string? description, int passingScore, int timeLimitMinutes, bool isPublished)
+        {
+            var role = HttpContext.Session.GetString("UserRole");
+            if (role != "Admin") return Json(new { success = false, message = "Unauthorized" });
+
+            if (string.IsNullOrWhiteSpace(title))
+                return Json(new { success = false, message = "Title is required." });
+
+            var quiz = new ModuleQuiz
+            {
+                CourseId = courseId,
+                ModuleNumber = moduleNumber,
+                Title = title.Trim(),
+                Description = description?.Trim(),
+                PassingScore = passingScore,
+                TimeLimitMinutes = timeLimitMinutes,
+                IsPublished = isPublished
+            };
+
+            if (_dbHelper.CreateModuleQuiz(quiz, out string? error))
+                return Json(new { success = true, message = "Quiz created successfully!", quizId = quiz.Id });
+
+            return Json(new { success = false, message = $"Failed: {error}" });
+        }
+
+        // POST: /Admin/ToggleQuizPublish
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult ToggleQuizPublish(int id, bool isPublished)
+        {
+            var role = HttpContext.Session.GetString("UserRole");
+            if (role != "Admin") return Json(new { success = false, message = "Unauthorized" });
+
+            if (_dbHelper.ToggleQuizPublish(id, isPublished))
+                return Json(new { success = true, message = isPublished ? "Quiz published." : "Quiz unpublished." });
+
+            return Json(new { success = false, message = "Failed to update." });
+        }
+
+        // POST: /Admin/DeleteQuiz
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult DeleteQuiz(int id)
+        {
+            var role = HttpContext.Session.GetString("UserRole");
+            if (role != "Admin") return Json(new { success = false, message = "Unauthorized" });
+
+            if (_dbHelper.DeleteModuleQuiz(id))
+                return Json(new { success = true, message = "Quiz deleted." });
+
+            return Json(new { success = false, message = "Failed to delete." });
+        }
+
+        // GET: /Admin/ManageQuizQuestions?quizId=5
+        [HttpGet]
+        public IActionResult ManageQuizQuestions(int quizId)
+        {
+            var role = HttpContext.Session.GetString("UserRole");
+            if (role != "Admin") return RedirectToAction("Login", "Account");
+
+            var quiz = _dbHelper.GetQuizById(quizId, includeQuestions: true);
+            if (quiz == null)
+            {
+                TempData["Error"] = "Quiz not found.";
+                return RedirectToAction("ManageCourses");
+            }
+
+            var course = _dbHelper.GetCourseById(quiz.CourseId);
+            ViewBag.Course = course;
+            return View(quiz);
+        }
+
+        // POST: /Admin/AddQuizQuestion
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult AddQuizQuestion(int quizId, string questionText,
+            string optionA, string optionB, string optionC, string optionD,
+            string correctOption, int marks, int questionOrder)
+        {
+            var role = HttpContext.Session.GetString("UserRole");
+            if (role != "Admin") return Json(new { success = false, message = "Unauthorized" });
+
+            if (string.IsNullOrWhiteSpace(questionText))
+                return Json(new { success = false, message = "Question text is required." });
+
+            var q = new QuizQuestionItem
+            {
+                QuizId = quizId,
+                QuestionText = questionText.Trim(),
+                OptionA = optionA?.Trim() ?? "",
+                OptionB = optionB?.Trim() ?? "",
+                OptionC = optionC?.Trim() ?? "",
+                OptionD = optionD?.Trim() ?? "",
+                CorrectOption = correctOption?.ToUpper() ?? "A",
+                Marks = marks <= 0 ? 1 : marks,
+                QuestionOrder = questionOrder
+            };
+
+            if (_dbHelper.AddQuizQuestion(q, out string? error))
+                return Json(new { success = true, message = "Question added successfully!" });
+
+            return Json(new { success = false, message = $"Failed: {error}" });
+        }
+
+        // POST: /Admin/DeleteQuizQuestion
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult DeleteQuizQuestion(int id)
+        {
+            var role = HttpContext.Session.GetString("UserRole");
+            if (role != "Admin") return Json(new { success = false, message = "Unauthorized" });
+
+            if (_dbHelper.DeleteQuizQuestion(id))
+                return Json(new { success = true, message = "Question deleted." });
+
+            return Json(new { success = false, message = "Failed to delete." });
+        }
+
+        // POST: /Admin/CreateAssignment
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult CreateAssignment(int courseId, int milestoneNumber, string title,
+            string? description, string? instructions, int totalMarks, int dueDays, bool isPublished)
+        {
+            var role = HttpContext.Session.GetString("UserRole");
+            if (role != "Admin") return Json(new { success = false, message = "Unauthorized" });
+
+            if (string.IsNullOrWhiteSpace(title))
+                return Json(new { success = false, message = "Title is required." });
+
+            var a = new MilestoneAssignment
+            {
+                CourseId = courseId,
+                MilestoneNumber = milestoneNumber,
+                Title = title.Trim(),
+                Description = description?.Trim(),
+                Instructions = instructions?.Trim(),
+                TotalMarks = totalMarks,
+                DueDays = dueDays,
+                IsPublished = isPublished
+            };
+
+            if (_dbHelper.CreateMilestoneAssignment(a, out string? error))
+                return Json(new { success = true, message = "Assignment created successfully!", assignmentId = a.Id });
+
+            return Json(new { success = false, message = $"Failed: {error}" });
+        }
+
+        // POST: /Admin/ToggleAssignmentPublish
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult ToggleAssignmentPublish(int id, bool isPublished)
+        {
+            var role = HttpContext.Session.GetString("UserRole");
+            if (role != "Admin") return Json(new { success = false, message = "Unauthorized" });
+
+            if (_dbHelper.ToggleAssignmentPublish(id, isPublished))
+                return Json(new { success = true, message = isPublished ? "Assignment published." : "Assignment unpublished." });
+
+            return Json(new { success = false, message = "Failed to update." });
+        }
+
+        // POST: /Admin/DeleteAssignment
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult DeleteAssignment(int id)
+        {
+            var role = HttpContext.Session.GetString("UserRole");
+            if (role != "Admin") return Json(new { success = false, message = "Unauthorized" });
+
+            if (_dbHelper.DeleteMilestoneAssignment(id))
+                return Json(new { success = true, message = "Assignment deleted." });
+
+            return Json(new { success = false, message = "Failed to delete." });
+        }
+
+        // POST: /Admin/SetModulesPerMilestone
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult SetModulesPerMilestone(int courseId, int modulesPerMilestone)
+        {
+            var role = HttpContext.Session.GetString("UserRole");
+            if (role != "Admin") return Json(new { success = false, message = "Unauthorized" });
+
+            if (modulesPerMilestone < 1 || modulesPerMilestone > 20)
+                return Json(new { success = false, message = "Modules per milestone must be between 1 and 20." });
+
+            if (_dbHelper.SetModulesPerMilestone(courseId, modulesPerMilestone))
+                return Json(new { success = true, message = "Configuration saved." });
+
+            return Json(new { success = false, message = "Failed to save." });
         }
     }
 }

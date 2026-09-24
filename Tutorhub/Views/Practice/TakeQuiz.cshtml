@@ -1,0 +1,153 @@
+﻿@model Tutorbub.Models.TakeQuizViewModel
+
+@{
+    ViewData["Title"] = Model.QuizTitle;
+    Layout = "_Layout";
+}
+
+<style>
+    .tq-wrapper { max-width: 850px; margin: 0 auto; padding: 30px 20px 80px; }
+    .tq-header { background: white; border-radius: 16px; padding: 24px 28px; margin-bottom: 20px; box-shadow: 0 4px 18px rgba(0,0,0,0.05); }
+    .tq-header h1 { font-family: 'Georgia', serif; color: #1F3B2C; font-size: 24px; margin: 0 0 6px; font-weight: 700; }
+    .tq-header .meta { display: flex; gap: 16px; font-size: 13px; color: #6B7568; flex-wrap: wrap; }
+    .tq-header .meta i { color: #1F3B2C; margin-right: 5px; }
+
+    .tq-timer { background: #FFF9E6; border-radius: 12px; padding: 12px 20px; margin-bottom: 18px; border-left: 4px solid #F4C744; display: flex; justify-content: space-between; align-items: center; font-weight: 700; color: #1F3B2C; }
+
+    .q-block { background: white; border-radius: 14px; padding: 22px 24px; margin-bottom: 16px; box-shadow: 0 2px 12px rgba(0,0,0,0.04); border: 1px solid rgba(0,0,0,0.05); }
+    .q-block .q-num { font-size: 12px; text-transform: uppercase; letter-spacing: 1px; color: #8A9188; font-weight: 700; margin-bottom: 6px; }
+    .q-block .q-text { font-size: 16px; font-weight: 700; color: #1F3B2C; line-height: 1.5; margin-bottom: 16px; }
+
+    .opt-label { display: flex; align-items: center; gap: 12px; padding: 14px 18px; border: 2px solid #E5E1D3; border-radius: 10px; margin-bottom: 10px; cursor: pointer; transition: all 0.2s; font-size: 14.5px; color: #4B5648; font-weight: 500; }
+    .opt-label:hover { border-color: #1F3B2C; background: #FAF9F4; }
+    .opt-label input[type="radio"] { accent-color: #1F3B2C; transform: scale(1.3); }
+    .opt-label input[type="radio"]:checked ~ span { color: #1F3B2C; font-weight: 700; }
+    .opt-label:has(input:checked) { border-color: #1F3B2C; background: #E8F0E9; }
+
+    .submit-area { position: sticky; bottom: 20px; background: white; padding: 16px 22px; border-radius: 14px; box-shadow: 0 -4px 20px rgba(0,0,0,0.08); text-align: right; margin-top: 24px; }
+
+    .btn-submit { background: #1F3B2C; color: white; border: none; padding: 13px 40px; border-radius: 10px; font-weight: 700; font-size: 15px; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; transition: all 0.25s; }
+    .btn-submit:hover { opacity: 0.9; transform: translateY(-1px); }
+
+    .prev-attempt { background: #E8F0E9; border-radius: 10px; padding: 12px 18px; margin-bottom: 18px; font-size: 13.5px; color: #1F3B2C; }
+</style>
+
+<div class="tq-wrapper">
+
+    <div class="tq-header">
+        <h1><i class="fas fa-question-circle me-2"></i>@Model.QuizTitle</h1>
+        <div class="meta">
+            <span><i class="fas fa-book"></i> Module @Model.ModuleNumber</span>
+            <span><i class="fas fa-list-ol"></i> @Model.Questions.Count Questions</span>
+            <span><i class="fas fa-star"></i> @Model.Questions.Sum(q => q.Marks) Total Marks</span>
+            <span><i class="fas fa-check-circle"></i> Pass: @Model.PassingScore%</span>
+        </div>
+        @if (!string.IsNullOrEmpty(Model.Description))
+        {
+            <p style="margin: 12px 0 0; color: #5B6B5E; font-size: 13.5px;">@Model.Description</p>
+        }
+    </div>
+
+    @if (Model.PreviousAttempt != null)
+    {
+        <div class="prev-attempt">
+            <i class="fas fa-history me-2"></i>
+            Previous attempt: <strong>@Model.PreviousAttempt.Score / @Model.PreviousAttempt.TotalMarks</strong> 
+            (@Model.PreviousAttempt.Percentage%) — 
+            @if (Model.PreviousAttempt.Passed)
+            {
+                <span style="color:#155724; font-weight:700;">Passed</span>
+            }
+            else
+            {
+                <span style="color:#721c24; font-weight:700;">Not Passed</span>
+            }
+        </div>
+    }
+
+    @if (Model.TimeLimitMinutes > 0)
+    {
+        <div class="tq-timer">
+            <span><i class="fas fa-clock me-2"></i>Time Limit: @Model.TimeLimitMinutes minutes</span>
+            <span>Time Remaining: <strong id="timerDisplay">--:--</strong></span>
+        </div>
+    }
+
+    <form id="quizForm" method="post" action="/Practice/SubmitQuiz">
+        @Html.AntiForgeryToken()
+        <input type="hidden" name="quizId" value="@Model.QuizId" />
+
+        @{ int idx = 1; }
+        @foreach (var q in Model.Questions)
+        {
+            <div class="q-block">
+                <div class="q-num">Question @idx of @Model.Questions.Count</div>
+                <div class="q-text">@q.QuestionText</div>
+
+                <label class="opt-label">
+                    <input type="radio" name="answers[q_@q.Id]" value="A" />
+                    <span>A. @q.OptionA</span>
+                </label>
+                <label class="opt-label">
+                    <input type="radio" name="answers[q_@q.Id]" value="B" />
+                    <span>B. @q.OptionB</span>
+                </label>
+                <label class="opt-label">
+                    <input type="radio" name="answers[q_@q.Id]" value="C" />
+                    <span>C. @q.OptionC</span>
+                </label>
+                <label class="opt-label">
+                    <input type="radio" name="answers[q_@q.Id]" value="D" />
+                    <span>D. @q.OptionD</span>
+                </label>
+            </div>
+            idx++;
+        }
+
+        <div class="submit-area">
+            <button type="submit" class="btn-submit">
+                <i class="fas fa-paper-plane"></i> Submit Quiz
+            </button>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    <script>
+        const timeLimit = @Model.TimeLimitMinutes;
+        if (timeLimit > 0) {
+            let remaining = timeLimit * 60;
+            const display = document.getElementById('timerDisplay');
+
+            function tick() {
+                const m = Math.floor(remaining / 60);
+                const s = remaining % 60;
+                display.textContent = String(m).padStart(2, '0') + ':' + String(s).padStart(2, '0');
+
+                if (remaining <= 0) {
+                    alert('⏰ Time is up! Your answers will be submitted automatically.');
+                    document.getElementById('quizForm').submit();
+                    return;
+                }
+                remaining--;
+                setTimeout(tick, 1000);
+            }
+            tick();
+        }
+
+        document.getElementById('quizForm').addEventListener('submit', function (e) {
+            const total = @Model.Questions.Count;
+            let answered = 0;
+            for (let i = 0; i < total; i++) { /* just count via name pattern */ }
+            const names = new Set();
+            document.querySelectorAll('input[type=radio]:checked').forEach(r => names.add(r.name));
+            answered = names.size;
+
+            if (answered < total) {
+                if (!confirm(`You have answered ${answered} out of ${total} questions. Submit anyway?`)) {
+                    e.preventDefault();
+                }
+            }
+        });
+    </script>
+}

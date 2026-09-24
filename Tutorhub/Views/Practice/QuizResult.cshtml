@@ -1,0 +1,71 @@
+﻿@model Tutorbub.Models.QuizAttempt
+
+@{
+    ViewData["Title"] = "Quiz Result";
+    Layout = "_Layout";
+    var passed = Model.Passed;
+    var color = passed ? "#2ecc71" : "#e74c3c";
+}
+
+<style>
+    .qr-wrapper { max-width: 680px; margin: 40px auto; padding: 0 20px; }
+    .qr-card { background: white; border-radius: 20px; padding: 40px 32px; box-shadow: 0 10px 40px rgba(0,0,0,0.08); text-align: center; }
+    .qr-icon { width: 100px; height: 100px; margin: 0 auto 20px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 50px; }
+    .qr-card h2 { font-family: 'Georgia', serif; color: #1F3B2C; margin: 0 0 8px; font-size: 28px; }
+    .qr-card p.sub { color: #6B7568; font-size: 15px; margin: 0 0 24px; }
+    .qr-score { font-size: 54px; font-weight: 800; color: @color; margin: 0; line-height: 1; }
+    .qr-score small { font-size: 20px; color: #8A9188; font-weight: 500; }
+    .qr-pct { font-size: 18px; color: #6B7568; margin: 8px 0 28px; font-weight: 600; }
+    .qr-details { background: #FAF9F4; border-radius: 12px; padding: 20px; margin-bottom: 24px; text-align: left; }
+    .qr-details .row-line { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #EFECE0; font-size: 14px; }
+    .qr-details .row-line:last-child { border-bottom: none; }
+    .qr-details .row-line span:first-child { color: #6B7568; }
+    .qr-details .row-line span:last-child { color: #1F3B2C; font-weight: 700; }
+
+    .qr-btn { display: inline-flex; align-items: center; gap: 8px; padding: 13px 32px; border-radius: 10px; font-weight: 600; text-decoration: none; transition: all 0.25s; font-size: 14.5px; }
+    .qr-btn-primary { background: #1F3B2C; color: white; }
+    .qr-btn-primary:hover { opacity: 0.9; color: white; transform: translateY(-1px); }
+    .qr-btn-outline { background: white; color: #1F3B2C; border: 1.5px solid #1F3B2C; margin-left: 10px; }
+</style>
+
+<div class="qr-wrapper">
+    <div class="qr-card">
+        <div class="qr-icon" style="background: @(passed ? "#d4edda" : "#f8d7da"); color: @color;">
+            <i class="fas @(passed ? "fa-check-circle" : "fa-times-circle")"></i>
+        </div>
+
+        <h2>@(passed ? "Congratulations!" : "Better Luck Next Time")</h2>
+        <p class="sub">@(passed ? "You have passed this quiz." : "You did not reach the passing score.")</p>
+
+        <p class="qr-score">@Model.Score <small>/ @Model.TotalMarks</small></p>
+        <p class="qr-pct">@Model.Percentage%</p>
+
+        <div class="qr-details">
+            <div class="row-line">
+                <span>Score</span>
+                <span>@Model.Score / @Model.TotalMarks</span>
+            </div>
+            <div class="row-line">
+                <span>Percentage</span>
+                <span>@Model.Percentage%</span>
+            </div>
+            <div class="row-line">
+                <span>Status</span>
+                <span style="color:@color;">@(passed ? "PASSED" : "FAILED")</span>
+            </div>
+            <div class="row-line">
+                <span>Attempted At</span>
+                <span>@Model.AttemptedAt.ToLocalTime().ToString("dd MMM yyyy, hh:mm tt")</span>
+            </div>
+        </div>
+
+        <div>
+            <a href="/Practice/CourseQuizzes?courseId=@Model.CourseId" class="qr-btn qr-btn-primary">
+                <i class="fas fa-arrow-left"></i> Back to Quizzes
+            </a>
+            <a href="/MyClass/Classroom?courseId=@Model.CourseId" class="qr-btn qr-btn-outline">
+                <i class="fas fa-chalkboard"></i> Go to Classroom
+            </a>
+        </div>
+    </div>
+</div>

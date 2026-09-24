@@ -73,7 +73,7 @@ namespace Tutorbub.Controllers
         }
 
         // ============================================================
-        // ===== Classroom পেজ (DB থেকে Video + Module List) =====
+        // ===== Classroom পেজ (DB থেকে Video + Module List + Quiz + Assignment) =====
         // ============================================================
         [HttpGet]
         public IActionResult Classroom(int courseId)
@@ -107,6 +107,56 @@ namespace Tutorbub.Controllers
             // ৩) DB থেকে লেসন লোড
             var dbLessons = _dbHelper.GetLessonsByCourseId(courseId);
 
+            // ৪) ইউজারের completed lessons (lesson id set)
+            var completedLessonIds = _dbHelper.GetCompletedLessonIds(userId, courseId);
+
+            // ৫) Module progress (module -> (Total, Completed))
+            var moduleProgress = _dbHelper.GetModuleProgress(userId, courseId);
+
+            // ৬) Published Quizzes (module-wise lookup)
+            var quizzesByModule = _dbHelper.GetQuizzesByCourse(courseId)
+                .Where(q => q.IsPublished)
+                .ToDictionary(q => q.ModuleNumber, q => q);
+
+            // ৭) Published Assignments (milestone-wise lookup)
+            int modulesPerMilestone = _dbHelper.GetModulesPerMilestone(courseId);
+            var assignmentsByMilestone = _dbHelper.GetAssignmentsByCourse(courseId)
+                .Where(a => a.IsPublished)
+                .ToDictionary(a => a.MilestoneNumber, a => a);
+
+            // ৮) Completed Milestones হিসাব
+            var completedMilestones = new List<int>();
+            if (modulesPerMilestone > 0 && moduleProgress.Count > 0)
+            {
+                // ✅ FIX: মোট কতটি মডিউল আছে সেটি moduleProgress এবং dbLessons দুটো থেকেই বের করা
+                int maxModule = dbLessons.Any()
+                    ? dbLessons.Max(l => l.ModuleNumber)
+                    : moduleProgress.Keys.DefaultIfEmpty(0).Max();
+
+                int maxMilestone = maxModule / modulesPerMilestone;
+
+                for (int ms = 1; ms <= maxMilestone; ms++)
+                {
+                    int startMod = (ms - 1) * modulesPerMilestone + 1;
+                    int endMod = ms * modulesPerMilestone;
+
+                    bool allComplete = true;
+                    for (int m = startMod; m <= endMod; m++)
+                    {
+                        if (!moduleProgress.TryGetValue(m, out var prog)
+                            || prog.Total == 0
+                            || prog.Completed < prog.Total)
+                        {
+                            allComplete = false;
+                            break;
+                        }
+                    }
+
+                    if (allComplete) completedMilestones.Add(ms);
+                }
+            }
+
+            // ৯) Module list তৈরি
             List<ClassroomModule> modules;
 
             if (dbLessons.Count > 0)
@@ -120,21 +170,43 @@ namespace Tutorbub.Controllers
                     var lessons = group.OrderBy(l => l.LessonNumber).ToList();
                     int totalDuration = lessons.Sum(l => ParseDuration(l.Duration));
 
+                    int totalLessons = lessons.Count;
+                    int completedCount = lessons.Count(l => completedLessonIds.Contains(l.Id));
+                    bool moduleCompleted = totalLessons > 0 && completedCount >= totalLessons;
+
+                    // ✅ FIX: Quiz available চেক — module completed এবং quiz published থাকলে available
+                    bool quizAvailable = false;
+                    int? quizId = null;
+                    string? quizTitle = null;
+
+                    if (moduleCompleted && quizzesByModule.TryGetValue(group.Key, out var quiz))
+                    {
+                        quizAvailable = true;
+                        quizId = quiz.Id;
+                        quizTitle = quiz.Title;
+                    }
+
                     modules.Add(new ClassroomModule
                     {
                         ModuleNumber = group.Key,
                         Title = $"Module {group.Key}",
                         TotalDuration = $"{totalDuration} min",
-                        CompletedLessons = 0,
-                        TotalLessons = lessons.Count,
+                        CompletedLessons = completedCount,
+                        TotalLessons = totalLessons,
                         Lessons = lessons.Select(l => new ClassroomLesson
                         {
                             Id = l.Id,
                             Title = l.Title,
                             Duration = l.Duration,
                             VideoUrl = l.VideoUrl,
-                            IsCompleted = false
-                        }).ToList()
+                            IsCompleted = completedLessonIds.Contains(l.Id)
+                        }).ToList(),
+
+                        // ✅ নতুন ফিল্ড
+                        IsModuleCompleted = moduleCompleted,
+                        QuizAvailable = quizAvailable,
+                        QuizId = quizId,
+                        QuizTitle = quizTitle
                     });
                 }
             }
@@ -144,7 +216,17 @@ namespace Tutorbub.Controllers
                 modules = GetCourseCurriculum(courseId);
             }
 
-            // ৪) প্রথম লেসন active করো
+            // ১০) Available Assignments (যেগুলোর Milestone complete হয়েছে)
+            var availableAssignments = new List<MilestoneAssignment>();
+            foreach (var ms in completedMilestones)
+            {
+                if (assignmentsByMilestone.TryGetValue(ms, out var assignment))
+                {
+                    availableAssignments.Add(assignment);
+                }
+            }
+
+            // ১১) প্রথম লেসন active করো
             var firstLesson = modules.FirstOrDefault()?.Lessons.FirstOrDefault();
 
             var model = new ClassroomViewModel
@@ -159,14 +241,115 @@ namespace Tutorbub.Controllers
                 ActiveLessonId = firstLesson?.Id ?? 0,
                 ActiveLessonTitle = firstLesson?.Title ?? "Introduction",
                 ActiveLessonVideoUrl = firstLesson?.VideoUrl ?? "",
-                ActiveLessonDuration = firstLesson?.Duration ?? ""
+                ActiveLessonDuration = firstLesson?.Duration ?? "",
+
+                // ✅ নতুন
+                AvailableAssignments = availableAssignments,
+                ModulesPerMilestone = modulesPerMilestone,
+                CompletedMilestones = completedMilestones
             };
 
             return View("classroom", model);
         }
 
         // ============================================================
-        // ===== Helper: Parse duration "6 min" -> 6 =====
+        // ===== Lesson Complete মার্ক করা (AJAX) =====
+        // POST: /MyClass/MarkLessonComplete
+        // ============================================================
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult MarkLessonComplete(int courseId, int lessonId, int moduleNumber)
+        {
+            if (HttpContext.Session.GetString("UserName") == null)
+                return Json(new { success = false, message = "Unauthorized" });
+
+            var userId = int.Parse(HttpContext.Session.GetString("UserId") ?? "0");
+            if (userId == 0)
+                return Json(new { success = false, message = "User not found" });
+
+            // Enrolled কিনা চেক
+            if (!_dbHelper.IsUserEnrolled(userId, courseId))
+                return Json(new { success = false, message = "You are not enrolled in this course." });
+
+            // Lesson complete mark
+            bool ok = _dbHelper.MarkLessonCompleted(userId, courseId, lessonId, moduleNumber);
+            if (!ok)
+            {
+                // Already completed হলেও success return করি (duplicate ignore)
+                return Json(new
+                {
+                    success = true,
+                    moduleCompleted = false,
+                    quizId = (int?)null,
+                    message = "Already completed"
+                });
+            }
+
+            // Module complete হয়েছে কিনা চেক
+            var progress = _dbHelper.GetModuleProgress(userId, courseId);
+            bool moduleCompleted = progress.TryGetValue(moduleNumber, out var p)
+                && p.Total > 0
+                && p.Completed >= p.Total;
+
+            // Module complete হলে Quiz available কিনা দেখি
+            int? quizId = null;
+            string? quizTitle = null;
+
+            if (moduleCompleted)
+            {
+                var quizzes = _dbHelper.GetQuizzesByCourse(courseId);
+                var quiz = quizzes.FirstOrDefault(x => x.ModuleNumber == moduleNumber && x.IsPublished);
+                if (quiz != null)
+                {
+                    quizId = quiz.Id;
+                    quizTitle = quiz.Title;
+                }
+            }
+
+            // Milestone complete হয়েছে কিনা চেক
+            int modulesPerMilestone = _dbHelper.GetModulesPerMilestone(courseId);
+            bool milestoneCompleted = false;
+            int? milestoneNumber = null;
+
+            if (modulesPerMilestone > 0 && moduleCompleted)
+            {
+                // এই module যে milestone-এ পড়ে
+                int ms = ((moduleNumber - 1) / modulesPerMilestone) + 1;
+
+                // Milestone-এর সব module complete কিনা
+                int startMod = (ms - 1) * modulesPerMilestone + 1;
+                int endMod = ms * modulesPerMilestone;
+
+                bool allComplete = true;
+                for (int m = startMod; m <= endMod; m++)
+                {
+                    if (!progress.TryGetValue(m, out var pr) || pr.Total == 0 || pr.Completed < pr.Total)
+                    {
+                        allComplete = false;
+                        break;
+                    }
+                }
+
+                if (allComplete)
+                {
+                    milestoneCompleted = true;
+                    milestoneNumber = ms;
+                }
+            }
+
+            return Json(new
+            {
+                success = true,
+                moduleCompleted = moduleCompleted,
+                quizId = quizId,
+                quizTitle = quizTitle,
+                milestoneCompleted = milestoneCompleted,
+                milestoneNumber = milestoneNumber
+            });
+        }
+
+        // ============================================================
+        // ===== Helper: Parse duration "6 min" → 6 =====
         // ============================================================
         private static int ParseDuration(string duration)
         {
