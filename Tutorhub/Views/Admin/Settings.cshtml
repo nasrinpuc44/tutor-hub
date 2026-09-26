@@ -1,0 +1,824 @@
+﻿@model Tutorbub.Models.SiteSettings
+
+@{
+    ViewData["Title"] = "Site Settings";
+    Layout = "_Layout";
+    var heroImages = Model.GetHeroImageList();
+}
+
+<style>
+    /* ===== Main Content Layout ===== */
+    .admin-main-content {
+        margin-left: 250px;
+        padding: 20px;
+        min-height: calc(100vh - 80px);
+    }
+
+    /* ===== Settings Cards ===== */
+    .settings-card {
+        background: white;
+        border-radius: 16px;
+        padding: 24px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+        border: 1px solid rgba(0,0,0,0.04);
+        margin-bottom: 22px;
+    }
+
+        .settings-card h5 {
+            color: #1F3B2C;
+            font-weight: 700;
+            margin: 0 0 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 16px;
+        }
+
+            .settings-card h5 i {
+                color: #1F3B2C;
+            }
+
+    /* ===== Forms ===== */
+    .form-label {
+        font-weight: 700;
+        color: #1F3B2C;
+        font-size: 13px;
+        margin-bottom: 6px;
+    }
+
+    .form-control,
+    .form-select {
+        border-radius: 10px;
+        border: 1.5px solid #E5E1D3;
+        padding: 11px 14px;
+        font-size: 14px;
+        background: #FAF9F4;
+        transition: all 0.2s;
+    }
+
+        .form-control:focus,
+        .form-select:focus {
+            border-color: #1F3B2C;
+            box-shadow: 0 0 0 3px rgba(31,59,44,0.1);
+            background: white;
+        }
+
+    /* ===== Image Gallery ===== */
+    .image-gallery {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+        gap: 12px;
+        margin-top: 14px;
+    }
+
+    .image-item {
+        position: relative;
+        border-radius: 12px;
+        overflow: hidden;
+        border: 2px solid #E7E4D9;
+        aspect-ratio: 16/10;
+        background: #F3F1E7;
+        transition: all 0.25s;
+    }
+
+        .image-item:hover {
+            border-color: #1F3B2C;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.1);
+        }
+
+        .image-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .image-item .remove-btn {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: rgba(231,76,60,0.95);
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-size: 13px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+
+            .image-item .remove-btn:hover {
+                background: #c0392b;
+                transform: scale(1.1);
+            }
+
+        .image-item .primary-badge {
+            position: absolute;
+            bottom: 8px;
+            left: 8px;
+            background: #2ecc71;
+            color: white;
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+    /* ===== Upload Button ===== */
+    .upload-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 12px 24px;
+        background: #1F3B2C;
+        color: white;
+        border-radius: 10px;
+        font-weight: 600;
+        font-size: 13.5px;
+        cursor: pointer;
+        transition: all 0.2s;
+        border: none;
+        white-space: nowrap;
+    }
+
+        .upload-btn:hover {
+            opacity: 0.9;
+            transform: translateY(-1px);
+            box-shadow: 0 6px 18px rgba(31,59,44,0.22);
+            color: white;
+        }
+
+    /* ===== Save Button ===== */
+    .btn-save {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 13px 40px;
+        background: #1F3B2C;
+        color: white;
+        border-radius: 10px;
+        font-weight: 700;
+        font-size: 14px;
+        cursor: pointer;
+        transition: all 0.2s;
+        border: none;
+    }
+
+        .btn-save:hover {
+            opacity: 0.9;
+            transform: translateY(-1px);
+            box-shadow: 0 8px 24px rgba(31,59,44,0.25);
+            color: white;
+        }
+
+        .btn-save:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+    /* ===== Toggle Switch ===== */
+    .toggle-switch {
+        position: relative;
+        display: inline-block;
+        width: 52px;
+        height: 28px;
+        flex-shrink: 0;
+    }
+
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+    .toggle-slider {
+        position: absolute;
+        cursor: pointer;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: #ccc;
+        transition: 0.3s;
+        border-radius: 34px;
+    }
+
+        .toggle-slider:before {
+            position: absolute;
+            content: "";
+            height: 20px;
+            width: 20px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: 0.3s;
+            border-radius: 50%;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.15);
+        }
+
+    input:checked + .toggle-slider {
+        background-color: #2ecc71;
+    }
+
+        input:checked + .toggle-slider:before {
+            transform: translateX(24px);
+        }
+
+    /* ===== Color Picker ===== */
+    .color-picker-row {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 14px;
+        padding: 12px 16px;
+        background: #FAF9F4;
+        border-radius: 10px;
+        border: 1.5px solid #E5E1D3;
+        transition: border-color 0.2s;
+    }
+
+        .color-picker-row:hover {
+            border-color: #1F3B2C;
+        }
+
+        .color-picker-row label {
+            flex: 1;
+            font-weight: 600;
+            color: #1F3B2C;
+            font-size: 13.5px;
+            margin: 0;
+        }
+
+        .color-picker-row input[type="color"] {
+            width: 50px;
+            height: 40px;
+            border: 2px solid #1F3B2C;
+            border-radius: 8px;
+            cursor: pointer;
+            background: transparent;
+            padding: 2px;
+        }
+
+        .color-picker-row input[type="text"] {
+            width: 110px;
+            padding: 8px 12px;
+            border: 1.5px solid #E5E1D3;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            background: white;
+            outline: none;
+            font-weight: 600;
+            color: #1F3B2C;
+            text-transform: uppercase;
+        }
+
+            .color-picker-row input[type="text"]:focus {
+                border-color: #1F3B2C;
+                box-shadow: 0 0 0 3px rgba(31,59,44,0.08);
+            }
+
+    /* ===== Info Note ===== */
+    .info-note {
+        font-size: 12px;
+        color: #8A9188;
+        margin-top: 6px;
+        display: block;
+        line-height: 1.5;
+    }
+
+        .info-note i {
+            color: #1F3B2C;
+            margin-right: 4px;
+        }
+
+    /* ===== Empty State ===== */
+    .empty-gallery {
+        grid-column: 1/-1;
+        text-align: center;
+        padding: 50px 20px;
+        color: #8A9188;
+        background: #FAF9F4;
+        border: 2px dashed #E5E1D3;
+        border-radius: 12px;
+    }
+
+        .empty-gallery i {
+            font-size: 48px;
+            color: #E7E4D9;
+            display: block;
+            margin-bottom: 12px;
+        }
+
+        .empty-gallery p {
+            margin: 0;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+    /* ===== Preview Color Chips ===== */
+    .theme-preview {
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+        margin-top: 14px;
+        padding: 16px;
+        background: #FAF9F4;
+        border-radius: 12px;
+        border: 1.5px dashed #E5E1D3;
+    }
+
+    .theme-chip {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 6px;
+    }
+
+        .theme-chip .chip-color {
+            width: 60px;
+            height: 60px;
+            border-radius: 12px;
+            border: 2px solid white;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.12);
+            transition: transform 0.25s;
+        }
+
+            .theme-chip .chip-color:hover {
+                transform: scale(1.08);
+            }
+
+        .theme-chip .chip-label {
+            font-size: 11px;
+            color: #6B7568;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+        }
+
+    /* ===== Responsive ===== */
+    @@media (max-width: 992px) {
+        .admin-main-content {
+            margin-left: 0;
+            padding: 20px 15px;
+        }
+
+        .image-gallery {
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+        }
+    }
+
+    @@media (max-width: 576px) {
+        .settings-card {
+            padding: 18px 16px;
+        }
+
+        .color-picker-row {
+            flex-wrap: wrap;
+        }
+
+            .color-picker-row input[type="text"] {
+                width: 100%;
+            }
+
+        .btn-save {
+            width: 100%;
+            justify-content: center;
+        }
+    }
+</style>
+
+<!-- ===== Admin Sidebar (Partial) ===== -->
+<partial name="_AdminSidebar" />
+
+<!-- ===== Main Content ===== -->
+<div class="admin-main-content">
+
+    <!-- ===== Page Header ===== -->
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+        <div>
+            <h2 style="color:#1F3B2C; margin:0;"><i class="fas fa-cog me-2"></i>Site Settings</h2>
+            <p style="color:#6B7568; margin:4px 0 0 0; font-size:14px;">
+                হোম পেইজ ইমেজ, স্লাইডার, এবং কালার থিম কাস্টমাইজ করুন
+            </p>
+        </div>
+    </div>
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success" style="border-radius:10px;">
+            <i class="fas fa-check-circle me-2"></i>@TempData["Success"]
+        </div>
+    }
+
+    @Html.AntiForgeryToken()
+    <input type="hidden" id="settingsId" value="@Model.Id" />
+
+    <!-- ===== Hero Images Section ===== -->
+    <div class="settings-card">
+        <h5><i class="fas fa-images"></i> Hero Images</h5>
+        <p style="color:#6B7568; font-size:13.5px; margin-bottom:14px;">
+            হোম পেইজের বাম পাশের হিরো ইমেজ। একাধিক ইমেজ যোগ করলে স্লাইডার হিসেবে কাজ করবে।
+        </p>
+
+        <div class="d-flex gap-2 mb-3 flex-wrap">
+            <label for="heroImageFile" class="upload-btn">
+                <i class="fas fa-upload"></i> Upload New Image
+            </label>
+            <input type="file" id="heroImageFile" accept="image/*" style="display:none;" />
+
+            <div class="d-flex gap-2" style="flex: 1; min-width: 250px;">
+                <input type="text" id="heroImageUrlInput" class="form-control" placeholder="অথবা Direct URL দিন..." />
+                <button type="button" class="upload-btn" onclick="addImageFromUrl()" style="white-space:nowrap;">
+                    <i class="fas fa-plus"></i> Add
+                </button>
+            </div>
+        </div>
+
+        <span class="info-note">
+            <i class="fas fa-info-circle"></i>
+            Max 5MB per image. JPG, PNG, GIF, WEBP allowed. প্রথম ইমেজটি Primary হিসেবে দেখাবে।
+        </span>
+
+        <!-- Image Gallery -->
+        <div id="imageGallery" class="image-gallery">
+            @if (heroImages.Count == 0)
+            {
+                <div class="empty-gallery">
+                    <i class="fas fa-image"></i>
+                    <p>No images yet. Upload your first hero image!</p>
+                </div>
+            }
+            else
+            {
+                for (int i = 0; i < heroImages.Count; i++)
+                {
+                    <div class="image-item" data-url="@heroImages[i]">
+                        <img src="@heroImages[i]" alt="Hero Image @(i + 1)" />
+                        @if (i == 0)
+                        {
+                            <span class="primary-badge"><i class="fas fa-star"></i> Primary</span>
+                        }
+                        <button type="button" class="remove-btn" onclick="removeImage(this)" title="Remove">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                }
+            }
+        </div>
+    </div>
+
+    <!-- ===== Slider Settings ===== -->
+    <div class="settings-card">
+        <h5><i class="fas fa-play-circle"></i> Slider Settings</h5>
+
+        <div class="d-flex align-items-center gap-3 mb-3 flex-wrap">
+            <label class="toggle-switch">
+                <input type="checkbox" id="sliderEnabled" @(Model.SliderEnabled ? "checked" : "") />
+                <span class="toggle-slider"></span>
+            </label>
+            <div>
+                <strong style="color:#1F3B2C; font-size:14px;">Enable Image Slider</strong>
+                <p style="color:#8A9188; font-size:12.5px; margin:0;">
+                    একাধিক ইমেজ থাকলে অটো-স্লাইড হবে
+                </p>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-6">
+                <label class="form-label">Slider Interval (Seconds)</label>
+                <input type="number" id="sliderInterval" class="form-control"
+                       value="@Model.SliderIntervalSeconds" min="1" max="60" />
+                <span class="info-note">
+                    <i class="fas fa-clock"></i>
+                    কত সেকেন্ড পর পর ইমেজ পরিবর্তন হবে (1-60 সেকেন্ড)
+                </span>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== Theme Colors ===== -->
+    <div class="settings-card">
+        <h5><i class="fas fa-palette"></i> Theme Colors</h5>
+        <p style="color:#6B7568; font-size:13.5px; margin-bottom:14px;">
+            ওয়েবসাইটের মূল রং পরিবর্তন করুন। প্রতিটি রং পরিবর্তন করলে সাথে সাথে প্রিভিউ আপডেট হবে।
+        </p>
+
+        <div class="row">
+            <div class="col-md-6">
+                <div class="color-picker-row">
+                    <label>Primary Color</label>
+                    <input type="color" id="primaryColor" value="@Model.PrimaryColor" oninput="syncColor('primaryColor')" />
+                    <input type="text" id="primaryColorText" value="@Model.PrimaryColor" oninput="syncColorText('primaryColor')" />
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="color-picker-row">
+                    <label>Secondary Color</label>
+                    <input type="color" id="secondaryColor" value="@Model.SecondaryColor" oninput="syncColor('secondaryColor')" />
+                    <input type="text" id="secondaryColorText" value="@Model.SecondaryColor" oninput="syncColorText('secondaryColor')" />
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="color-picker-row">
+                    <label>Accent Color</label>
+                    <input type="color" id="accentColor" value="@Model.AccentColor" oninput="syncColor('accentColor')" />
+                    <input type="text" id="accentColorText" value="@Model.AccentColor" oninput="syncColorText('accentColor')" />
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="color-picker-row">
+                    <label>Text Color</label>
+                    <input type="color" id="textColor" value="@Model.TextColor" oninput="syncColor('textColor')" />
+                    <input type="text" id="textColorText" value="@Model.TextColor" oninput="syncColorText('textColor')" />
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="color-picker-row">
+                    <label>Navbar Background</label>
+                    <input type="color" id="navbarBgColor" value="@Model.NavbarBgColor" oninput="syncColor('navbarBgColor')" />
+                    <input type="text" id="navbarBgColorText" value="@Model.NavbarBgColor" oninput="syncColorText('navbarBgColor')" />
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="color-picker-row">
+                    <label>Footer Background</label>
+                    <input type="color" id="footerBgColor" value="@Model.FooterBgColor" oninput="syncColor('footerBgColor')" />
+                    <input type="text" id="footerBgColorText" value="@Model.FooterBgColor" oninput="syncColorText('footerBgColor')" />
+                </div>
+            </div>
+        </div>
+
+        <!-- Live Preview -->
+        <div class="theme-preview">
+            <div class="theme-chip">
+                <div class="chip-color" id="previewPrimary" style="background:@Model.PrimaryColor;"></div>
+                <span class="chip-label">Primary</span>
+            </div>
+            <div class="theme-chip">
+                <div class="chip-color" id="previewSecondary" style="background:@Model.SecondaryColor;"></div>
+                <span class="chip-label">Secondary</span>
+            </div>
+            <div class="theme-chip">
+                <div class="chip-color" id="previewAccent" style="background:@Model.AccentColor;"></div>
+                <span class="chip-label">Accent</span>
+            </div>
+            <div class="theme-chip">
+                <div class="chip-color" id="previewText" style="background:@Model.TextColor;"></div>
+                <span class="chip-label">Text</span>
+            </div>
+            <div class="theme-chip">
+                <div class="chip-color" id="previewNavbar" style="background:@Model.NavbarBgColor;"></div>
+                <span class="chip-label">Navbar</span>
+            </div>
+            <div class="theme-chip">
+                <div class="chip-color" id="previewFooter" style="background:@Model.FooterBgColor;"></div>
+                <span class="chip-label">Footer</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== Save Button ===== -->
+    <div class="text-end mb-5">
+        <button type="button" class="btn-save" id="saveBtn" onclick="saveAllSettings()">
+            <i class="fas fa-save"></i> Save All Settings
+        </button>
+    </div>
+
+</div>
+
+@section Scripts {
+    <script>
+        // ===== Anti-Forgery Token Helper =====
+        function getToken() {
+            const t = document.querySelector('input[name="__RequestVerificationToken"]');
+            return t ? t.value : '';
+        }
+
+        // ===== Escape HTML =====
+        function escapeHtml(text) {
+            if (!text) return '';
+            return String(text)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#39;');
+        }
+
+        // ===== Color Picker Sync =====
+        function syncColor(id) {
+            const val = document.getElementById(id).value;
+            document.getElementById(id + 'Text').value = val.toUpperCase();
+            updatePreview(id, val);
+        }
+
+        function syncColorText(id) {
+            const val = document.getElementById(id + 'Text').value;
+            if (/^#[0-9A-Fa-f]{6}$/.test(val)) {
+                document.getElementById(id).value = val;
+                updatePreview(id, val);
+            }
+        }
+
+        function updatePreview(id, color) {
+            const previewId = 'preview' + id.charAt(0).toUpperCase() + id.slice(1);
+            const el = document.getElementById(previewId);
+            if (el) el.style.background = color;
+        }
+
+        // ===== Image Upload =====
+        document.getElementById('heroImageFile').addEventListener('change', function () {
+            const file = this.files[0];
+            if (!file) return;
+
+            const allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+            if (!allowedTypes.includes(file.type)) {
+                alert('Only JPG, PNG, GIF, or WEBP images are allowed.');
+                this.value = '';
+                return;
+            }
+
+            if (file.size > 5 * 1024 * 1024) {
+                alert('Image size must be less than 5MB.');
+                this.value = '';
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('heroImage', file);
+
+            const token = document.querySelector('input[name="__RequestVerificationToken"]');
+            if (token) formData.append('__RequestVerificationToken', token.value);
+
+            const uploadLabel = document.querySelector('label[for="heroImageFile"]');
+            const originalHtml = uploadLabel.innerHTML;
+            uploadLabel.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Uploading...';
+            uploadLabel.style.pointerEvents = 'none';
+
+            fetch('/Admin/UploadHeroImage', {
+                method: 'POST',
+                body: formData
+            })
+                .then(r => r.json())
+                .then(data => {
+                    uploadLabel.innerHTML = originalHtml;
+                    uploadLabel.style.pointerEvents = 'auto';
+
+                    if (data.success) {
+                        addImageToGallery(data.imageUrl);
+                        document.getElementById('heroImageFile').value = '';
+                    } else {
+                        alert(data.message || 'Failed to upload.');
+                    }
+                })
+                .catch(err => {
+                    uploadLabel.innerHTML = originalHtml;
+                    uploadLabel.style.pointerEvents = 'auto';
+                    alert('Error: ' + err.message);
+                });
+        });
+
+        // ===== Add Image from URL =====
+        function addImageFromUrl() {
+            const input = document.getElementById('heroImageUrlInput');
+            const url = input.value.trim();
+            if (!url) {
+                alert('Please enter an image URL.');
+                return;
+            }
+            if (!/^https?:\/\//i.test(url)) {
+                alert('URL must start with http:// or https://');
+                return;
+            }
+            addImageToGallery(url);
+            input.value = '';
+        }
+
+        function addImageToGallery(url) {
+            const gallery = document.getElementById('imageGallery');
+
+            // Remove empty state if present
+            const emptyState = gallery.querySelector('.empty-gallery');
+            if (emptyState) emptyState.remove();
+
+            const div = document.createElement('div');
+            div.className = 'image-item';
+            div.setAttribute('data-url', url);
+            div.innerHTML = `
+                                <img src="${escapeHtml(url)}" alt="Hero Image" onerror="this.src='https://i.ibb.co/fd9s88Y/IMG-6916-1.png'" />
+                                <button type="button" class="remove-btn" onclick="removeImage(this)" title="Remove">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            `;
+            gallery.appendChild(div);
+            updatePrimaryBadge();
+        }
+
+        // ===== Remove Image =====
+        function removeImage(btn) {
+            if (!confirm('Remove this image?')) return;
+            btn.closest('.image-item').remove();
+            updatePrimaryBadge();
+
+            // If no images left, show empty state
+            const gallery = document.getElementById('imageGallery');
+            if (gallery.querySelectorAll('.image-item').length === 0) {
+                gallery.innerHTML = `
+                                    <div class="empty-gallery">
+                                        <i class="fas fa-image"></i>
+                                        <p>No images yet. Upload your first hero image!</p>
+                                    </div>
+                                `;
+            }
+        }
+
+        // ===== Update Primary Badge =====
+        function updatePrimaryBadge() {
+            document.querySelectorAll('.image-item .primary-badge').forEach(b => b.remove());
+            const first = document.querySelector('.image-item');
+            if (first) {
+                const badge = document.createElement('span');
+                badge.className = 'primary-badge';
+                badge.innerHTML = '<i class="fas fa-star"></i> Primary';
+                first.appendChild(badge);
+            }
+        }
+
+        // ===== Save All Settings =====
+        function saveAllSettings() {
+            // Gather image URLs
+            const imageUrls = Array.from(document.querySelectorAll('.image-item'))
+                .map(el => el.getAttribute('data-url'))
+                .filter(u => u);
+
+            // Validation: at least one image required
+            if (imageUrls.length === 0) {
+                alert('অন্তত একটি হিরো ইমেজ যোগ করুন।');
+                return;
+            }
+
+            // Validation: slider interval
+            const sliderInterval = parseInt(document.getElementById('sliderInterval').value) || 5;
+            if (sliderInterval < 1 || sliderInterval > 60) {
+                alert('Slider interval must be between 1 and 60 seconds.');
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('Id', document.getElementById('settingsId').value);
+            formData.append('HeroImageUrls', imageUrls.join(','));
+            formData.append('SliderEnabled', document.getElementById('sliderEnabled').checked);
+            formData.append('SliderIntervalSeconds', sliderInterval);
+            formData.append('PrimaryColor', document.getElementById('primaryColor').value);
+            formData.append('SecondaryColor', document.getElementById('secondaryColor').value);
+            formData.append('AccentColor', document.getElementById('accentColor').value);
+            formData.append('TextColor', document.getElementById('textColor').value);
+            formData.append('NavbarBgColor', document.getElementById('navbarBgColor').value);
+            formData.append('FooterBgColor', document.getElementById('footerBgColor').value);
+            formData.append('__RequestVerificationToken', getToken());
+
+            const btn = document.getElementById('saveBtn');
+            const originalHtml = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
+            btn.disabled = true;
+
+            fetch('/Admin/SaveSettings', { method: 'POST', body: formData })
+                .then(r => r.json())
+                .then(data => {
+                    btn.innerHTML = originalHtml;
+                    btn.disabled = false;
+
+                    if (data.success) {
+                        alert('✅ ' + data.message);
+                        location.reload();
+                    } else {
+                        alert('❌ ' + (data.message || 'Failed to save settings.'));
+                    }
+                })
+                .catch(err => {
+                    btn.innerHTML = originalHtml;
+                    btn.disabled = false;
+                    alert('Error: ' + err.message);
+                });
+        }
+
+        // ===== Enter key on URL input =====
+        document.getElementById('heroImageUrlInput').addEventListener('keydown', function (e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                addImageFromUrl();
+            }
+        });
+
+        console.log('✅ Settings page loaded');
+    </script>
+}

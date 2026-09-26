@@ -358,13 +358,9 @@ namespace Tutorbub.Models
         }
 
         // ============================================================
-        // ===== ✅ POINTS SYSTEM (NEW) =====
+        // ===== ✅ POINTS SYSTEM =====
         // ============================================================
 
-        /// <summary>
-        /// ইউজারের TotalPoints-এ পয়েন্ট যোগ করা (positive) বা বিয়োগ করা (negative)।
-        /// Points কখনো 0 এর নিচে যাবে না।
-        /// </summary>
         public bool AddPoints(int userId, int points)
         {
             string query = @"
@@ -388,9 +384,6 @@ namespace Tutorbub.Models
             }
         }
 
-        /// <summary>
-        /// ইউজারের বর্তমান TotalPoints বের করা।
-        /// </summary>
         public int GetUserPoints(int userId)
         {
             string query = @"SELECT COALESCE(""TotalPoints"", 0) FROM ""Users"" WHERE ""Id"" = @id";
@@ -413,33 +406,228 @@ namespace Tutorbub.Models
             }
         }
 
-        /// <summary>
-        /// প্রতিটি Quiz Attempt-এর জন্য points হিসাব:
-        /// প্রতি সঠিক উত্তরে 1 point।
-        /// Quiz Attempt save হলে অটোমেটিক User-এর TotalPoints-এ যোগ হবে।
-        /// </summary>
         public bool SaveQuizAttemptAndAwardPoints(QuizAttempt attempt, out string? errorMessage)
         {
             errorMessage = null;
 
-            // ১) Attempt save করা
             if (!SaveQuizAttempt(attempt, out string? saveError))
             {
                 errorMessage = saveError;
                 return false;
             }
 
-            // ২) Points = Score (কারণ প্রতি সঠিক উত্তরে ১ পয়েন্ট, এবং Score = সঠিক উত্তরের সংখ্যা)
-            //    এখানে attempt.Score ইতিমধ্যে মোট সঠিক উত্তরের সমান (Marks=1 হলে)।
-            //    কিন্তু Marks ভিন্ন হলে Score ≠ সঠিক উত্তরের সংখ্যা।
-            //    তাই আমরা attempt.Score-ই ব্যবহার করব (কারণ Marks দিয়ে গুণ করা হয়েছে)।
-            //    তবে আপনার সিস্টেমে "প্রতি প্রশ্নে ১ পয়েন্ট" চাইলে Score = সঠিক উত্তরের সংখ্যা হওয়া উচিত।
             if (attempt.Score > 0)
             {
                 AddPoints(attempt.UserId, attempt.Score);
             }
 
             return true;
+        }
+
+        // ============================================================
+        // ===== ✅ POINTS TRANSACTION LOG SYSTEM =====
+        // ============================================================
+
+        public bool LogPointsTransaction(int userId, int points, string type,
+            string? reference = null, string? description = null)
+        {
+            string query = @"
+                INSERT INTO ""PointsTransactions"" 
+                (""UserId"", ""Points"", ""Type"", ""Reference"", ""Description"", ""CreatedAt"")
+                VALUES (@userId, @points, @type, @reference, @description, @createdAt)";
+
+            try
+            {
+                using var connection = new NpgsqlConnection(_connectionString);
+                using var command = new NpgsqlCommand(query, connection);
+
+                command.Parameters.AddWithValue("@userId", userId);
+                command.Parameters.AddWithValue("@points", points);
+                command.Parameters.AddWithValue("@type", type);
+                command.Parameters.AddWithValue("@reference", reference ?? (object)DBNull.Value);
+                command.Parameters.AddWithValue("@description", description ?? (object)DBNull.Value);
+                command.Parameters.AddWithValue("@createdAt", DateTime.UtcNow);
+
+                connection.Open();
+                return command.ExecuteNonQuery() > 0;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Error LogPointsTransaction: " + ex.Message);
+                return false;
+            }
+        }
+
+        public List<PointsTransaction> GetPointsHistory(int userId, int limit = 50)
+        {
+            var list = new List<PointsTransaction>();
+            string query = @"
+                SELECT ""Id"", ""UserId"", ""Points"", ""Type"", ""Reference"", ""Description"", ""CreatedAt""
+                FROM ""PointsTransactions""
+                WHERE ""UserId"" = @userId
+                ORDER BY ""CreatedAt"" DESC
+                LIMIT @limit";
+
+            try
+            {
+                using var connection = new NpgsqlConnection(_connectionString);
+                using var command = new NpgsqlCommand(query, connection);
+                command.Parameters.AddWithValue("@userId", userId);
+                command.Parameters.AddWithValue("@limit", limit);
+                connection.Open();
+
+                using var reader = command.ExecuteReader();
+                while (reader.Read())
+                {
+                    list.Add(new PointsTransaction
+                    {
+                        Id = reader.GetInt32(reader.GetOrdinal("Id")),
+                        UserId = reader.GetInt32(reader.GetOrdinal("UserId")),
+                        Points = Convert.ToInt32(reader["Points"]),
+                        Type = reader["Type"]?.ToString() ?? "info",
+                        Reference = reader["Reference"]?.ToString(),
+                        Description = reader["Description"]?.ToString(),
+                        CreatedAt = reader["CreatedAt"] as DateTime? ?? DateTime.UtcNow
+                    });
+                }
+                return list;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Error GetPointsHistory: " + ex.Message);
+                return list;
+            }
+        }
+
+        public bool SpendPoints(int userId, int points, string type, string reference,
+            string description, out string? errorMessage)
+        {
+            errorMessage = null;
+
+            try
+            {
+                using var connection = new NpgsqlConnection(_connectionString);
+                connection.Open();
+                using var transaction = connection.BeginTransaction();
+
+                try
+                {
+                    // 1) Current points check (with row lock)
+                    int currentPoints;
+                    using (var checkCmd = new NpgsqlCommand(
+                        @"SELECT COALESCE(""TotalPoints"", 0) FROM ""Users"" WHERE ""Id"" = @id FOR UPDATE",
+                        connection, transaction))
+                    {
+                        checkCmd.Parameters.AddWithValue("@id", userId);
+                        var result = checkCmd.ExecuteScalar();
+                        currentPoints = result != null && result != DBNull.Value ? Convert.ToInt32(result) : 0;
+                    }
+
+                    if (currentPoints < points)
+                    {
+                        errorMessage = $"Not enough points. You have {currentPoints}, need {points}.";
+                        transaction.Rollback();
+                        return false;
+                    }
+
+                    // 2) Deduct points
+                    using (var deductCmd = new NpgsqlCommand(
+                        @"UPDATE ""Users"" SET ""TotalPoints"" = ""TotalPoints"" - @points WHERE ""Id"" = @id",
+                        connection, transaction))
+                    {
+                        deductCmd.Parameters.AddWithValue("@points", points);
+                        deductCmd.Parameters.AddWithValue("@id", userId);
+                        deductCmd.ExecuteNonQuery();
+                    }
+
+                    // 3) Log transaction
+                    using (var logCmd = new NpgsqlCommand(
+                        @"INSERT INTO ""PointsTransactions"" 
+                          (""UserId"", ""Points"", ""Type"", ""Reference"", ""Description"", ""CreatedAt"")
+                          VALUES (@userId, @points, @type, @reference, @description, @createdAt)",
+                        connection, transaction))
+                    {
+                        logCmd.Parameters.AddWithValue("@userId", userId);
+                        logCmd.Parameters.AddWithValue("@points", -points);
+                        logCmd.Parameters.AddWithValue("@type", type);
+                        logCmd.Parameters.AddWithValue("@reference", reference ?? (object)DBNull.Value);
+                        logCmd.Parameters.AddWithValue("@description", description ?? (object)DBNull.Value);
+                        logCmd.Parameters.AddWithValue("@createdAt", DateTime.UtcNow);
+                        logCmd.ExecuteNonQuery();
+                    }
+
+                    transaction.Commit();
+                    Console.WriteLine($"✅ Spent {points} pts from user {userId} — {description}");
+                    return true;
+                }
+                catch
+                {
+                    transaction.Rollback();
+                    throw;
+                }
+            }
+            catch (Exception ex)
+            {
+                errorMessage = ex.Message;
+                Console.WriteLine("Error SpendPoints: " + ex.Message);
+                return false;
+            }
+        }
+
+        public bool AddPointsWithLog(int userId, int points, string type, string reference, string description)
+        {
+            if (points <= 0) return false;
+
+            try
+            {
+                using var connection = new NpgsqlConnection(_connectionString);
+                connection.Open();
+                using var transaction = connection.BeginTransaction();
+
+                try
+                {
+                    // 1) Add points
+                    using (var addCmd = new NpgsqlCommand(
+                        @"UPDATE ""Users"" 
+                          SET ""TotalPoints"" = GREATEST(0, COALESCE(""TotalPoints"", 0) + @points)
+                          WHERE ""Id"" = @id",
+                        connection, transaction))
+                    {
+                        addCmd.Parameters.AddWithValue("@points", points);
+                        addCmd.Parameters.AddWithValue("@id", userId);
+                        addCmd.ExecuteNonQuery();
+                    }
+
+                    // 2) Log transaction
+                    using (var logCmd = new NpgsqlCommand(
+                        @"INSERT INTO ""PointsTransactions"" 
+                          (""UserId"", ""Points"", ""Type"", ""Reference"", ""Description"", ""CreatedAt"")
+                          VALUES (@userId, @points, @type, @reference, @description, @createdAt)",
+                        connection, transaction))
+                    {
+                        logCmd.Parameters.AddWithValue("@userId", userId);
+                        logCmd.Parameters.AddWithValue("@points", points);
+                        logCmd.Parameters.AddWithValue("@type", type);
+                        logCmd.Parameters.AddWithValue("@reference", reference ?? (object)DBNull.Value);
+                        logCmd.Parameters.AddWithValue("@description", description ?? (object)DBNull.Value);
+                        logCmd.Parameters.AddWithValue("@createdAt", DateTime.UtcNow);
+                        logCmd.ExecuteNonQuery();
+                    }
+
+                    transaction.Commit();
+                    return true;
+                }
+                catch
+                {
+                    transaction.Rollback();
+                    throw;
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Error AddPointsWithLog: " + ex.Message);
+                return false;
+            }
         }
 
         // ============================================================
@@ -841,7 +1029,6 @@ namespace Tutorbub.Models
                 using var connection = new NpgsqlConnection(_connectionString);
                 connection.Open();
 
-                // Quiz related deletions
                 using (var deleteQuizQuestions = new NpgsqlCommand(
                     @"DELETE FROM ""QuizQuestions"" WHERE ""QuizId"" IN (SELECT ""Id"" FROM ""ModuleQuizzes"" WHERE ""CourseId"" = @id)", connection))
                 {
@@ -1559,6 +1746,22 @@ namespace Tutorbub.Models
         public bool CreateNotice(Notice notice, out string? errorMessage)
         {
             errorMessage = null;
+
+            // 🔧 FIX: Category = "News" হলে IsAnnouncement force FALSE
+            if (string.Equals(notice.Category, "News", StringComparison.OrdinalIgnoreCase))
+            {
+                notice.IsAnnouncement = false;
+                Console.WriteLine("🔧 DB FIX: Category=News → IsAnnouncement forced to FALSE");
+            }
+
+            if (notice.PublishedDate == default(DateTime) ||
+                notice.PublishedDate.Year < 2000 ||
+                notice.PublishedDate.Year > 2100)
+            {
+                notice.PublishedDate = DateTime.Now;
+                Console.WriteLine("🔧 DB FIX: PublishedDate was invalid → set to NOW");
+            }
+
             string query = @"
                 INSERT INTO ""Notices"" 
                 (""Title"", ""Content"", ""Category"", ""ImageUrl"", 
@@ -1587,6 +1790,7 @@ namespace Tutorbub.Models
                 if (result != null && int.TryParse(result.ToString(), out int newId))
                 {
                     notice.Id = newId;
+                    Console.WriteLine($"✅ Notice saved: Id={newId}, Category={notice.Category}, IsAnnouncement={notice.IsAnnouncement}");
                     return true;
                 }
                 return false;
@@ -1616,11 +1820,6 @@ namespace Tutorbub.Models
                 }
 
                 Console.WriteLine($"GetAllNotices: {notices.Count} notices found");
-                foreach (var n in notices)
-                {
-                    Console.WriteLine($"  - Id={n.Id}, Title={n.Title}, IsAnnouncement={n.IsAnnouncement}");
-                }
-
                 return notices;
             }
             catch (Exception ex)
@@ -1658,6 +1857,21 @@ namespace Tutorbub.Models
         public bool UpdateNotice(Notice notice, out string? errorMessage)
         {
             errorMessage = null;
+
+            // 🔧 FIX: Category = "News" হলে IsAnnouncement force FALSE
+            if (string.Equals(notice.Category, "News", StringComparison.OrdinalIgnoreCase))
+            {
+                notice.IsAnnouncement = false;
+                Console.WriteLine("🔧 DB UPDATE FIX: Category=News → IsAnnouncement forced to FALSE");
+            }
+
+            if (notice.PublishedDate == default(DateTime) ||
+                notice.PublishedDate.Year < 2000 ||
+                notice.PublishedDate.Year > 2100)
+            {
+                notice.PublishedDate = DateTime.Now;
+            }
+
             string query = @"
                 UPDATE ""Notices"" SET 
                     ""Title"" = @title,
@@ -1715,7 +1929,7 @@ namespace Tutorbub.Models
         }
 
         // ============================================================
-        // ===== QUIZ RELATED METHODS (Course-wise Module Quiz) =====
+        // ===== QUIZ RELATED METHODS =====
         // ============================================================
 
         public bool CreateModuleQuiz(ModuleQuiz quiz, out string? errorMessage)
@@ -1925,7 +2139,6 @@ namespace Tutorbub.Models
             catch { return false; }
         }
 
-        // ===== Quiz Questions =====
         public List<QuizQuestionItem> GetQuizQuestions(int quizId)
         {
             var questions = new List<QuizQuestionItem>();
@@ -2019,7 +2232,6 @@ namespace Tutorbub.Models
             catch { return false; }
         }
 
-        // ===== Quiz Attempts =====
         public bool SaveQuizAttempt(QuizAttempt attempt, out string? errorMessage)
         {
             errorMessage = null;
@@ -2220,12 +2432,10 @@ namespace Tutorbub.Models
             catch { return ids; }
         }
 
-        // Returns module -> (total lessons, completed lessons)
         public Dictionary<int, (int Total, int Completed)> GetModuleProgress(int userId, int courseId)
         {
             var result = new Dictionary<int, (int Total, int Completed)>();
 
-            // 1) total lessons per module
             var totalByModule = new Dictionary<int, int>();
             string totalQuery = @"SELECT ""ModuleNumber"", COUNT(*) FROM ""CourseLessons"" WHERE ""CourseId"" = @c GROUP BY ""ModuleNumber""";
             try
@@ -2242,7 +2452,6 @@ namespace Tutorbub.Models
             }
             catch { }
 
-            // 2) completed lessons per module
             var completedByModule = new Dictionary<int, int>();
             string completedQuery = @"
                 SELECT ""ModuleNumber"", COUNT(*) 
@@ -2428,7 +2637,6 @@ namespace Tutorbub.Models
             catch { return false; }
         }
 
-        // Milestone config (admin can set modules per milestone)
         public int GetModulesPerMilestone(int courseId)
         {
             string query = @"SELECT ""ModulesPerMilestone"" FROM ""CourseMilestoneConfig"" WHERE ""CourseId"" = @c";
@@ -2462,6 +2670,774 @@ namespace Tutorbub.Models
                 return command.ExecuteNonQuery() > 0;
             }
             catch { return false; }
+        }
+
+        // ============================================================
+        // ===== ASSIGNMENT SUBMISSION METHODS =====
+        // ============================================================
+
+        public bool CreateAssignmentSubmission(AssignmentSubmission submission, out string? errorMessage)
+        {
+            errorMessage = null;
+
+            try
+            {
+                // Late check
+                var (isLate, daysLate, latePointsCost, _) =
+                    CheckLateSubmission(submission.AssignmentId, DateTime.UtcNow);
+
+                int pointsDeducted = 0;
+
+                if (isLate)
+                {
+                    if (!SpendPoints(submission.UserId, latePointsCost,
+                        "Spent_Late",
+                        $"assignment_{submission.AssignmentId}_late",
+                        $"Late submission fee ({daysLate} days late)",
+                        out string? spendError))
+                    {
+                        errorMessage = $"Late submission requires {latePointsCost} points. {spendError}";
+                        return false;
+                    }
+                    pointsDeducted = latePointsCost;
+                }
+
+                string query = @"
+                    INSERT INTO ""AssignmentSubmissions"" 
+                    (""AssignmentId"", ""UserId"", ""CourseId"", ""DriveLink"", ""Note"", 
+                     ""Status"", ""SubmittedAt"", ""IsLateSubmission"", ""LatePointsCharged"")
+                    VALUES 
+                    (@assignmentId, @userId, @courseId, @driveLink, @note, 
+                     'Submitted', @submittedAt, @isLate, @latePoints)
+                    ON CONFLICT (""AssignmentId"", ""UserId"") 
+                    DO UPDATE SET 
+                        ""DriveLink"" = EXCLUDED.""DriveLink"",
+                        ""Note"" = EXCLUDED.""Note"",
+                        ""SubmittedAt"" = EXCLUDED.""SubmittedAt"",
+                        ""Status"" = 'Resubmitted',
+                        ""Marks"" = NULL,
+                        ""Feedback"" = NULL,
+                        ""GradedAt"" = NULL,
+                        ""GradedBy"" = NULL,
+                        ""IsLateSubmission"" = EXCLUDED.""IsLateSubmission"",
+                        ""LatePointsCharged"" = ""AssignmentSubmissions"".""LatePointsCharged"" + EXCLUDED.""LatePointsCharged""
+                    RETURNING ""Id""";
+
+                using var connection = new NpgsqlConnection(_connectionString);
+                using var command = new NpgsqlCommand(query, connection);
+
+                command.Parameters.AddWithValue("@assignmentId", submission.AssignmentId);
+                command.Parameters.AddWithValue("@userId", submission.UserId);
+                command.Parameters.AddWithValue("@courseId", submission.CourseId);
+                command.Parameters.AddWithValue("@driveLink", submission.DriveLink ?? "");
+                command.Parameters.AddWithValue("@note", submission.Note ?? (object)DBNull.Value);
+                command.Parameters.AddWithValue("@submittedAt", DateTime.UtcNow);
+                command.Parameters.AddWithValue("@isLate", isLate);
+                command.Parameters.AddWithValue("@latePoints", pointsDeducted);
+
+                connection.Open();
+                var result = command.ExecuteScalar();
+
+                if (result != null && int.TryParse(result.ToString(), out int newId))
+                {
+                    submission.Id = newId;
+                    submission.IsLateSubmission = isLate;
+                    submission.LatePointsCharged = pointsDeducted;
+                    Console.WriteLine($"✅ Submission saved: Id={newId}, IsLate={isLate}, PointsDeducted={pointsDeducted}");
+                    return true;
+                }
+
+                return false;
+            }
+            catch (Exception ex)
+            {
+                errorMessage = ex.Message;
+                Console.WriteLine("❌ Error CreateAssignmentSubmission: " + ex.Message);
+                return false;
+            }
+        }
+
+        public AssignmentSubmission? GetUserSubmission(int userId, int assignmentId)
+        {
+            string query = @"
+                SELECT s.*, a.""Title"" AS AssignmentTitle, a.""MilestoneNumber"", 
+                       a.""TotalMarks"", a.""DueDays"", a.""CreatedAt"" AS AssignmentCreatedAt
+                FROM ""AssignmentSubmissions"" s
+                LEFT JOIN ""MilestoneAssignments"" a ON s.""AssignmentId"" = a.""Id""
+                WHERE s.""UserId"" = @userId AND s.""AssignmentId"" = @assignmentId
+                LIMIT 1";
+
+            try
+            {
+                using var connection = new NpgsqlConnection(_connectionString);
+                using var command = new NpgsqlCommand(query, connection);
+                command.Parameters.AddWithValue("@userId", userId);
+                command.Parameters.AddWithValue("@assignmentId", assignmentId);
+                connection.Open();
+
+                using var reader = command.ExecuteReader();
+                if (reader.Read())
+                {
+                    var sub = new AssignmentSubmission
+                    {
+                        Id = reader.GetInt32(reader.GetOrdinal("Id")),
+                        AssignmentId = reader.GetInt32(reader.GetOrdinal("AssignmentId")),
+                        UserId = reader.GetInt32(reader.GetOrdinal("UserId")),
+                        CourseId = reader.GetInt32(reader.GetOrdinal("CourseId")),
+                        DriveLink = reader["DriveLink"]?.ToString() ?? "",
+                        Note = reader["Note"]?.ToString(),
+                        SubmittedAt = reader["SubmittedAt"] as DateTime? ?? DateTime.UtcNow,
+                        Marks = reader["Marks"] != DBNull.Value ? Convert.ToInt32(reader["Marks"]) : (int?)null,
+                        Feedback = reader["Feedback"]?.ToString(),
+                        GradedAt = reader["GradedAt"] as DateTime?,
+                        GradedBy = reader["GradedBy"] != DBNull.Value ? Convert.ToInt32(reader["GradedBy"]) : (int?)null,
+                        Status = reader["Status"]?.ToString() ?? "Submitted",
+                        AssignmentTitle = reader["AssignmentTitle"]?.ToString() ?? "",
+                        MilestoneNumber = reader["MilestoneNumber"] != DBNull.Value ? Convert.ToInt32(reader["MilestoneNumber"]) : 0,
+                        TotalMarks = reader["TotalMarks"] != DBNull.Value ? Convert.ToInt32(reader["TotalMarks"]) : 0
+                    };
+
+                    try { sub.ResubmitCount = Convert.ToInt32(reader["ResubmitCount"]); } catch { }
+                    try { sub.RecheckCount = Convert.ToInt32(reader["RecheckCount"]); } catch { }
+                    try { sub.PointsSpent = Convert.ToInt32(reader["PointsSpent"]); } catch { }
+                    try { sub.FirstMarks = reader["FirstMarks"] != DBNull.Value ? Convert.ToInt32(reader["FirstMarks"]) : (int?)null; } catch { }
+                    try { sub.IsLateSubmission = reader["IsLateSubmission"] as bool? ?? false; } catch { }
+                    try { sub.LatePointsCharged = Convert.ToInt32(reader["LatePointsCharged"]); } catch { }
+
+                    try
+                    {
+                        var assignmentCreatedAt = reader["AssignmentCreatedAt"] as DateTime?;
+                        var dueDays = reader["DueDays"] != DBNull.Value ? Convert.ToInt32(reader["DueDays"]) : 0;
+                        if (assignmentCreatedAt.HasValue && dueDays > 0)
+                        {
+                            sub.DueDate = assignmentCreatedAt.Value.AddDays(dueDays);
+                        }
+                    }
+                    catch { }
+
+                    return sub;
+                }
+                return null;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Error GetUserSubmission: " + ex.Message);
+                return null;
+            }
+        }
+
+        public List<AdminSubmissionViewModel> GetAllSubmissions(int? courseId = null, int? assignmentId = null, string? status = null)
+        {
+            var list = new List<AdminSubmissionViewModel>();
+
+            string query = @"
+                SELECT 
+                    s.""Id"", s.""AssignmentId"", s.""UserId"", s.""CourseId"",
+                    s.""DriveLink"", s.""Note"", s.""SubmittedAt"",
+                    s.""Marks"", s.""Feedback"", s.""GradedAt"", s.""Status"",
+                    a.""Title"" AS AssignmentTitle, a.""MilestoneNumber"", a.""TotalMarks"",
+                    c.""Title"" AS CourseName,
+                    u.""FullName"" AS UserFullName, u.""Email"" AS UserEmail, u.""UserName"" AS UserName
+                FROM ""AssignmentSubmissions"" s
+                LEFT JOIN ""MilestoneAssignments"" a ON s.""AssignmentId"" = a.""Id""
+                LEFT JOIN ""Courses"" c ON s.""CourseId"" = c.""Id""
+                LEFT JOIN ""Users"" u ON s.""UserId"" = u.""Id""
+                WHERE 1=1";
+
+            if (courseId.HasValue && courseId.Value > 0)
+                query += @" AND s.""CourseId"" = @courseId";
+
+            if (assignmentId.HasValue && assignmentId.Value > 0)
+                query += @" AND s.""AssignmentId"" = @assignmentId";
+
+            if (!string.IsNullOrEmpty(status) && status != "all")
+                query += @" AND s.""Status"" = @status";
+
+            query += @" ORDER BY s.""SubmittedAt"" DESC";
+
+            try
+            {
+                using var connection = new NpgsqlConnection(_connectionString);
+                using var command = new NpgsqlCommand(query, connection);
+
+                if (courseId.HasValue && courseId.Value > 0)
+                    command.Parameters.AddWithValue("@courseId", courseId.Value);
+
+                if (assignmentId.HasValue && assignmentId.Value > 0)
+                    command.Parameters.AddWithValue("@assignmentId", assignmentId.Value);
+
+                if (!string.IsNullOrEmpty(status) && status != "all")
+                    command.Parameters.AddWithValue("@status", status);
+
+                connection.Open();
+                using var reader = command.ExecuteReader();
+
+                while (reader.Read())
+                {
+                    var vm = new AdminSubmissionViewModel
+                    {
+                        Id = reader.GetInt32(reader.GetOrdinal("Id")),
+                        AssignmentId = reader.GetInt32(reader.GetOrdinal("AssignmentId")),
+                        UserId = reader.GetInt32(reader.GetOrdinal("UserId")),
+                        CourseId = reader.GetInt32(reader.GetOrdinal("CourseId")),
+                        DriveLink = reader["DriveLink"]?.ToString() ?? "",
+                        Note = reader["Note"]?.ToString(),
+                        SubmittedAt = reader["SubmittedAt"] as DateTime? ?? DateTime.UtcNow,
+                        Marks = reader["Marks"] != DBNull.Value ? Convert.ToInt32(reader["Marks"]) : (int?)null,
+                        Feedback = reader["Feedback"]?.ToString(),
+                        GradedAt = reader["GradedAt"] as DateTime?,
+                        Status = reader["Status"]?.ToString() ?? "Submitted",
+                        AssignmentTitle = reader["AssignmentTitle"]?.ToString() ?? "",
+                        MilestoneNumber = reader["MilestoneNumber"] != DBNull.Value ? Convert.ToInt32(reader["MilestoneNumber"]) : 0,
+                        TotalMarks = reader["TotalMarks"] != DBNull.Value ? Convert.ToInt32(reader["TotalMarks"]) : 0,
+                        CourseName = reader["CourseName"]?.ToString() ?? "",
+                        UserFullName = reader["UserFullName"]?.ToString() ?? "",
+                        UserEmail = reader["UserEmail"]?.ToString() ?? "",
+                        UserName = reader["UserName"]?.ToString() ?? ""
+                    };
+
+                    try { vm.ResubmitCount = Convert.ToInt32(reader["ResubmitCount"]); } catch { }
+                    try { vm.RecheckCount = Convert.ToInt32(reader["RecheckCount"]); } catch { }
+                    try { vm.PointsSpent = Convert.ToInt32(reader["PointsSpent"]); } catch { }
+                    try { vm.FirstMarks = reader["FirstMarks"] != DBNull.Value ? Convert.ToInt32(reader["FirstMarks"]) : (int?)null; } catch { }
+                    try { vm.IsLateSubmission = reader["IsLateSubmission"] as bool? ?? false; } catch { }
+                    try { vm.LatePointsCharged = Convert.ToInt32(reader["LatePointsCharged"]); } catch { }
+
+                    list.Add(vm);
+                }
+                return list;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Error GetAllSubmissions: " + ex.Message);
+                return list;
+            }
+        }
+
+        public AssignmentSubmission? GetSubmissionById(int submissionId)
+        {
+            string query = @"
+                SELECT s.*, a.""Title"" AS AssignmentTitle, a.""MilestoneNumber"", 
+                       a.""TotalMarks"", a.""DueDays"", a.""CreatedAt"" AS AssignmentCreatedAt,
+                       c.""Title"" AS CourseName,
+                       u.""FullName"" AS UserFullName, u.""Email"" AS UserEmail, u.""UserName"" AS UserName
+                FROM ""AssignmentSubmissions"" s
+                LEFT JOIN ""MilestoneAssignments"" a ON s.""AssignmentId"" = a.""Id""
+                LEFT JOIN ""Courses"" c ON s.""CourseId"" = c.""Id""
+                LEFT JOIN ""Users"" u ON s.""UserId"" = u.""Id""
+                WHERE s.""Id"" = @id";
+
+            try
+            {
+                using var connection = new NpgsqlConnection(_connectionString);
+                using var command = new NpgsqlCommand(query, connection);
+                command.Parameters.AddWithValue("@id", submissionId);
+                connection.Open();
+
+                using var reader = command.ExecuteReader();
+                if (reader.Read())
+                {
+                    var sub = new AssignmentSubmission
+                    {
+                        Id = reader.GetInt32(reader.GetOrdinal("Id")),
+                        AssignmentId = reader.GetInt32(reader.GetOrdinal("AssignmentId")),
+                        UserId = reader.GetInt32(reader.GetOrdinal("UserId")),
+                        CourseId = reader.GetInt32(reader.GetOrdinal("CourseId")),
+                        DriveLink = reader["DriveLink"]?.ToString() ?? "",
+                        Note = reader["Note"]?.ToString(),
+                        SubmittedAt = reader["SubmittedAt"] as DateTime? ?? DateTime.UtcNow,
+                        Marks = reader["Marks"] != DBNull.Value ? Convert.ToInt32(reader["Marks"]) : (int?)null,
+                        Feedback = reader["Feedback"]?.ToString(),
+                        GradedAt = reader["GradedAt"] as DateTime?,
+                        GradedBy = reader["GradedBy"] != DBNull.Value ? Convert.ToInt32(reader["GradedBy"]) : (int?)null,
+                        Status = reader["Status"]?.ToString() ?? "Submitted",
+                        AssignmentTitle = reader["AssignmentTitle"]?.ToString() ?? "",
+                        MilestoneNumber = reader["MilestoneNumber"] != DBNull.Value ? Convert.ToInt32(reader["MilestoneNumber"]) : 0,
+                        TotalMarks = reader["TotalMarks"] != DBNull.Value ? Convert.ToInt32(reader["TotalMarks"]) : 0,
+                        CourseName = reader["CourseName"]?.ToString() ?? "",
+                        UserFullName = reader["UserFullName"]?.ToString() ?? "",
+                        UserEmail = reader["UserEmail"]?.ToString() ?? "",
+                        UserName = reader["UserName"]?.ToString() ?? ""
+                    };
+
+                    try { sub.ResubmitCount = Convert.ToInt32(reader["ResubmitCount"]); } catch { }
+                    try { sub.RecheckCount = Convert.ToInt32(reader["RecheckCount"]); } catch { }
+                    try { sub.PointsSpent = Convert.ToInt32(reader["PointsSpent"]); } catch { }
+                    try { sub.FirstMarks = reader["FirstMarks"] != DBNull.Value ? Convert.ToInt32(reader["FirstMarks"]) : (int?)null; } catch { }
+                    try { sub.IsLateSubmission = reader["IsLateSubmission"] as bool? ?? false; } catch { }
+                    try { sub.LatePointsCharged = Convert.ToInt32(reader["LatePointsCharged"]); } catch { }
+
+                    try
+                    {
+                        var assignmentCreatedAt = reader["AssignmentCreatedAt"] as DateTime?;
+                        var dueDays = reader["DueDays"] != DBNull.Value ? Convert.ToInt32(reader["DueDays"]) : 0;
+                        if (assignmentCreatedAt.HasValue && dueDays > 0)
+                        {
+                            sub.DueDate = assignmentCreatedAt.Value.AddDays(dueDays);
+                        }
+                    }
+                    catch { }
+
+                    return sub;
+                }
+                return null;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Error GetSubmissionById: " + ex.Message);
+                return null;
+            }
+        }
+
+        public bool GradeSubmission(int submissionId, int marks, string? feedback, int adminId)
+        {
+            string query = @"
+                UPDATE ""AssignmentSubmissions"" SET
+                    ""Marks"" = @marks,
+                    ""Feedback"" = @feedback,
+                    ""GradedAt"" = @gradedAt,
+                    ""GradedBy"" = @gradedBy,
+                    ""Status"" = 'Graded'
+                WHERE ""Id"" = @id";
+
+            try
+            {
+                using var connection = new NpgsqlConnection(_connectionString);
+                using var command = new NpgsqlCommand(query, connection);
+
+                command.Parameters.AddWithValue("@id", submissionId);
+                command.Parameters.AddWithValue("@marks", marks);
+                command.Parameters.AddWithValue("@feedback", feedback ?? (object)DBNull.Value);
+                command.Parameters.AddWithValue("@gradedAt", DateTime.UtcNow);
+                command.Parameters.AddWithValue("@gradedBy", adminId);
+
+                connection.Open();
+                bool ok = command.ExecuteNonQuery() > 0;
+                Console.WriteLine($"✅ GradeSubmission: submissionId={submissionId}, marks={marks}, ok={ok}");
+                return ok;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Error GradeSubmission: " + ex.Message);
+                return false;
+            }
+        }
+
+        public List<AssignmentSubmission> GetUserSubmissionsForCourse(int userId, int courseId)
+        {
+            var list = new List<AssignmentSubmission>();
+            string query = @"
+                SELECT s.*, a.""Title"" AS AssignmentTitle, a.""MilestoneNumber"", a.""TotalMarks""
+                FROM ""AssignmentSubmissions"" s
+                LEFT JOIN ""MilestoneAssignments"" a ON s.""AssignmentId"" = a.""Id""
+                WHERE s.""UserId"" = @userId AND s.""CourseId"" = @courseId
+                ORDER BY s.""SubmittedAt"" DESC";
+
+            try
+            {
+                using var connection = new NpgsqlConnection(_connectionString);
+                using var command = new NpgsqlCommand(query, connection);
+                command.Parameters.AddWithValue("@userId", userId);
+                command.Parameters.AddWithValue("@courseId", courseId);
+                connection.Open();
+
+                using var reader = command.ExecuteReader();
+                while (reader.Read())
+                {
+                    list.Add(new AssignmentSubmission
+                    {
+                        Id = reader.GetInt32(reader.GetOrdinal("Id")),
+                        AssignmentId = reader.GetInt32(reader.GetOrdinal("AssignmentId")),
+                        UserId = reader.GetInt32(reader.GetOrdinal("UserId")),
+                        CourseId = reader.GetInt32(reader.GetOrdinal("CourseId")),
+                        DriveLink = reader["DriveLink"]?.ToString() ?? "",
+                        Note = reader["Note"]?.ToString(),
+                        SubmittedAt = reader["SubmittedAt"] as DateTime? ?? DateTime.UtcNow,
+                        Marks = reader["Marks"] != DBNull.Value ? Convert.ToInt32(reader["Marks"]) : (int?)null,
+                        Feedback = reader["Feedback"]?.ToString(),
+                        GradedAt = reader["GradedAt"] as DateTime?,
+                        Status = reader["Status"]?.ToString() ?? "Submitted",
+                        AssignmentTitle = reader["AssignmentTitle"]?.ToString() ?? "",
+                        MilestoneNumber = reader["MilestoneNumber"] != DBNull.Value ? Convert.ToInt32(reader["MilestoneNumber"]) : 0,
+                        TotalMarks = reader["TotalMarks"] != DBNull.Value ? Convert.ToInt32(reader["TotalMarks"]) : 0
+                    });
+                }
+                return list;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Error GetUserSubmissionsForCourse: " + ex.Message);
+                return list;
+            }
+        }
+
+        public (int Total, int Pending, int Graded) GetSubmissionStats()
+        {
+            string query = @"
+                SELECT 
+                    COUNT(*) AS total,
+                    COUNT(*) FILTER (WHERE ""Status"" != 'Graded') AS pending,
+                    COUNT(*) FILTER (WHERE ""Status"" = 'Graded') AS graded
+                FROM ""AssignmentSubmissions""";
+
+            try
+            {
+                using var connection = new NpgsqlConnection(_connectionString);
+                using var command = new NpgsqlCommand(query, connection);
+                connection.Open();
+                using var reader = command.ExecuteReader();
+                if (reader.Read())
+                {
+                    return (
+                        Convert.ToInt32(reader["total"]),
+                        Convert.ToInt32(reader["pending"]),
+                        Convert.ToInt32(reader["graded"])
+                    );
+                }
+                return (0, 0, 0);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Error GetSubmissionStats: " + ex.Message);
+                return (0, 0, 0);
+            }
+        }
+
+        // ============================================================
+        // ===== ✅ RESUBMIT ELIGIBILITY (50 Points) =====
+        // ============================================================
+
+        public (bool CanResubmit, int UserPoints, int RequiredPoints, string Reason)
+            CheckResubmitEligibility(int userId, int assignmentId)
+        {
+            const int COST = AssignmentSubmission.RESUBMIT_COST;
+
+            try
+            {
+                var submission = GetUserSubmission(userId, assignmentId);
+                if (submission == null)
+                    return (false, 0, COST, "No submission found.");
+
+                if (!submission.IsGraded)
+                    return (false, 0, COST, "Your submission is not yet graded.");
+
+                if (submission.Percentage >= AssignmentSubmission.PASS_PERCENTAGE)
+                    return (false, 0, COST, "You already passed this assignment.");
+
+                if (submission.ResubmitCount >= AssignmentSubmission.MAX_RESUBMITS)
+                    return (false, 0, COST, $"Maximum resubmit limit ({AssignmentSubmission.MAX_RESUBMITS}) reached.");
+
+                int userPoints = GetUserPoints(userId);
+                if (userPoints < COST)
+                    return (false, userPoints, COST, $"You have {userPoints} points. Need {COST} points.");
+
+                return (true, userPoints, COST, "Eligible for resubmit.");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Error CheckResubmitEligibility: " + ex.Message);
+                return (false, 0, COST, "Error checking eligibility.");
+            }
+        }
+
+        public bool ResubmitAssignmentWithPoints(int userId, int assignmentId, out string? errorMessage)
+        {
+            errorMessage = null;
+
+            try
+            {
+                var (canResubmit, _, _, reason) = CheckResubmitEligibility(userId, assignmentId);
+                if (!canResubmit)
+                {
+                    errorMessage = reason;
+                    return false;
+                }
+
+                var submission = GetUserSubmission(userId, assignmentId);
+                if (submission == null)
+                {
+                    errorMessage = "Submission not found.";
+                    return false;
+                }
+
+                if (!SpendPoints(userId, AssignmentSubmission.RESUBMIT_COST,
+                    "Spent_Resubmit",
+                    $"assignment_{assignmentId}_resubmit",
+                    $"Resubmit assignment: {submission.AssignmentTitle}",
+                    out string? spendError))
+                {
+                    errorMessage = spendError;
+                    return false;
+                }
+
+                using var connection = new NpgsqlConnection(_connectionString);
+                connection.Open();
+
+                using var command = new NpgsqlCommand(@"
+                    UPDATE ""AssignmentSubmissions"" SET
+                        ""ResubmitCount"" = ""ResubmitCount"" + 1,
+                        ""PointsSpent"" = ""PointsSpent"" + @cost,
+                        ""FirstMarks"" = COALESCE(""FirstMarks"", ""Marks""),
+                        ""Marks"" = NULL,
+                        ""Feedback"" = NULL,
+                        ""GradedAt"" = NULL,
+                        ""GradedBy"" = NULL,
+                        ""Status"" = 'Resubmitted'
+                    WHERE ""Id"" = @id", connection);
+
+                command.Parameters.AddWithValue("@id", submission.Id);
+                command.Parameters.AddWithValue("@cost", AssignmentSubmission.RESUBMIT_COST);
+
+                return command.ExecuteNonQuery() > 0;
+            }
+            catch (Exception ex)
+            {
+                errorMessage = ex.Message;
+                return false;
+            }
+        }
+
+        // ============================================================
+        // ===== ✅ RECHECK ELIGIBILITY (50 Points) =====
+        // ============================================================
+
+        public (bool CanRecheck, int UserPoints, int RequiredPoints, string Reason)
+            CheckRecheckEligibility(int userId, int assignmentId)
+        {
+            const int COST = AssignmentSubmission.RECHECK_COST;
+
+            try
+            {
+                var submission = GetUserSubmission(userId, assignmentId);
+                if (submission == null)
+                    return (false, 0, COST, "No submission found.");
+
+                if (!submission.IsGraded)
+                    return (false, 0, COST, "Your submission is not yet graded.");
+
+                if (submission.RecheckCount >= AssignmentSubmission.MAX_RECHECKS)
+                    return (false, 0, COST, $"Maximum recheck limit ({AssignmentSubmission.MAX_RECHECKS}) reached.");
+
+                int userPoints = GetUserPoints(userId);
+                if (userPoints < COST)
+                    return (false, userPoints, COST, $"You have {userPoints} points. Need {COST} points.");
+
+                return (true, userPoints, COST, "Eligible for recheck.");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Error CheckRecheckEligibility: " + ex.Message);
+                return (false, 0, COST, "Error checking eligibility.");
+            }
+        }
+
+        public bool RequestRecheckWithPoints(int userId, int assignmentId, string? reason,
+            out string? errorMessage)
+        {
+            errorMessage = null;
+
+            try
+            {
+                var (canRecheck, _, _, eReason) = CheckRecheckEligibility(userId, assignmentId);
+                if (!canRecheck)
+                {
+                    errorMessage = eReason;
+                    return false;
+                }
+
+                var submission = GetUserSubmission(userId, assignmentId);
+                if (submission == null)
+                {
+                    errorMessage = "Submission not found.";
+                    return false;
+                }
+
+                if (!SpendPoints(userId, AssignmentSubmission.RECHECK_COST,
+                    "Spent_Recheck",
+                    $"assignment_{assignmentId}_recheck",
+                    $"Recheck request: {submission.AssignmentTitle}",
+                    out string? spendError))
+                {
+                    errorMessage = spendError;
+                    return false;
+                }
+
+                using var connection = new NpgsqlConnection(_connectionString);
+                connection.Open();
+
+                using var command = new NpgsqlCommand(@"
+                    UPDATE ""AssignmentSubmissions"" SET
+                        ""RecheckCount"" = ""RecheckCount"" + 1,
+                        ""PointsSpent"" = ""PointsSpent"" + @cost,
+                        ""Status"" = 'Recheck_Requested',
+                        ""Note"" = COALESCE(""Note"", '') || @recheckNote
+                    WHERE ""Id"" = @id", connection);
+
+                command.Parameters.AddWithValue("@id", submission.Id);
+                command.Parameters.AddWithValue("@cost", AssignmentSubmission.RECHECK_COST);
+                command.Parameters.AddWithValue("@recheckNote",
+                    $"\n\n[RECHECK REQUESTED]: {reason ?? "No reason provided"}");
+
+                return command.ExecuteNonQuery() > 0;
+            }
+            catch (Exception ex)
+            {
+                errorMessage = ex.Message;
+                return false;
+            }
+        }
+
+        // ============================================================
+        // ===== ✅ LATE SUBMIT CHECK (100 Points) =====
+        // ============================================================
+
+        public (bool IsLate, int DaysLate, int PointsCost, string Message)
+            CheckLateSubmission(int assignmentId, DateTime submitTime)
+        {
+            const int LATE_COST = AssignmentSubmission.LATE_SUBMIT_COST;
+
+            try
+            {
+                var assignment = GetAssignmentById(assignmentId);
+                if (assignment == null)
+                    return (false, 0, 0, "Assignment not found.");
+
+                if (assignment.CreatedAt == default(DateTime))
+                    return (false, 0, 0, "No due date set.");
+
+                var dueDate = assignment.CreatedAt.AddDays(assignment.DueDays);
+
+                if (submitTime <= dueDate)
+                    return (false, 0, 0, "Submission on time.");
+
+                var daysLate = (int)Math.Ceiling((submitTime - dueDate).TotalDays);
+                return (true, daysLate, LATE_COST,
+                    $"This is a LATE submission ({daysLate} day{(daysLate > 1 ? "s" : "")} late). {LATE_COST} points will be deducted.");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Error CheckLateSubmission: " + ex.Message);
+                return (false, 0, 0, "Error checking late status.");
+            }
+        }
+
+        // ============================================================
+        // ===== SITE SETTINGS METHODS =====
+        // ============================================================
+
+        public SiteSettings GetSiteSettings()
+        {
+            string query = @"SELECT * FROM ""SiteSettings"" ORDER BY ""Id"" LIMIT 1";
+
+            try
+            {
+                using var connection = new NpgsqlConnection(_connectionString);
+                using var command = new NpgsqlCommand(query, connection);
+                connection.Open();
+                using var reader = command.ExecuteReader();
+
+                if (reader.Read())
+                {
+                    return new SiteSettings
+                    {
+                        Id = reader.GetInt32(reader.GetOrdinal("Id")),
+                        HeroImageUrls = reader["HeroImageUrls"]?.ToString() ?? "",
+                        SliderEnabled = reader["SliderEnabled"] as bool? ?? false,
+                        SliderIntervalSeconds = Convert.ToInt32(reader["SliderIntervalSeconds"]),
+                        PrimaryColor = reader["PrimaryColor"]?.ToString() ?? "#1F3B2C",
+                        SecondaryColor = reader["SecondaryColor"]?.ToString() ?? "#F3F1E7",
+                        AccentColor = reader["AccentColor"]?.ToString() ?? "#F4C744",
+                        TextColor = reader["TextColor"]?.ToString() ?? "#4B5648",
+                        NavbarBgColor = reader["NavbarBgColor"]?.ToString() ?? "#F3F1E7",
+                        FooterBgColor = reader["FooterBgColor"]?.ToString() ?? "#F3F1E7",
+                        CreatedAt = reader["CreatedAt"] as DateTime? ?? DateTime.UtcNow,
+                        UpdatedAt = reader["UpdatedAt"] as DateTime?
+                    };
+                }
+                return new SiteSettings();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Error getting site settings: " + ex.Message);
+                return new SiteSettings();
+            }
+        }
+
+        public bool SaveSiteSettings(SiteSettings settings, out string? errorMessage)
+        {
+            errorMessage = null;
+
+            string checkQuery = @"SELECT COUNT(*) FROM ""SiteSettings""";
+
+            try
+            {
+                using var connection = new NpgsqlConnection(_connectionString);
+                connection.Open();
+
+                long existing;
+                using (var checkCmd = new NpgsqlCommand(checkQuery, connection))
+                {
+                    existing = Convert.ToInt64(checkCmd.ExecuteScalar());
+                }
+
+                string query;
+                if (existing > 0)
+                {
+                    query = @"
+                        UPDATE ""SiteSettings"" SET
+                            ""HeroImageUrls"" = @heroImageUrls,
+                            ""SliderEnabled"" = @sliderEnabled,
+                            ""SliderIntervalSeconds"" = @sliderInterval,
+                            ""PrimaryColor"" = @primaryColor,
+                            ""SecondaryColor"" = @secondaryColor,
+                            ""AccentColor"" = @accentColor,
+                            ""TextColor"" = @textColor,
+                            ""NavbarBgColor"" = @navbarBgColor,
+                            ""FooterBgColor"" = @footerBgColor,
+                            ""UpdatedAt"" = @updatedAt
+                        WHERE ""Id"" = @id";
+                }
+                else
+                {
+                    query = @"
+                        INSERT INTO ""SiteSettings"" 
+                        (""HeroImageUrls"", ""SliderEnabled"", ""SliderIntervalSeconds"",
+                         ""PrimaryColor"", ""SecondaryColor"", ""AccentColor"", ""TextColor"",
+                         ""NavbarBgColor"", ""FooterBgColor"", ""CreatedAt"")
+                        VALUES 
+                        (@heroImageUrls, @sliderEnabled, @sliderInterval,
+                         @primaryColor, @secondaryColor, @accentColor, @textColor,
+                         @navbarBgColor, @footerBgColor, @createdAt)";
+                }
+
+                using var command = new NpgsqlCommand(query, connection);
+                command.Parameters.AddWithValue("@heroImageUrls", settings.HeroImageUrls ?? "");
+                command.Parameters.AddWithValue("@sliderEnabled", settings.SliderEnabled);
+                command.Parameters.AddWithValue("@sliderInterval", settings.SliderIntervalSeconds);
+                command.Parameters.AddWithValue("@primaryColor", settings.PrimaryColor ?? "#1F3B2C");
+                command.Parameters.AddWithValue("@secondaryColor", settings.SecondaryColor ?? "#F3F1E7");
+                command.Parameters.AddWithValue("@accentColor", settings.AccentColor ?? "#F4C744");
+                command.Parameters.AddWithValue("@textColor", settings.TextColor ?? "#4B5648");
+                command.Parameters.AddWithValue("@navbarBgColor", settings.NavbarBgColor ?? "#F3F1E7");
+                command.Parameters.AddWithValue("@footerBgColor", settings.FooterBgColor ?? "#F3F1E7");
+
+                if (existing > 0)
+                {
+                    command.Parameters.AddWithValue("@id", settings.Id);
+                    command.Parameters.AddWithValue("@updatedAt", DateTime.UtcNow);
+                }
+                else
+                {
+                    command.Parameters.AddWithValue("@createdAt", DateTime.UtcNow);
+                }
+
+                return command.ExecuteNonQuery() > 0;
+            }
+            catch (Exception ex)
+            {
+                errorMessage = ex.Message;
+                return false;
+            }
         }
 
         // ============================================================

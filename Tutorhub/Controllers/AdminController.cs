@@ -38,11 +38,13 @@ namespace Tutorbub.Controllers
             var pendingCount = requests.Count(r => r.Status == "Pending");
 
             var payStats = _dbHelper.GetPaymentStats();
+            var submissionStats = _dbHelper.GetSubmissionStats();
 
             ViewBag.UserCount = users.Count;
             ViewBag.PendingCount = pendingCount;
             ViewBag.PendingPayments = payStats.Pending;
             ViewBag.TotalRevenue = payStats.TotalRevenue;
+            ViewBag.PendingSubmissions = submissionStats.Pending;
 
             return View(users);
         }
@@ -381,6 +383,7 @@ namespace Tutorbub.Controllers
 
             var payments = _dbHelper.GetAllOrders(status);
             var stats = _dbHelper.GetPaymentStats();
+            var subStats = _dbHelper.GetSubmissionStats();
 
             ViewBag.PendingCount = stats.Pending;
             ViewBag.ApprovedCount = stats.Approved;
@@ -388,6 +391,7 @@ namespace Tutorbub.Controllers
             ViewBag.TotalRevenue = stats.TotalRevenue;
             ViewBag.CurrentFilter = status;
             ViewBag.PendingPayments = stats.Pending;
+            ViewBag.PendingSubmissions = subStats.Pending;
 
             return View(payments);
         }
@@ -776,6 +780,9 @@ namespace Tutorbub.Controllers
             });
         }
 
+        // ============================================================
+        // 🔧 AddNotice POST — Category-ভিত্তিক IsAnnouncement Force Fix
+        // ============================================================
         [HttpPost]
         [ValidateAntiForgeryToken]
         public IActionResult AddNotice(Notice model)
@@ -794,11 +801,25 @@ namespace Tutorbub.Controllers
                 return View(model);
             }
 
+            // 🔧 ULTIMATE FIX: Category="News" হলে IsAnnouncement = false force
+            if (string.Equals(model.Category, "News", StringComparison.OrdinalIgnoreCase))
+            {
+                model.IsAnnouncement = false;
+                Console.WriteLine("🔧 FIX: Category=News → IsAnnouncement forced to FALSE");
+            }
+
+            // PublishedDate validation
+            if (model.PublishedDate == default(DateTime) || model.PublishedDate.Year < 2000 || model.PublishedDate.Year > 2100)
+            {
+                model.PublishedDate = DateTime.Now;
+            }
+
             Console.WriteLine("========== AddNotice POST ==========");
             Console.WriteLine($"Title: {model.Title}");
+            Console.WriteLine($"Category: {model.Category}");
             Console.WriteLine($"IsAnnouncement: {model.IsAnnouncement}");
             Console.WriteLine($"IsActive: {model.IsActive}");
-            Console.WriteLine($"Category: {model.Category}");
+            Console.WriteLine($"PublishedDate: {model.PublishedDate}");
             Console.WriteLine("====================================");
 
             if (model.IsAnnouncement)
@@ -837,6 +858,9 @@ namespace Tutorbub.Controllers
             return View(notice);
         }
 
+        // ============================================================
+        // 🔧 EditNotice POST — Category-ভিত্তিক IsAnnouncement Force Fix
+        // ============================================================
         [HttpPost]
         [ValidateAntiForgeryToken]
         public IActionResult EditNotice(Notice model)
@@ -855,11 +879,22 @@ namespace Tutorbub.Controllers
                 return View(model);
             }
 
+            // 🔧 FIX: Category="News" হলে IsAnnouncement = false
+            if (string.Equals(model.Category, "News", StringComparison.OrdinalIgnoreCase))
+            {
+                model.IsAnnouncement = false;
+                Console.WriteLine("🔧 EDIT FIX: Category=News → IsAnnouncement forced to FALSE");
+            }
+
+            if (model.PublishedDate == default(DateTime) || model.PublishedDate.Year < 2000 || model.PublishedDate.Year > 2100)
+            {
+                model.PublishedDate = DateTime.Now;
+            }
+
             Console.WriteLine("========== EditNotice POST ==========");
             Console.WriteLine($"Id: {model.Id}");
-            Console.WriteLine($"Title: {model.Title}");
+            Console.WriteLine($"Category: {model.Category}");
             Console.WriteLine($"IsAnnouncement: {model.IsAnnouncement}");
-            Console.WriteLine($"IsActive: {model.IsActive}");
             Console.WriteLine("=====================================");
 
             if (model.IsAnnouncement)
@@ -947,11 +982,9 @@ namespace Tutorbub.Controllers
         }
 
         // ============================================================
-        // ===== QUIZ & ASSIGNMENT OVERVIEW (NEW) =====
-        // ===== List all courses with quiz/assignment counts =====
+        // ===== QUIZ & ASSIGNMENT OVERVIEW =====
         // ============================================================
 
-        // GET: /Admin/QuizAssignmentOverview
         [HttpGet]
         public IActionResult QuizAssignmentOverview()
         {
@@ -960,7 +993,6 @@ namespace Tutorbub.Controllers
 
             var courses = _dbHelper.GetAllCourses();
 
-            // প্রতিটি course-এর quiz ও assignment count বের করা
             var quizCounts = new Dictionary<int, int>();
             var assignCounts = new Dictionary<int, int>();
 
@@ -995,7 +1027,6 @@ namespace Tutorbub.Controllers
         // ===== COURSE QUIZ & ASSIGNMENT MANAGEMENT =====
         // ============================================================
 
-        // GET: /Admin/ManageQuizAssignment?courseId=5
         [HttpGet]
         public IActionResult ManageQuizAssignment(int courseId)
         {
@@ -1021,7 +1052,6 @@ namespace Tutorbub.Controllers
             return View(vm);
         }
 
-        // POST: /Admin/CreateQuiz
         [HttpPost]
         [ValidateAntiForgeryToken]
         public IActionResult CreateQuiz(int courseId, int moduleNumber, string title,
@@ -1050,7 +1080,6 @@ namespace Tutorbub.Controllers
             return Json(new { success = false, message = $"Failed: {error}" });
         }
 
-        // POST: /Admin/ToggleQuizPublish
         [HttpPost]
         [ValidateAntiForgeryToken]
         public IActionResult ToggleQuizPublish(int id, bool isPublished)
@@ -1064,7 +1093,6 @@ namespace Tutorbub.Controllers
             return Json(new { success = false, message = "Failed to update." });
         }
 
-        // POST: /Admin/DeleteQuiz
         [HttpPost]
         [ValidateAntiForgeryToken]
         public IActionResult DeleteQuiz(int id)
@@ -1078,7 +1106,6 @@ namespace Tutorbub.Controllers
             return Json(new { success = false, message = "Failed to delete." });
         }
 
-        // GET: /Admin/ManageQuizQuestions?quizId=5
         [HttpGet]
         public IActionResult ManageQuizQuestions(int quizId)
         {
@@ -1097,7 +1124,6 @@ namespace Tutorbub.Controllers
             return View(quiz);
         }
 
-        // POST: /Admin/AddQuizQuestion
         [HttpPost]
         [ValidateAntiForgeryToken]
         public IActionResult AddQuizQuestion(int quizId, string questionText,
@@ -1129,7 +1155,6 @@ namespace Tutorbub.Controllers
             return Json(new { success = false, message = $"Failed: {error}" });
         }
 
-        // POST: /Admin/DeleteQuizQuestion
         [HttpPost]
         [ValidateAntiForgeryToken]
         public IActionResult DeleteQuizQuestion(int id)
@@ -1143,7 +1168,6 @@ namespace Tutorbub.Controllers
             return Json(new { success = false, message = "Failed to delete." });
         }
 
-        // POST: /Admin/CreateAssignment
         [HttpPost]
         [ValidateAntiForgeryToken]
         public IActionResult CreateAssignment(int courseId, int milestoneNumber, string title,
@@ -1168,12 +1192,21 @@ namespace Tutorbub.Controllers
             };
 
             if (_dbHelper.CreateMilestoneAssignment(a, out string? error))
+            {
+                Console.WriteLine("========== CreateAssignment ==========");
+                Console.WriteLine($"CourseId: {courseId}");
+                Console.WriteLine($"MilestoneNumber: {milestoneNumber}");
+                Console.WriteLine($"Title: {title}");
+                Console.WriteLine($"IsPublished: {isPublished}");
+                Console.WriteLine($"Assignment Id: {a.Id}");
+                Console.WriteLine("======================================");
+
                 return Json(new { success = true, message = "Assignment created successfully!", assignmentId = a.Id });
+            }
 
             return Json(new { success = false, message = $"Failed: {error}" });
         }
 
-        // POST: /Admin/ToggleAssignmentPublish
         [HttpPost]
         [ValidateAntiForgeryToken]
         public IActionResult ToggleAssignmentPublish(int id, bool isPublished)
@@ -1187,7 +1220,6 @@ namespace Tutorbub.Controllers
             return Json(new { success = false, message = "Failed to update." });
         }
 
-        // POST: /Admin/DeleteAssignment
         [HttpPost]
         [ValidateAntiForgeryToken]
         public IActionResult DeleteAssignment(int id)
@@ -1201,7 +1233,6 @@ namespace Tutorbub.Controllers
             return Json(new { success = false, message = "Failed to delete." });
         }
 
-        // POST: /Admin/SetModulesPerMilestone
         [HttpPost]
         [ValidateAntiForgeryToken]
         public IActionResult SetModulesPerMilestone(int courseId, int modulesPerMilestone)
@@ -1216,6 +1247,206 @@ namespace Tutorbub.Controllers
                 return Json(new { success = true, message = "Configuration saved." });
 
             return Json(new { success = false, message = "Failed to save." });
+        }
+
+        // ============================================================
+        // ===== ASSIGNMENT SUBMISSIONS (Admin) — NEW =====
+        // ============================================================
+
+        [HttpGet]
+        public IActionResult Submissions(string status = "all", int? courseId = null, int? assignmentId = null)
+        {
+            var role = HttpContext.Session.GetString("UserRole");
+            if (role != "Admin") return RedirectToAction("Login", "Account");
+
+            var submissions = _dbHelper.GetAllSubmissions(courseId, assignmentId, status);
+            var stats = _dbHelper.GetSubmissionStats();
+
+            ViewBag.TotalCount = stats.Total;
+            ViewBag.PendingCount = stats.Pending;
+            ViewBag.GradedCount = stats.Graded;
+            ViewBag.CurrentStatus = status;
+            ViewBag.CurrentCourseId = courseId;
+            ViewBag.CurrentAssignmentId = assignmentId;
+
+            return View(submissions);
+        }
+
+        [HttpGet]
+        public IActionResult SubmissionDetails(int id)
+        {
+            var role = HttpContext.Session.GetString("UserRole");
+            if (role != "Admin") return Json(new { success = false, message = "Unauthorized" });
+
+            var submission = _dbHelper.GetSubmissionById(id);
+            if (submission == null)
+                return Json(new { success = false, message = "Submission not found" });
+
+            return Json(new
+            {
+                success = true,
+                submission = new
+                {
+                    submission.Id,
+                    submission.AssignmentId,
+                    submission.UserId,
+                    submission.CourseId,
+                    submission.AssignmentTitle,
+                    submission.MilestoneNumber,
+                    submission.TotalMarks,
+                    submission.CourseName,
+                    submission.UserFullName,
+                    submission.UserEmail,
+                    submission.UserName,
+                    submission.DriveLink,
+                    submission.Note,
+                    SubmittedAt = submission.SubmittedAt.ToString("dd MMM yyyy, hh:mm tt"),
+                    submission.Marks,
+                    submission.Feedback,
+                    GradedAt = submission.GradedAt?.ToString("dd MMM yyyy, hh:mm tt"),
+                    submission.Status
+                }
+            });
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult GradeSubmission(int id, int marks, string? feedback)
+        {
+            var role = HttpContext.Session.GetString("UserRole");
+            if (role != "Admin") return Json(new { success = false, message = "Unauthorized" });
+
+            var adminId = int.Parse(HttpContext.Session.GetString("UserId") ?? "0");
+
+            var submission = _dbHelper.GetSubmissionById(id);
+            if (submission == null)
+                return Json(new { success = false, message = "Submission not found" });
+
+            if (marks < 0 || marks > submission.TotalMarks)
+                return Json(new { success = false, message = $"Marks must be between 0 and {submission.TotalMarks}." });
+
+            if (_dbHelper.GradeSubmission(id, marks, feedback, adminId))
+            {
+                // ============================================================
+                // ✅ Student-কে Notification পাঠানো
+                // ============================================================
+                try
+                {
+                    var percentage = submission.TotalMarks > 0
+                        ? (int)Math.Round((double)marks / submission.TotalMarks * 100)
+                        : 0;
+
+                    var passed = percentage >= 60;
+                    var icon = passed ? "fa-trophy" : "fa-clipboard-check";
+                    var type = passed ? "success" : "info";
+
+                    var message = $"Your assignment \"{submission.AssignmentTitle}\" has been graded. " +
+                                  $"You received {marks}/{submission.TotalMarks} ({percentage}%).";
+
+                    if (!string.IsNullOrWhiteSpace(feedback))
+                    {
+                        message += $" Feedback: {feedback}";
+                    }
+
+                    _dbHelper.CreateNotification(
+                        submission.UserId,
+                        passed ? "🎉 Assignment Graded — Great Job!" : "📋 Assignment Graded",
+                        message,
+                        type,
+                        $"/MyClass/SubmitAssignment?assignmentId={submission.AssignmentId}",
+                        icon
+                    );
+
+                    Console.WriteLine($"✅ Notification sent to user {submission.UserId} for assignment {submission.AssignmentId}");
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine("Notification error: " + ex.Message);
+                }
+
+                return Json(new { success = true, message = "Submission graded successfully!" });
+            }
+
+            return Json(new { success = false, message = "Failed to grade submission." });
+        }
+
+        // ============================================================
+        // ===== SITE SETTINGS =====
+        // ============================================================
+
+        [HttpGet]
+        public IActionResult Settings()
+        {
+            var role = HttpContext.Session.GetString("UserRole");
+            if (role != "Admin")
+                return RedirectToAction("Login", "Account");
+
+            var settings = _dbHelper.GetSiteSettings();
+            return View(settings);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult SaveSettings(SiteSettings model)
+        {
+            var role = HttpContext.Session.GetString("UserRole");
+            if (role != "Admin")
+                return Json(new { success = false, message = "Unauthorized" });
+
+            if (model.SliderIntervalSeconds < 1)
+                model.SliderIntervalSeconds = 5;
+            if (model.SliderIntervalSeconds > 60)
+                model.SliderIntervalSeconds = 60;
+
+            if (_dbHelper.SaveSiteSettings(model, out string? error))
+            {
+                return Json(new { success = true, message = "Settings saved successfully!" });
+            }
+
+            return Json(new { success = false, message = $"Failed: {error}" });
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> UploadHeroImage(IFormFile heroImage)
+        {
+            var role = HttpContext.Session.GetString("UserRole");
+            if (role != "Admin")
+                return Json(new { success = false, message = "Unauthorized" });
+
+            if (heroImage == null || heroImage.Length == 0)
+                return Json(new { success = false, message = "Please select an image." });
+
+            var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif", ".webp" };
+            var extension = Path.GetExtension(heroImage.FileName).ToLowerInvariant();
+
+            if (!allowedExtensions.Contains(extension))
+                return Json(new { success = false, message = "Only JPG, PNG, GIF, or WEBP images are allowed." });
+
+            if (heroImage.Length > 5 * 1024 * 1024)
+                return Json(new { success = false, message = "Image size must be less than 5MB." });
+
+            try
+            {
+                var uploadPath = Path.Combine(_webHostEnvironment.WebRootPath, "uploads", "hero");
+                if (!Directory.Exists(uploadPath))
+                    Directory.CreateDirectory(uploadPath);
+
+                var fileName = $"hero_{DateTime.Now.Ticks}{extension}";
+                var filePath = Path.Combine(uploadPath, fileName);
+
+                using (var stream = new FileStream(filePath, FileMode.Create))
+                {
+                    await heroImage.CopyToAsync(stream);
+                }
+
+                var imageUrl = $"/uploads/hero/{fileName}";
+                return Json(new { success = true, message = "Image uploaded!", imageUrl });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = $"Error: {ex.Message}" });
+            }
         }
     }
 }

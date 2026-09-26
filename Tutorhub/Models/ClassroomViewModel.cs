@@ -2,6 +2,7 @@
 // লোকেশন: Tutorbub/Models/ClassroomViewModel.cs
 
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Tutorbub.Models
 {
@@ -21,32 +22,86 @@ namespace Tutorbub.Models
         // ===== Module list =====
         public List<ClassroomModule> Modules { get; set; } = new();
 
-        // ===== Active lesson (default = first lesson) =====
+        // ===== Active lesson =====
         public int ActiveLessonId { get; set; }
         public string ActiveLessonTitle { get; set; } = string.Empty;
         public string ActiveLessonVideoUrl { get; set; } = string.Empty;
         public string ActiveLessonDuration { get; set; } = string.Empty;
 
         // ============================================================
-        // ===== Milestone Assignments (NEW) =====
+        // ===== Milestone Assignments =====
         // ============================================================
-
-        /// <summary>
-        /// যেসব Milestone complete হয়েছে এবং সেই milestone-এর Assignment Published,
-        /// সেগুলো এই list-এ থাকবে। User Classroom-এ এগুলো দেখতে পাবে।
-        /// </summary>
         public List<MilestoneAssignment> AvailableAssignments { get; set; } = new();
-
-        /// <summary>
-        /// কতটি Module complete হলে ১টি Milestone complete হবে।
-        /// Default = 4 (Admin Panel থেকে পরিবর্তন করা যায়)।
-        /// </summary>
         public int ModulesPerMilestone { get; set; } = 4;
-
-        /// <summary>
-        /// ইউজার এখন পর্যন্ত যেসব Milestone complete করেছে (1, 2, 3, ...)।
-        /// </summary>
         public List<int> CompletedMilestones { get; set; } = new();
+
+        // ============================================================
+        // ===== ✅ Milestone Grouping Helper =====
+        // ============================================================
+        /// <summary>
+        /// Module গুলোকে Milestone অনুযায়ী Group করে।
+        /// প্রতি N টি module = 1 Milestone।
+        /// </summary>
+        public List<MilestoneGroup> GetMilestoneGroups()
+        {
+            var groups = new List<MilestoneGroup>();
+            if (Modules == null || Modules.Count == 0) return groups;
+
+            int perMilestone = ModulesPerMilestone > 0 ? ModulesPerMilestone : 4;
+            int maxModule = Modules.Max(m => m.ModuleNumber);
+            int maxMilestone = (int)System.Math.Ceiling((double)maxModule / perMilestone);
+
+            for (int ms = 1; ms <= maxMilestone; ms++)
+            {
+                int startMod = (ms - 1) * perMilestone + 1;
+                int endMod = ms * perMilestone;
+
+                var modulesInGroup = Modules
+                    .Where(m => m.ModuleNumber >= startMod && m.ModuleNumber <= endMod)
+                    .OrderBy(m => m.ModuleNumber)
+                    .ToList();
+
+                if (modulesInGroup.Count == 0) continue;
+
+                bool allComplete = modulesInGroup.All(m => m.IsModuleCompleted);
+
+                var assignment = AvailableAssignments?
+                    .FirstOrDefault(a => a.MilestoneNumber == ms);
+
+                groups.Add(new MilestoneGroup
+                {
+                    MilestoneNumber = ms,
+                    StartModule = startMod,
+                    EndModule = endMod,
+                    Modules = modulesInGroup,
+                    IsComplete = allComplete,
+                    HasAssignment = assignment != null,
+                    Assignment = assignment,
+                    IsCurrentMilestone = modulesInGroup.Any(m => !m.IsModuleCompleted)
+                });
+            }
+
+            return groups;
+        }
+    }
+
+    // ============================================================
+    // ===== Milestone Group =====
+    // ============================================================
+    public class MilestoneGroup
+    {
+        public int MilestoneNumber { get; set; }
+        public int StartModule { get; set; }
+        public int EndModule { get; set; }
+        public List<ClassroomModule> Modules { get; set; } = new();
+
+        public bool IsComplete { get; set; }
+        public bool HasAssignment { get; set; }
+        public MilestoneAssignment? Assignment { get; set; }
+        public bool IsCurrentMilestone { get; set; }
+
+        public int CompletedCount => Modules.Count(m => m.IsModuleCompleted);
+        public int TotalCount => Modules.Count;
     }
 
     // ============================================================
@@ -54,41 +109,16 @@ namespace Tutorbub.Models
     // ============================================================
     public class ClassroomModule
     {
-        // ===== Module meta =====
         public int ModuleNumber { get; set; }
         public string Title { get; set; } = string.Empty;
         public string TotalDuration { get; set; } = string.Empty;
-
-        // ===== Lesson counts =====
         public int CompletedLessons { get; set; }
         public int TotalLessons { get; set; }
-
-        // ===== Lesson list =====
         public List<ClassroomLesson> Lessons { get; set; } = new();
 
-        // ============================================================
-        // ===== Module Completion & Quiz (NEW) =====
-        // ============================================================
-
-        /// <summary>
-        /// এই Module-এর সব lesson complete হয়েছে কিনা।
-        /// </summary>
         public bool IsModuleCompleted { get; set; }
-
-        /// <summary>
-        /// এই Module-এর Quiz ইউজারের জন্য available কিনা।
-        /// (শর্ত: module complete + quiz published)
-        /// </summary>
         public bool QuizAvailable { get; set; }
-
-        /// <summary>
-        /// Quiz-এর ID (যদি QuizAvailable = true হয়)।
-        /// </summary>
         public int? QuizId { get; set; }
-
-        /// <summary>
-        /// Quiz-এর Title (Display-এর জন্য)।
-        /// </summary>
         public string? QuizTitle { get; set; }
     }
 

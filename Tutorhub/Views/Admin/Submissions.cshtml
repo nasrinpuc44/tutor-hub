@@ -1,0 +1,656 @@
+﻿@model List<Tutorbub.Models.AdminSubmissionViewModel>
+
+@{
+    ViewData["Title"] = "Assignment Submissions";
+    Layout = "_Layout";
+}
+
+<style>
+    /* ===== Main Content Layout ===== */
+    .admin-main-content {
+        margin-left: 250px;
+        padding: 20px;
+        min-height: calc(100vh - 80px);
+    }
+
+    /* ===== Stats Grid ===== */
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 16px;
+        margin-bottom: 24px;
+    }
+
+    .stat-box {
+        background: white;
+        border-radius: 14px;
+        padding: 20px;
+        box-shadow: 0 4px 16px rgba(0,0,0,0.06);
+        border-left: 4px solid #1F3B2C;
+        transition: transform 0.2s;
+    }
+
+        .stat-box:hover {
+            transform: translateY(-3px);
+        }
+
+        .stat-box.pending {
+            border-left-color: #f39c12;
+        }
+
+        .stat-box.graded {
+            border-left-color: #2ecc71;
+        }
+
+        .stat-box .num {
+            font-size: 28px;
+            font-weight: 800;
+            color: #1F3B2C;
+            line-height: 1.2;
+        }
+
+        .stat-box .lbl {
+            font-size: 13px;
+            color: #6B7568;
+            margin-top: 4px;
+        }
+
+            .stat-box .lbl i {
+                margin-right: 5px;
+            }
+
+    /* ===== Filter Tabs ===== */
+    .filter-tabs {
+        display: flex;
+        gap: 8px;
+        margin-bottom: 20px;
+        flex-wrap: wrap;
+    }
+
+    .filter-tab {
+        padding: 9px 22px;
+        border-radius: 30px;
+        font-size: 13px;
+        font-weight: 600;
+        text-decoration: none;
+        transition: all 0.25s;
+        border: 1.5px solid #E5E1D3;
+        color: #5B6B5E;
+        background: white;
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+    }
+
+        .filter-tab:hover {
+            border-color: #1F3B2C;
+            color: #1F3B2C;
+        }
+
+        .filter-tab.active {
+            background: #1F3B2C;
+            color: white;
+            border-color: #1F3B2C;
+        }
+
+    /* ===== Submission Item ===== */
+    .sub-item {
+        background: white;
+        border-radius: 14px;
+        padding: 20px;
+        margin-bottom: 12px;
+        box-shadow: 0 2px 12px rgba(0,0,0,0.04);
+        border: 1px solid rgba(0,0,0,0.04);
+        display: flex;
+        gap: 16px;
+        align-items: center;
+        flex-wrap: wrap;
+        transition: all 0.25s;
+    }
+
+        .sub-item:hover {
+            box-shadow: 0 6px 22px rgba(31,59,44,0.08);
+            transform: translateY(-2px);
+        }
+
+        .sub-item .sub-avatar {
+            width: 52px;
+            height: 52px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #1F3B2C, #2d5a42);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 18px;
+            flex-shrink: 0;
+        }
+
+        .sub-item .info {
+            flex: 1;
+            min-width: 240px;
+        }
+
+            .sub-item .info h5 {
+                font-size: 15px;
+                font-weight: 700;
+                color: #1F3B2C;
+                margin: 0 0 6px;
+                line-height: 1.4;
+            }
+
+            .sub-item .info .meta {
+                font-size: 12.5px;
+                color: #6B7568;
+                display: flex;
+                gap: 14px;
+                flex-wrap: wrap;
+            }
+
+                .sub-item .info .meta span i {
+                    color: #1F3B2C;
+                    margin-right: 4px;
+                }
+
+    /* ===== Status Pill ===== */
+    .status-pill {
+        padding: 5px 14px;
+        border-radius: 30px;
+        font-size: 11.5px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.4px;
+        white-space: nowrap;
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+    }
+
+        .status-pill.submitted {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .status-pill.graded {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status-pill.resubmitted {
+            background: #cfe2ff;
+            color: #084298;
+        }
+
+    /* ===== Buttons ===== */
+    .btn-grade {
+        background: #2ecc71;
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 10px;
+        font-weight: 600;
+        font-size: 13px;
+        cursor: pointer;
+        transition: all 0.2s;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        white-space: nowrap;
+    }
+
+        .btn-grade:hover {
+            background: #27ae60;
+            transform: translateY(-1px);
+            box-shadow: 0 6px 18px rgba(46,204,113,0.25);
+        }
+
+    .btn-view-grade {
+        background: #F3F1E7;
+        color: #1F3B2C;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 10px;
+        font-weight: 600;
+        font-size: 13px;
+        cursor: pointer;
+        transition: all 0.2s;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        white-space: nowrap;
+    }
+
+        .btn-view-grade:hover {
+            background: #E7E4D9;
+            transform: translateY(-1px);
+        }
+
+    /* ===== Empty State ===== */
+    .empty-state {
+        text-align: center;
+        padding: 60px 20px;
+        background: white;
+        border-radius: 16px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+    }
+
+        .empty-state i {
+            font-size: 56px;
+            color: #E7E4D9;
+            display: block;
+            margin-bottom: 16px;
+        }
+
+        .empty-state h5 {
+            color: #1F3B2C;
+            font-size: 18px;
+            font-weight: 700;
+            margin: 0 0 8px;
+        }
+
+        .empty-state p {
+            color: #8A9188;
+            font-size: 14px;
+            margin: 0;
+        }
+
+    /* ===== Grade Modal ===== */
+    .modal-content {
+        background-color: #ffffff !important;
+        border-radius: 16px !important;
+        border: none !important;
+        box-shadow: 0 20px 60px rgba(0,0,0,0.15) !important;
+    }
+
+    .modal-header {
+        background-color: #1F3B2C !important;
+        color: white !important;
+        border-radius: 16px 16px 0 0 !important;
+        padding: 16px 22px !important;
+        border-bottom: none !important;
+    }
+
+        .modal-header .modal-title {
+            font-size: 16px;
+            font-weight: 700;
+        }
+
+        .modal-header .btn-close {
+            filter: brightness(0) invert(1) !important;
+            opacity: 0.8;
+        }
+
+    .modal-body {
+        padding: 24px !important;
+    }
+
+    /* ===== Responsive ===== */
+    @@media (max-width: 992px) {
+        .admin-main-content {
+            margin-left: 0;
+            padding: 20px 15px;
+        }
+
+        .stats-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    @@media (max-width: 576px) {
+        .sub-item {
+            flex-direction: column;
+            align-items: stretch;
+            text-align: center;
+        }
+
+            .sub-item .sub-avatar {
+                margin: 0 auto;
+            }
+
+            .sub-item .info .meta {
+                justify-content: center;
+            }
+
+        .btn-grade,
+        .btn-view-grade {
+            width: 100%;
+            justify-content: center;
+        }
+    }
+</style>
+
+<!-- ===== Admin Sidebar (Partial) ===== -->
+<partial name="_AdminSidebar" />
+
+<!-- ===== Main Content ===== -->
+<div class="admin-main-content">
+
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+        <div>
+            <h2 style="color:#1F3B2C; margin:0;">
+                <i class="fas fa-file-upload me-2"></i>Assignment Submissions
+            </h2>
+            <p style="color:#6B7568; margin:4px 0 0 0; font-size:14px;">
+                Check and grade student assignment submissions
+            </p>
+        </div>
+    </div>
+
+    <!-- ===== Stats Grid ===== -->
+    <div class="stats-grid">
+        <div class="stat-box">
+            <div class="num">@(ViewBag.TotalCount ?? 0)</div>
+            <div class="lbl"><i class="fas fa-list"></i>Total Submissions</div>
+        </div>
+        <div class="stat-box pending">
+            <div class="num">@(ViewBag.PendingCount ?? 0)</div>
+            <div class="lbl"><i class="fas fa-clock"></i>Pending Grading</div>
+        </div>
+        <div class="stat-box graded">
+            <div class="num">@(ViewBag.GradedCount ?? 0)</div>
+            <div class="lbl"><i class="fas fa-check-circle"></i>Graded</div>
+        </div>
+    </div>
+
+    <!-- ===== Filter Tabs ===== -->
+    <div class="filter-tabs">
+        <a href="/Admin/Submissions?status=all"
+           class="filter-tab @(ViewBag.CurrentStatus == "all" ? "active" : "")">
+            <i class="fas fa-list"></i> All
+        </a>
+        <a href="/Admin/Submissions?status=Submitted"
+           class="filter-tab @(ViewBag.CurrentStatus == "Submitted" ? "active" : "")">
+            <i class="fas fa-clock"></i> Pending
+        </a>
+        <a href="/Admin/Submissions?status=Graded"
+           class="filter-tab @(ViewBag.CurrentStatus == "Graded" ? "active" : "")">
+            <i class="fas fa-check"></i> Graded
+        </a>
+        <a href="/Admin/Submissions?status=Resubmitted"
+           class="filter-tab @(ViewBag.CurrentStatus == "Resubmitted" ? "active" : "")">
+            <i class="fas fa-redo"></i> Resubmitted
+        </a>
+    </div>
+
+    @Html.AntiForgeryToken()
+
+    <!-- ===== Submissions List ===== -->
+    @if (Model == null || Model.Count == 0)
+    {
+        <div class="empty-state">
+            <i class="fas fa-inbox"></i>
+            <h5>No submissions found</h5>
+            <p>There are no submissions matching your filter.</p>
+        </div>
+    }
+    else
+    {
+        foreach (var s in Model)
+        {
+            var statusClass = (s.Status ?? "Submitted").ToLower();
+
+            // Initials for avatar
+            var words = (s.UserFullName ?? "S").Split(' ', StringSplitOptions.RemoveEmptyEntries);
+            string initials = "S";
+            if (words.Length >= 2)
+                initials = words[0][0].ToString().ToUpper() + words[1][0].ToString().ToUpper();
+            else if (words.Length == 1 && words[0].Length > 0)
+                initials = words[0][0].ToString().ToUpper();
+
+            <div class="sub-item" id="submission-@s.Id">
+
+                <div class="sub-avatar">@initials</div>
+
+                <div class="info">
+                    <h5>
+                        <i class="fas fa-tasks me-2" style="color:#1F3B2C;"></i>
+                        @s.AssignmentTitle
+                    </h5>
+                    <div class="meta">
+                        <span><i class="fas fa-user"></i>@s.UserFullName (@s.UserName)</span>
+                        <span><i class="fas fa-envelope"></i>@s.UserEmail</span>
+                        <span><i class="fas fa-book"></i>@s.CourseName</span>
+                        <span><i class="fas fa-flag"></i>Milestone @s.MilestoneNumber</span>
+                        <span><i class="fas fa-calendar"></i>@s.SubmittedAt.ToString("dd MMM yyyy, hh:mm tt")</span>
+                    </div>
+                </div>
+
+                <span class="status-pill @statusClass">
+                    @if (s.Status == "Graded" && s.Marks.HasValue)
+                    {
+                        <i class="fas fa-star"></i>
+                        <text>@s.Marks / @s.TotalMarks</text>
+                    }
+                    else if (s.Status == "Resubmitted")
+                    {
+                        <i class="fas fa-redo"></i>
+                        <text>Resubmitted</text>
+                    }
+                    else
+                    {
+                        <i class="fas fa-clock"></i>
+                        <text>@s.Status</text>
+                    }
+                </span>
+
+                <button class="btn-@(s.Status == "Graded" ? "view-grade" : "grade")"
+                        onclick="openGradeModal(@s.Id)">
+                    @if (s.Status == "Graded")
+                    {
+                        <i class="fas fa-eye"></i>
+                        <text>View / Edit</text>
+                    }
+                    else
+                    {
+                        <i class="fas fa-star"></i>
+                        <text>Grade Now</text>
+                    }
+                </button>
+            </div>
+        }
+    }
+
+</div>
+
+<!-- ===== Grade Modal ===== -->
+<div class="modal fade" id="gradeModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-star me-2"></i>Grade Submission
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="gradeModalBody">
+                <div class="text-center py-5">
+                    <div class="spinner-border text-success" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <p class="mt-2 text-muted">Loading submission...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // ===== Anti-Forgery Token Helper =====
+        function getToken() {
+            const t = document.querySelector('input[name="__RequestVerificationToken"]');
+            return t ? t.value : '';
+        }
+
+        // ===== Open Grade Modal =====
+        function openGradeModal(submissionId) {
+            var modal = new bootstrap.Modal(document.getElementById('gradeModal'));
+            document.getElementById('gradeModalBody').innerHTML =
+                '<div class="text-center py-5"><div class="spinner-border text-success"></div><p class="mt-2 text-muted">Loading...</p></div>';
+            modal.show();
+
+            fetch('/Admin/SubmissionDetails?id=' + submissionId)
+                .then(r => r.json())
+                .then(data => {
+                    if (!data.success) {
+                        document.getElementById('gradeModalBody').innerHTML =
+                            '<div class="alert alert-danger">' + data.message + '</div>';
+                        return;
+                    }
+
+                    var s = data.submission;
+                    var isGraded = s.marks !== null && s.marks !== undefined;
+
+                    var html = '';
+
+                    // ===== Header info =====
+                    html += '<div style="background:#FAF9F4; border-radius:12px; padding:18px 20px; margin-bottom:20px;">';
+                    html += '<h5 style="color:#1F3B2C; margin:0 0 10px; font-weight:700; font-size:16px;">' + s.assignmentTitle + '</h5>';
+                    html += '<div style="font-size:13px; color:#6B7568; display:flex; gap:16px; flex-wrap:wrap;">';
+                    html += '<span><i class="fas fa-user" style="color:#1F3B2C;"></i> ' + s.userFullName + '</span>';
+                    html += '<span><i class="fas fa-envelope" style="color:#1F3B2C;"></i> ' + s.userEmail + '</span>';
+                    html += '<span><i class="fas fa-book" style="color:#1F3B2C;"></i> ' + s.courseName + '</span>';
+                    html += '<span><i class="fas fa-flag" style="color:#1F3B2C;"></i> Milestone ' + s.milestoneNumber + '</span>';
+                    html += '<span><i class="fas fa-star" style="color:#1F3B2C;"></i> Total: ' + s.totalMarks + ' Marks</span>';
+                    html += '<span><i class="fas fa-calendar" style="color:#1F3B2C;"></i> ' + s.submittedAt + '</span>';
+                    html += '</div>';
+                    html += '</div>';
+
+                    // ===== Drive link =====
+                    html += '<div style="margin-bottom:20px;">';
+                    html += '<label style="font-weight:700; color:#1F3B2C; font-size:13px; display:block; margin-bottom:8px;">';
+                    html += '<i class="fab fa-google-drive me-1" style="color:#4285f4;"></i> Submitted Drive Link</label>';
+                    html += '<a href="' + s.driveLink + '" target="_blank" ';
+                    html += 'style="display:flex; align-items:center; gap:10px; padding:14px 18px; background:#E8F0E9; border-radius:10px; color:#1F3B2C; text-decoration:none; font-size:13.5px; word-break:break-all; font-weight:500; transition:all 0.2s;" ';
+                    html += 'onmouseover="this.style.background=\'#D9EDDF\'" onmouseout="this.style.background=\'#E8F0E9\'">';
+                    html += '<i class="fas fa-external-link-alt" style="flex-shrink:0;"></i>';
+                    html += '<span>' + s.driveLink + '</span>';
+                    html += '</a>';
+                    html += '</div>';
+
+                    // ===== Student note =====
+                    if (s.note) {
+                        html += '<div style="margin-bottom:20px;">';
+                        html += '<label style="font-weight:700; color:#1F3B2C; font-size:13px; display:block; margin-bottom:8px;">';
+                        html += '<i class="fas fa-comment me-1"></i> Student Note</label>';
+                        html += '<div style="background:#FAF9F4; padding:14px 18px; border-radius:10px; font-size:13.5px; color:#4B5648; border-left:3px solid #F4C744; line-height:1.6;">' + s.note + '</div>';
+                        html += '</div>';
+                    }
+
+                    // ===== Existing feedback (if graded) =====
+                    if (isGraded && s.feedback) {
+                        html += '<div style="margin-bottom:20px;">';
+                        html += '<label style="font-weight:700; color:#1F3B2C; font-size:13px; display:block; margin-bottom:8px;">';
+                        html += '<i class="fas fa-comment-dots me-1"></i> Previous Feedback</label>';
+                        html += '<div style="background:#FFF9E6; padding:14px 18px; border-radius:10px; font-size:13.5px; color:#4B5648; border-left:3px solid #F4C744; line-height:1.6;">' + s.feedback + '</div>';
+                        html += '</div>';
+                    }
+
+                    // ===== Grade form =====
+                    html += '<div style="border-top:1px solid #f0f0f0; padding-top:22px;">';
+                    html += '<h6 style="color:#1F3B2C; font-weight:700; margin:0 0 14px; font-size:15px;">';
+                    html += '<i class="fas fa-star me-1"></i> ' + (isGraded ? 'Update Grade' : 'Give Grade');
+                    html += '</h6>';
+
+                    html += '<div>';
+                    html += '<label style="font-weight:700; color:#1F3B2C; font-size:13px; display:block; margin-bottom:8px;">';
+                    html += 'Marks (out of ' + s.totalMarks + ') <span style="color:#e74c3c;">*</span></label>';
+                    html += '<input type="number" id="gradeMarks" min="0" max="' + s.totalMarks + '" ';
+                    html += 'value="' + (isGraded ? s.marks : '') + '" ';
+                    html += 'placeholder="Enter marks" ';
+                    html += 'style="width:100%; padding:12px 16px; border:1.5px solid #E5E1D3; border-radius:10px; font-size:15px; background:#FAF9F4; outline:none; transition:all 0.2s;" ';
+                    html += 'onfocus="this.style.borderColor=\'#1F3B2C\'; this.style.background=\'white\'" ';
+                    html += 'onblur="this.style.borderColor=\'#E5E1D3\'; this.style.background=\'#FAF9F4\'" />';
+                    html += '</div>';
+
+                    html += '<div style="margin-top:16px;">';
+                    html += '<label style="font-weight:700; color:#1F3B2C; font-size:13px; display:block; margin-bottom:8px;">';
+                    html += 'Feedback (Optional)</label>';
+                    html += '<textarea id="gradeFeedback" rows="4" placeholder="Write feedback for the student..." ';
+                    html += 'style="width:100%; padding:12px 16px; border:1.5px solid #E5E1D3; border-radius:10px; font-size:14px; background:#FAF9F4; resize:vertical; font-family:inherit; outline:none; transition:all 0.2s;" ';
+                    html += 'onfocus="this.style.borderColor=\'#1F3B2C\'; this.style.background=\'white\'" ';
+                    html += 'onblur="this.style.borderColor=\'#E5E1D3\'; this.style.background=\'#FAF9F4\'">' + (isGraded && s.feedback ? s.feedback : '') + '</textarea>';
+                    html += '</div>';
+
+                    html += '<div id="gradeError" class="alert alert-danger" style="display:none; margin-top:14px; border-radius:10px;"></div>';
+
+                    html += '<div style="display:flex; gap:10px; justify-content:flex-end; margin-top:22px; flex-wrap:wrap;">';
+                    html += '<button type="button" class="btn btn-secondary" data-bs-dismiss="modal" style="border-radius:10px; padding:10px 24px; font-weight:600;">Cancel</button>';
+                    html += '<button type="button" id="gradeSubmitBtn" onclick="submitGrade(' + s.id + ', ' + s.totalMarks + ')" ';
+                    html += 'style="background:#2ecc71; color:white; border:none; padding:11px 32px; border-radius:10px; font-weight:700; cursor:pointer; font-size:14px; transition:all 0.2s; display:inline-flex; align-items:center; gap:6px;">';
+                    html += '<i class="fas fa-check"></i> ' + (isGraded ? 'Update Grade' : 'Submit Grade');
+                    html += '</button>';
+                    html += '</div>';
+
+                    html += '</div>';
+
+                    document.getElementById('gradeModalBody').innerHTML = html;
+                })
+                .catch(err => {
+                    document.getElementById('gradeModalBody').innerHTML =
+                        '<div class="alert alert-danger">Error loading submission: ' + err.message + '</div>';
+                });
+        }
+
+        // ===== Submit Grade =====
+        function submitGrade(submissionId, totalMarks) {
+            var marksInput = document.getElementById('gradeMarks');
+            var feedbackInput = document.getElementById('gradeFeedback');
+            var errorDiv = document.getElementById('gradeError');
+            var btn = document.getElementById('gradeSubmitBtn');
+
+            var marks = parseInt(marksInput.value);
+
+            if (isNaN(marks) || marks < 0 || marks > totalMarks) {
+                errorDiv.textContent = 'Marks must be between 0 and ' + totalMarks + '.';
+                errorDiv.style.display = 'block';
+                return;
+            }
+
+            errorDiv.style.display = 'none';
+
+            var originalHtml = btn.innerHTML;
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Submitting...';
+
+            var formData = new FormData();
+            formData.append('id', submissionId);
+            formData.append('marks', marks);
+            formData.append('feedback', feedbackInput.value.trim());
+            formData.append('__RequestVerificationToken', getToken());
+
+            fetch('/Admin/GradeSubmission', {
+                method: 'POST',
+                body: formData
+            })
+                .then(r => r.json())
+                .then(data => {
+                    if (data.success) {
+                        alert('✅ ' + data.message);
+                        location.reload();
+                    } else {
+                        btn.disabled = false;
+                        btn.innerHTML = originalHtml;
+                        errorDiv.textContent = data.message;
+                        errorDiv.style.display = 'block';
+                    }
+                })
+                .catch(err => {
+                    btn.disabled = false;
+                    btn.innerHTML = originalHtml;
+                    errorDiv.textContent = 'Error: ' + err.message;
+                    errorDiv.style.display = 'block';
+                });
+        }
+
+        // ===== ESC key to close modal =====
+        document.addEventListener('keydown', function (e) {
+            if (e.key === 'Escape') {
+                var modalEl = document.getElementById('gradeModal');
+                var modal = bootstrap.Modal.getInstance(modalEl);
+                if (modal) modal.hide();
+            }
+        });
+    </script>
+}

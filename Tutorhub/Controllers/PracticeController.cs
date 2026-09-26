@@ -3,6 +3,7 @@
 // ⚠️ এই Controller এখন Course-ভিত্তিক Quiz সিস্টেম handle করে।
 // ✅ ইউজার একটি কুইজে শুধুমাত্র একবারই অংশগ্রহণ করতে পারবে — Retake নেই।
 // ✅ প্রতি সঠিক উত্তরে ১ পয়েন্ট করে ইউজার পাবে এবং Users টেবিলের TotalPoints-এ যোগ হবে।
+// ✅ Points Transactions log-এও entry হবে।
 
 using Microsoft.AspNetCore.Mvc;
 using Tutorbub.Models;
@@ -30,7 +31,6 @@ namespace Tutorbub.Controllers
             if (HttpContext.Session.GetString("UserName") == null)
                 return RedirectToAction("Login", "Account");
 
-            // Practice এখন My Class-এর ভিতরে — সরাসরি redirect
             return RedirectToAction("MyClass", "MyClass");
         }
 
@@ -48,14 +48,14 @@ namespace Tutorbub.Controllers
             if (!int.TryParse(userIdStr, out int userId))
                 return RedirectToAction("Login", "Account");
 
-            // ১) ইউজার এই কোর্সে enrolled কিনা চেক
+            // ১) Enrolled check
             if (!_dbHelper.IsUserEnrolled(userId, courseId))
             {
                 TempData["Error"] = "You are not enrolled in this course.";
                 return RedirectToAction("MyClass", "MyClass");
             }
 
-            // ২) কোর্স লোড
+            // ২) Course লোড
             var course = _dbHelper.GetCourseById(courseId);
             if (course == null)
             {
@@ -66,7 +66,7 @@ namespace Tutorbub.Controllers
             ViewBag.Course = course;
             ViewBag.CourseId = courseId;
 
-            // ৩) সব published quiz ও assignment
+            // ৩) Published quizzes + assignments
             var quizzes = _dbHelper.GetQuizzesByCourse(courseId)
                 .Where(q => q.IsPublished)
                 .ToList();
@@ -78,7 +78,7 @@ namespace Tutorbub.Controllers
             ViewBag.Quizzes = quizzes;
             ViewBag.Assignments = assignments;
 
-            // ৪) ইউজারের module progress
+            // ৪) Module progress
             var moduleProgress = _dbHelper.GetModuleProgress(userId, courseId);
             var completedModules = moduleProgress
                 .Where(kvp => kvp.Value.Total > 0 && kvp.Value.Completed >= kvp.Value.Total)
@@ -92,11 +92,11 @@ namespace Tutorbub.Controllers
             var attempts = _dbHelper.GetUserQuizAttempts(userId, courseId);
             ViewBag.QuizAttempts = attempts;
 
-            // ৬) Milestone config (admin define করেছে কতটি module = 1টি milestone)
+            // ৬) Milestone config
             int modulesPerMilestone = _dbHelper.GetModulesPerMilestone(courseId);
             ViewBag.ModulesPerMilestone = modulesPerMilestone;
 
-            // ৭) Completed Milestones হিসাব
+            // ৭) Completed Milestones
             var completedMilestones = new List<int>();
             if (modulesPerMilestone > 0 && moduleProgress.Count > 0)
             {
@@ -125,7 +125,7 @@ namespace Tutorbub.Controllers
             }
             ViewBag.CompletedMilestones = completedMilestones;
 
-            // ৮) ইউজারের মোট পয়েন্ট (নতুন)
+            // ৮) ইউজারের মোট পয়েন্ট
             ViewBag.UserTotalPoints = _dbHelper.GetUserPoints(userId);
 
             return View("CourseQuizzes");
@@ -155,7 +155,7 @@ namespace Tutorbub.Controllers
                 return RedirectToAction("MyClass", "MyClass");
             }
 
-            // ২) ইউজার Enrolled কিনা
+            // ২) Enrolled কিনা
             if (!_dbHelper.IsUserEnrolled(userId, quiz.CourseId))
             {
                 TempData["Error"] = "You are not enrolled in this course.";
@@ -174,8 +174,7 @@ namespace Tutorbub.Controllers
                 return RedirectToAction("CourseQuizzes", new { courseId = quiz.CourseId });
             }
 
-            // ✅ ৪) NEW: ইউজার আগে এই কুইজে attempt করেছে কিনা চেক
-            //    attempt থাকলে আর কুইজ দিতে পারবে না — সরাসরি Result পেজে পাঠানো হবে।
+            // ৪) আগে attempt করেছে কিনা চেক
             var previousAttempt = _dbHelper.GetBestQuizAttempt(userId, quiz.Id);
             if (previousAttempt != null)
             {
@@ -201,7 +200,7 @@ namespace Tutorbub.Controllers
                 PassingScore = quiz.PassingScore,
                 TimeLimitMinutes = quiz.TimeLimitMinutes,
                 Questions = quiz.Questions,
-                PreviousAttempt = null    // ✅ সবসময় null — attempt থাকলে এখানে আসতেই পারে না
+                PreviousAttempt = null
             };
 
             return View(vm);
@@ -213,7 +212,8 @@ namespace Tutorbub.Controllers
         //
         // ✅ পয়েন্ট সিস্টেম:
         //    - প্রতি সঠিক উত্তরে ১ পয়েন্ট
-        //    - Quiz submit হলে স্বয়ংক্রিয়ভাবে User.TotalPoints-এ যোগ হবে
+        //    - Quiz submit হলে User.TotalPoints-এ যোগ হবে
+        //    - PointsTransactions-এও log হবে
         //
         // ✅ একবারই attempt — server-side double-submit চেক সহ
         // ============================================================
@@ -242,7 +242,7 @@ namespace Tutorbub.Controllers
                 return RedirectToAction("MyClass", "MyClass");
             }
 
-            // ✅ ৩) NEW: আগে attempt করেছে কিনা চেক — থাকলে submit করতে দেবে না
+            // ৩) আগে attempt করেছে কিনা চেক
             var existingAttempt = _dbHelper.GetBestQuizAttempt(userId, quiz.Id);
             if (existingAttempt != null)
             {
@@ -251,8 +251,8 @@ namespace Tutorbub.Controllers
             }
 
             // ৪) Score হিসাব
-            int score = 0;              // মোট প্রাপ্ত মার্ক
-            int correctCount = 0;       // সঠিক উত্তরের সংখ্যা (points award-এর জন্য)
+            int score = 0;
+            int correctCount = 0;
             int totalMarks = 0;
             var submittedAnswers = answers ?? new Dictionary<string, string>();
 
@@ -260,7 +260,6 @@ namespace Tutorbub.Controllers
             {
                 totalMarks += q.Marks;
 
-                // form key format: "q_{questionId}"
                 string key = $"q_{q.Id}";
                 if (submittedAnswers.TryGetValue(key, out var ans))
                 {
@@ -279,7 +278,7 @@ namespace Tutorbub.Controllers
 
             bool passed = pct >= quiz.PassingScore;
 
-            // ৫) Attempt সেভ + পয়েন্ট অ্যাওয়ার্ড
+            // ৫) Attempt সেভ
             var attempt = new QuizAttempt
             {
                 UserId = userId,
@@ -298,12 +297,6 @@ namespace Tutorbub.Controllers
             try
             {
                 saved = _dbHelper.SaveQuizAttempt(attempt, out saveError);
-
-                if (saved && correctCount > 0)
-                {
-                    // প্রতি সঠিক উত্তরে ১ পয়েন্ট যোগ
-                    _dbHelper.AddPoints(userId, correctCount);
-                }
             }
             catch (Exception ex)
             {
@@ -317,7 +310,29 @@ namespace Tutorbub.Controllers
                 return RedirectToAction("CourseQuizzes", new { courseId = quiz.CourseId });
             }
 
-            // ৬) ইউজারকে notification পাঠানো
+            // ============================================================
+            // ৬) ✅ পয়েন্ট অ্যাওয়ার্ড (with transaction log)
+            // ============================================================
+            if (correctCount > 0)
+            {
+                try
+                {
+                    _dbHelper.AddPointsWithLog(
+                        userId,
+                        correctCount,
+                        "Earned",
+                        $"quiz_{quizId}_attempt_{attempt.Id}",
+                        $"Earned {correctCount} points from quiz: {quiz.Title}"
+                    );
+                    Console.WriteLine($"✅ Awarded {correctCount} points to user {userId}");
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine("Points award error (non-fatal): " + ex.Message);
+                }
+            }
+
+            // ৭) Notification
             try
             {
                 string title = passed ? "🎉 Quiz Passed!" : "📝 Quiz Attempt Recorded";
@@ -340,7 +355,7 @@ namespace Tutorbub.Controllers
                 Console.WriteLine("Notification error (non-fatal): " + ex.Message);
             }
 
-            // ৭) Result পেজে যাওয়া
+            // ৮) Result পেজে যাওয়া
             TempData["QuizResult"] = passed ? "passed" : "failed";
             TempData["PointsEarned"] = correctCount;
             return RedirectToAction("QuizResult", new { attemptId = attempt.Id });
@@ -366,7 +381,7 @@ namespace Tutorbub.Controllers
                 return RedirectToAction("MyClass", "MyClass");
             }
 
-            // Quiz ও Course-এর info load করা
+            // Quiz ও Course-এর info load
             var quiz = _dbHelper.GetQuizById(attempt.QuizId);
             if (quiz != null)
             {
@@ -378,7 +393,7 @@ namespace Tutorbub.Controllers
                 attempt.QuizTitle = "Quiz";
             }
 
-            // ইউজারের মোট পয়েন্ট (Result পেজে দেখানোর জন্য)
+            // ইউজারের মোট পয়েন্ট
             ViewBag.UserTotalPoints = _dbHelper.GetUserPoints(userId);
 
             return View(attempt);

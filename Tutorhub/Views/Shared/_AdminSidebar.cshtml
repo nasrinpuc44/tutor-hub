@@ -1,0 +1,388 @@
+﻿@* 📁 Views/Shared/_AdminSidebar.cshtml *@
+@* লোকেশন: Tutorbub/Views/Shared/_AdminSidebar.cshtml *@
+@using Tutorbub.Models
+@{
+    var currentAction = ViewContext.RouteData.Values["action"]?.ToString() ?? "";
+    var userFullName = Context.Session.GetString("UserFullName") ?? "Admin";
+
+    // ============================================================
+    // ===== AUTO-LOAD PENDING COUNTS (if not already in ViewBag) =====
+    // ============================================================
+    int pendingTeacherRequests = 0;
+    int pendingPayments = 0;
+    int pendingSubmissions = 0;
+
+    // ViewBag থেকে আগে চেক করি — যদি পেজ নিজে সেট করে থাকে
+    try
+    {
+        if (ViewBag.PendingCount != null)
+            pendingTeacherRequests = Convert.ToInt32(ViewBag.PendingCount);
+        else
+        {
+            var cfg = Context.RequestServices.GetService<IConfiguration>();
+            if (cfg != null)
+            {
+                var db = new DatabaseHelper(cfg);
+                pendingTeacherRequests = db.GetAllTeacherRequests().Count(r => r.Status == "Pending");
+            }
+        }
+    }
+    catch { }
+
+    try
+    {
+        if (ViewBag.PendingPayments != null)
+            pendingPayments = Convert.ToInt32(ViewBag.PendingPayments);
+        else
+        {
+            var cfg = Context.RequestServices.GetService<IConfiguration>();
+            if (cfg != null)
+            {
+                var db = new DatabaseHelper(cfg);
+                pendingPayments = db.GetPaymentStats().Pending;
+            }
+        }
+    }
+    catch { }
+
+    try
+    {
+        if (ViewBag.PendingSubmissions != null)
+            pendingSubmissions = Convert.ToInt32(ViewBag.PendingSubmissions);
+        else
+        {
+            var cfg = Context.RequestServices.GetService<IConfiguration>();
+            if (cfg != null)
+            {
+                var db = new DatabaseHelper(cfg);
+                pendingSubmissions = db.GetSubmissionStats().Pending;
+            }
+        }
+    }
+    catch { }
+}
+
+<style>
+    /* ============================================================
+           ===== ADMIN SIDEBAR =====
+           ============================================================ */
+    .admin-sidebar {
+        position: fixed;
+        top: 80px;
+        left: 0;
+        bottom: 0;
+        width: 250px;
+        background-color: #1F3B2C;
+        color: white;
+        padding: 20px 0;
+        overflow-y: auto;
+        z-index: 100;
+        transition: transform 0.3s ease;
+    }
+
+    .admin-sidebar-brand {
+        padding: 0 20px 20px 20px;
+        border-bottom: 1px solid rgba(255,255,255,0.1);
+        margin-bottom: 15px;
+    }
+
+        .admin-sidebar-brand h4 {
+            color: #F3F1E7;
+            font-weight: 600;
+            margin: 0;
+            font-size: 18px;
+        }
+
+        .admin-sidebar-brand small {
+            color: #8A9188;
+            font-size: 12px;
+        }
+
+    .admin-sidebar-menu {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+        .admin-sidebar-menu li {
+            padding: 0;
+        }
+
+            .admin-sidebar-menu li a {
+                display: flex;
+                align-items: center;
+                padding: 12px 20px;
+                color: #C7D0C9;
+                text-decoration: none;
+                transition: all 0.3s ease;
+                border-left: 3px solid transparent;
+                font-size: 14px;
+                cursor: pointer;
+            }
+
+                .admin-sidebar-menu li a:hover,
+                .admin-sidebar-menu li a.active {
+                    background-color: rgba(255,255,255,0.08);
+                    color: #ffffff;
+                    border-left-color: #F4C744;
+                }
+
+                .admin-sidebar-menu li a i {
+                    width: 24px;
+                    margin-right: 10px;
+                    font-size: 16px;
+                    text-align: center;
+                }
+
+                .admin-sidebar-menu li a .badge-sidebar {
+                    margin-left: auto;
+                    background-color: rgba(255,255,255,0.15);
+                    padding: 2px 10px;
+                    border-radius: 12px;
+                    font-size: 11px;
+                    color: #F3F1E7;
+                    font-weight: 600;
+                }
+
+                    .admin-sidebar-menu li a .badge-sidebar.warning {
+                        background-color: #F4C744;
+                        color: #1F3B2C;
+                    }
+
+    .admin-sidebar-status {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        padding: 15px 20px;
+        text-align: center;
+        border-top: 1px solid rgba(255,255,255,0.05);
+        background-color: #1F3B2C;
+    }
+
+        .admin-sidebar-status small {
+            color: #6B7568;
+            font-size: 11px;
+            display: block;
+        }
+
+            .admin-sidebar-status small i {
+                color: #2ecc71;
+                font-size: 8px;
+                margin-right: 4px;
+            }
+
+            .admin-sidebar-status small strong {
+                color: #F3F1E7;
+            }
+
+    /* ===== Mobile Toggle ===== */
+    .admin-sidebar-toggle {
+        display: none;
+        position: fixed;
+        top: 90px;
+        left: 15px;
+        z-index: 101;
+        background-color: #1F3B2C;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        padding: 10px 12px;
+        font-size: 18px;
+        cursor: pointer;
+    }
+
+        .admin-sidebar-toggle:hover {
+            background-color: #2d5a42;
+        }
+
+    .admin-sidebar-overlay {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: rgba(0,0,0,0.5);
+        z-index: 99;
+    }
+
+        .admin-sidebar-overlay.active {
+            display: block;
+        }
+
+    /* ===== Responsive ===== */
+    @@media (max-width: 992px) {
+        .admin-sidebar {
+            transform: translateX(-100%);
+        }
+
+            .admin-sidebar.open {
+                transform: translateX(0);
+            }
+
+        .admin-sidebar-toggle {
+            display: block;
+        }
+    }
+</style>
+
+<!-- ===== Sidebar Toggle (Mobile) ===== -->
+<button class="admin-sidebar-toggle" id="adminSidebarToggle" type="button" title="Toggle Menu">
+    <i class="fas fa-bars"></i>
+</button>
+<div class="admin-sidebar-overlay" id="adminSidebarOverlay"></div>
+
+<!-- ===== Admin Sidebar ===== -->
+<div class="admin-sidebar" id="adminSidebar">
+
+    <!-- ===== Brand ===== -->
+    <div class="admin-sidebar-brand">
+        <h4><i class="fas fa-shield-alt me-2"></i>Admin Panel</h4>
+        <small>Smart Tutor Hub</small>
+    </div>
+
+    <!-- ===== Menu ===== -->
+    <ul class="admin-sidebar-menu">
+
+        <li>
+            <a asp-controller="Admin" asp-action="Dashboard"
+               class="@(currentAction == "Dashboard" ? "active" : "")">
+                <i class="fas fa-chart-pie"></i> Dashboard
+            </a>
+        </li>
+
+        <li>
+            <a asp-controller="Admin" asp-action="TeacherRequests"
+               class="@(currentAction == "TeacherRequests" ? "active" : "")">
+                <i class="fas fa-user-graduate"></i> Teacher Requests
+                @if (pendingTeacherRequests > 0)
+                {
+                    <span class="badge-sidebar warning">@pendingTeacherRequests</span>
+                }
+            </a>
+        </li>
+
+        <li>
+            <a asp-controller="Admin" asp-action="Payments"
+               class="@(currentAction == "Payments" ? "active" : "")">
+                <i class="fas fa-money-check-alt"></i> Payments
+                @if (pendingPayments > 0)
+                {
+                    <span class="badge-sidebar warning">@pendingPayments</span>
+                }
+            </a>
+        </li>
+
+        <li>
+            <a asp-controller="Admin" asp-action="AddCourse"
+               class="@(currentAction == "AddCourse" ? "active" : "")">
+                <i class="fas fa-plus-circle"></i> Add Course
+            </a>
+        </li>
+
+        <li>
+            <a asp-controller="Admin" asp-action="ManageCourses"
+               class="@(currentAction == "ManageCourses" || currentAction == "UploadLesson" ? "active" : "")">
+                <i class="fas fa-tasks"></i> Manage Courses
+            </a>
+        </li>
+
+        <li>
+            <a asp-controller="Admin" asp-action="QuizAssignmentOverview"
+               class="@(currentAction == "QuizAssignmentOverview" || currentAction == "ManageQuizAssignment" || currentAction == "ManageQuizQuestions" ? "active" : "")">
+                <i class="fas fa-question-circle"></i> Quiz &amp; Assignment
+            </a>
+        </li>
+
+        <li>
+            <a asp-controller="Admin" asp-action="Submissions"
+               class="@(currentAction == "Submissions" ? "active" : "")">
+                <i class="fas fa-file-upload"></i> Submissions
+                @if (pendingSubmissions > 0)
+                {
+                    <span class="badge-sidebar warning">@pendingSubmissions</span>
+                }
+            </a>
+        </li>
+
+        <li>
+            <a asp-controller="Admin" asp-action="ManageNotices"
+               class="@(currentAction == "ManageNotices" || currentAction == "AddNotice" || currentAction == "EditNotice" ? "active" : "")">
+                <i class="fas fa-newspaper"></i> News &amp; Announcements
+            </a>
+        </li>
+
+        <li>
+            <a asp-controller="Admin" asp-action="Settings"
+               class="@(currentAction == "Settings" ? "active" : "")">
+                <i class="fas fa-cog"></i> Settings
+            </a>
+        </li>
+
+        <!-- ===== Change Password ===== -->
+        <li style="border-top: 1px solid rgba(255,255,255,0.05); margin-top: 10px; padding-top: 10px;">
+            <a href="#" onclick="adminChangePasswordFromSidebar(); return false;" style="color: #F4C744;">
+                <i class="fas fa-key"></i> Change Password
+            </a>
+        </li>
+
+        <!-- ===== Logout ===== -->
+        <li>
+            <form method="post" asp-controller="Account" asp-action="Logout" id="adminSidebarLogoutForm">
+                @Html.AntiForgeryToken()
+                <a href="#" onclick="document.getElementById('adminSidebarLogoutForm').submit(); return false;" style="color: #e74c3c;">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </a>
+            </form>
+        </li>
+
+    </ul>
+
+    <!-- ===== Logged In As ===== -->
+    <div class="admin-sidebar-status">
+        <small>
+            <i class="fas fa-circle"></i>
+            Logged in as: <strong>@userFullName</strong>
+        </small>
+    </div>
+</div>
+
+<script>
+    // ============================================================
+    // ===== Sidebar Toggle (Mobile) =====
+    // ============================================================
+    (function () {
+        var toggle = document.getElementById('adminSidebarToggle');
+        var sidebar = document.getElementById('adminSidebar');
+        var overlay = document.getElementById('adminSidebarOverlay');
+
+        if (toggle && sidebar && overlay) {
+            toggle.addEventListener('click', function () {
+                sidebar.classList.toggle('open');
+                overlay.classList.toggle('active');
+            });
+
+            overlay.addEventListener('click', function () {
+                sidebar.classList.remove('open');
+                overlay.classList.remove('active');
+            });
+        }
+    })();
+
+    // ============================================================
+    // ===== Change Password (Fallback) =====
+    // Dashboard-এ changeAdminPassword() function আছে।
+    // অন্য পেজে সেই function নেই, তাই Dashboard-এ redirect করে।
+    // ============================================================
+    function adminChangePasswordFromSidebar() {
+        // যদি বর্তমান পেজে changeAdminPassword() function থেকে থাকে, সেটা কল করি
+        if (typeof changeAdminPassword === 'function') {
+            changeAdminPassword();
+            return;
+        }
+
+        // নাহলে Dashboard-এ redirect করে (সেখানে change password UI আছে)
+        window.location.href = '/Admin/Dashboard';
+    }
+</script>
